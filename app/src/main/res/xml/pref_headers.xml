@@ -1,0 +1,23 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <header
+        android:fragment="hr.caellian.notestream.gui.ActivitySettings$GeneralPreferenceFragment"
+        android:icon="@drawable/ic_song"
+        android:title="General" />
+
+    <header
+        android:fragment="hr.caellian.notestream.gui.ActivitySettings$StoragePreferenceFragment"
+        android:icon="@drawable/ic_files"
+        android:title="Storage" />
+
+    <header
+        android:fragment="hr.caellian.notestream.gui.ActivitySettings$DataPreferenceFragment"
+        android:icon="@drawable/ic_sync"
+        android:title="Data Usage" />
+
+    <header
+        android:fragment="hr.caellian.notestream.gui.ActivitySettings$AboutPreferenceFragment"
+        android:icon="@drawable/ic_info"
+        android:title="About" />
+
+</preference-headers>

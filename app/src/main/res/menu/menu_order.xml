@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/order_title"
+        android:title="@string/label_order_title" />
+    <item
+        android:id="@+id/order_author"
+        android:title="@string/label_order_author" />
+    <item
+        android:id="@+id/order_date"
+        android:title="@string/label_order_date" />
+</menu>

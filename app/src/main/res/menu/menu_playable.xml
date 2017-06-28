@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/add_library"
+        android:title="@string/label_add_library" />
+    <item
+        android:id="@+id/add_playlist"
+        android:title="@string/label_add_playlist" />
+    <item
+        android:id="@+id/add_favorites"
+        android:title="@string/label_add_favorites" />
+    <item
+        android:id="@+id/download"
+        android:title="@string/label_download" />
+    <item
+        android:id="@+id/play_next"
+        android:title="@string/label_play_next" />
+    <item
+        android:id="@+id/add_queue"
+        android:title="@string/label_add_queue" />
+    <item
+        android:id="@+id/show_album"
+        android:title="@string/label_show_album" />
+    <item
+        android:id="@+id/show_artist"
+        android:title="@string/label_show_artist" />
+    <item
+        android:id="@+id/share"
+        android:title="@string/label_share" />
+    <item
+        android:id="@+id/edit_tags"
+        android:title="@string/label_edit_tags" />
+    <item
+        android:id="@+id/delete"
+        android:title="@string/label_delete" />
+</menu>

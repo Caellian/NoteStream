@@ -1,0 +1,31 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="offline_switch"
+        android:summary="Only allow playing music already downloaded to this device."
+        android:title="Offline Mode" />
+
+    <Preference
+        android:key="buffered_playlist"
+        android:summary="Buffers selected number of songs on playlist before and after currently playing one."
+        android:title="Buffered Playlist" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="cellular_switch"
+        android:summary="Download music using cellular internet connection. (Recommended: Off)"
+        android:title="Download Using Cellular" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="fast_download_switch"
+        android:summary="Download music using multiple connections. Actual download speed will vary depending on network conditions."
+        android:title="Fast Download Mode" />
+
+    <Preference
+        android:key="fast_download_options"
+        android:summary="More fast download options."
+        android:title="Fast Download Options" />
+
+</PreferenceScreen>
