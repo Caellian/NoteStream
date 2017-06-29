@@ -14,7 +14,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/songTitle"
+            android:id="@+id/labelSongTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -23,7 +23,7 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/songAuthor"
+            android:id="@+id/labelSongAuthor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"

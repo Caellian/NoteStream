@@ -9,11 +9,11 @@
     android:gravity="center">
 
     <ImageView
-        android:id="@+id/tile_bg"
+        android:id="@+id/tileBG"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:scaleType="centerCrop"
         android:contentDescription="@string/label_album"
+        android:scaleType="centerCrop"
         app:srcCompat="@drawable/ic_song" />
 
     <TextView

@@ -49,13 +49,18 @@ public class StatusBarLarge extends RemoteViews implements Playable.ControlListe
         serviceIntent.setAction(Constants.ACTION_TOGGLE_REPEAT);
         servicePending = PendingIntent.getService(context, Constants.APP_REQUEST_CODE, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         setOnClickPendingIntent(R.id.buttonRepeat, servicePending);
+
+        serviceIntent = new Intent(context, PlayerService.class);
+        serviceIntent.setAction(Constants.ACTION_STOP);
+        servicePending = PendingIntent.getService(context, Constants.APP_REQUEST_CODE, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        setOnClickPendingIntent(R.id.buttonDismiss, servicePending);
     }
 
     @Override
     public void onPlayableChanged(Playable current) {
+        setImageViewBitmap(R.id.albumImage, current.getMetadata().getCover());
         setTextViewText(R.id.labelSongTitle, current.getMetadata().getTitle());
         setTextViewText(R.id.labelSongAuthor, current.getMetadata().getAuthor());
-        setImageViewBitmap(R.id.albumImage, current.getMetadata().getTrackCover());
     }
 
     @Override

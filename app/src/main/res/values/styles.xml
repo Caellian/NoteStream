@@ -26,11 +26,16 @@
         <item name="android:background">@drawable/button_shuffle</item>
     </style>
 
+    <style name="NoteStreamButtonAdd" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/button_green_round</item>
+    </style>
+
     <style name="NoteStreamButtonDefault" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/button_custom</item>
     </style>
 
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 </resources>

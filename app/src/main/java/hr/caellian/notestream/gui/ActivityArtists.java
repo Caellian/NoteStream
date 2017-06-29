@@ -2,25 +2,25 @@ package hr.caellian.notestream.gui;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.Map;
+
+import hr.caellian.notestream.NoteStream;
 import hr.caellian.notestream.R;
 import hr.caellian.notestream.data.Playlist;
 import hr.caellian.notestream.gui.fragments.FragmentCategoryTile;
-import hr.caellian.notestream.util.Genres;
 import hr.caellian.notestream.util.Util;
 
 /**
- * Created by caellyan on 26/06/17.
+ * Created by tinsv on 22/07/2017.
  */
 
-public class ActivityGenres extends TableActivity {
+public class ActivityArtists extends TableActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(null);
@@ -28,21 +28,20 @@ public class ActivityGenres extends TableActivity {
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ((TextView) findViewById(R.id.labelTableTitle)).setText(R.string.label_genres);
+        ((TextView) findViewById(R.id.labelTableTitle)).setText(R.string.label_artists);
 
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
 
         int counter = 0;
         TableRow row = addTableRow();
-        for (Genres genre : Genres.values()) {
-            Playlist genrePlaylist = Playlist.get(Playlist.TEMPORARY_PREFIX + Playlist.GENRE_PREFIX + genre.id);
+        for (Map.Entry<String, Playlist> artist : NoteStream.getInstance().library.artists.entrySet()) {
             FragmentCategoryTile fragment = FragmentCategoryTile.newInstance(
                     true,
-                    genre.resourceIcon,
-                    genre.name,
-                    genrePlaylist);
-            ft.add(row.getId(), fragment , Playlist.GENRE_PREFIX + genre.id );
+                    R.drawable.ic_artist,
+                    artist.getKey(),
+                    artist.getValue());
+            ft.add(row.getId(), fragment , Playlist.ARTIST_PREFIX + artist.getKey());
             counter = ++counter % 2;
             if (counter == 0) row = addTableRow();
         }

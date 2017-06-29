@@ -1,6 +1,5 @@
 package hr.caellian.notestream.gui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,6 +12,7 @@ import android.view.MenuItem;
 
 import hr.caellian.notestream.NoteStream;
 import hr.caellian.notestream.R;
+import hr.caellian.notestream.lib.Constants;
 
 /**
  * Created by caellyan on 25/06/17.
@@ -21,11 +21,6 @@ import hr.caellian.notestream.R;
 public abstract class NavigationActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     protected NavigationView navigationView;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     protected abstract DrawerLayout getDrawerLayout();
 
@@ -42,7 +37,6 @@ public abstract class NavigationActivity extends AppCompatActivity implements Na
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         Intent intent;
@@ -54,7 +48,7 @@ public abstract class NavigationActivity extends AppCompatActivity implements Na
                 break;
             case R.id.nav_songs:
                 intent = new Intent(NavigationActivity.this, ActivityPlaylist.class);
-                intent.putExtra("playlist", NoteStream.getInstance().library.savedMusic);
+                intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.getInstance().library.savedMusic);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 break;
@@ -62,10 +56,14 @@ public abstract class NavigationActivity extends AppCompatActivity implements Na
 
                 break;
             case R.id.nav_albums:
-
+                intent = new Intent(NavigationActivity.this, ActivityAlbums.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
                 break;
             case R.id.nav_artists:
-
+                intent = new Intent(NavigationActivity.this, ActivityArtists.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
                 break;
             case R.id.nav_search:
                 intent = new Intent(NavigationActivity.this, ActivitySearch.class);
@@ -74,7 +72,7 @@ public abstract class NavigationActivity extends AppCompatActivity implements Na
                 break;
             case R.id.nav_local:
                 intent = new Intent(NavigationActivity.this, ActivityPlaylist.class);
-                intent.putExtra("playlist", NoteStream.getInstance().library.localMusic);
+                intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.getInstance().library.localMusic);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 break;

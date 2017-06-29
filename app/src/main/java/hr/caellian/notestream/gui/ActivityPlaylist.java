@@ -27,6 +27,7 @@ import hr.caellian.notestream.gui.fragments.FragmentItemPlayable;
 import hr.caellian.notestream.data.playable.Playable;
 import hr.caellian.notestream.data.PlayerService;
 import hr.caellian.notestream.data.Playlist;
+import hr.caellian.notestream.lib.Constants;
 
 /**
  * Created by caellyan on 16/06/17.
@@ -45,31 +46,33 @@ public class ActivityPlaylist extends NavigationActivity implements Library.Libr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(null);
         setContentView(R.layout.activity_playlist);
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        final Playlist playlist = (Playlist) getIntent().getSerializableExtra("playlist");
+        final Playlist playlist = Playlist.get(getIntent().getStringExtra(Constants.EXTRA_PLAYLIST));
         this.playlist = playlist;
 
         if (playlist == null || playlist.size() == 0) {
-            Toast.makeText(ActivityPlaylist.this, "Invalid or empty playlist.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityPlaylist.this, getString(R.string.invalid_playlist), Toast.LENGTH_SHORT).show();
             finish();
         }
 
         findViewById(R.id.buttonShufflePlay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (playlist != null && !playlist.isEmpty()) {
+                if (psb == null) {
+                    Toast.makeText(ActivityPlaylist.this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show();
+                } else if (playlist != null && !playlist.isEmpty()) {
                     psb.shufflePlay(playlist);
 
                     Intent intent = new Intent(ActivityPlaylist.this, ActivityPlayer.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(ActivityPlaylist.this, "Can't shuffle play empty playlist!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityPlaylist.this, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -106,7 +109,7 @@ public class ActivityPlaylist extends NavigationActivity implements Library.Libr
                         setOrder(item.getItemId());
 
                         Intent intent = new Intent(ActivityPlaylist.this, ActivityPlaylist.class);
-                        intent.putExtra("playlist", playlist);
+                        intent.putExtra(Constants.EXTRA_PLAYLIST, playlist);
                         startActivity(intent);
                         finish();
                         return true;
@@ -119,16 +122,12 @@ public class ActivityPlaylist extends NavigationActivity implements Library.Libr
 
         setPlaylist(playlist);
 
-        final Timer bindTimer = new Timer();
-        bindTimer.scheduleAtFixedRate(new TimerTask() {
+        NoteStream.registerPlayerServiceListener(new NoteStream.PlayerServiceListener() {
             @Override
-            public void run() {
-                if (NoteStream.getInstance().getPlayerServiceBinder() != null) {
-                    psb = NoteStream.getInstance().getPlayerServiceBinder();
-                    bindTimer.cancel();
-                }
+            public void onPlayerServiceConnected(PlayerService.PlayerServiceBinder psb) {
+                ActivityPlaylist.this.psb = NoteStream.getInstance().getPlayerServiceBinder();
             }
-        }, 1000, 1000);
+        });
     }
 
     public boolean setOrder(final int order) {
@@ -213,7 +212,8 @@ public class ActivityPlaylist extends NavigationActivity implements Library.Libr
     public void onPlayableAddedToPlaylist(Playable playable, Playlist playlist) {
         if (playlist == this.playlist) {
             for (FragmentItemPlayable playlistItem : playlistItems) {
-                if (playlistItem.playable == playable) return;
+                Playable fragmentPlayable = (Playable) playlistItem.getArguments().getSerializable(Constants.EXTRA_PLAYABLE);
+                if (fragmentPlayable != null && fragmentPlayable == playable) return;
             }
 
             FragmentItemPlayable fragment = FragmentItemPlayable.newInstance(playable, playlist);

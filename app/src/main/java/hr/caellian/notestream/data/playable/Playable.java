@@ -1,6 +1,7 @@
 package hr.caellian.notestream.data.playable;
 
 import android.media.MediaPlayer;
+import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 
@@ -14,7 +15,11 @@ import hr.caellian.notestream.util.RepeatState;
 public interface Playable extends Serializable {
     MutableMediaMetadata getMetadata();
 
-    String getPlayableId();
+    String getID();
+
+    PlayableSource getPlayableSource();
+
+    String getPath();
 
     String getLocation();
 
@@ -35,7 +40,7 @@ public interface Playable extends Serializable {
          * Called when a new playable has been selected.
          * @param current currently selected playable.
          */
-        void onPlayableChanged(Playable current);
+        void onPlayableChanged(@NonNull Playable current);
 
         /**
          * Called on play/pause button click.
@@ -53,6 +58,6 @@ public interface Playable extends Serializable {
          * Called on repeat state change.
          * @param currentState current repeat state.
          */
-        void onRepeatStateChanged(RepeatState currentState);
+        void onRepeatStateChanged(@NonNull RepeatState currentState);
     }
 }

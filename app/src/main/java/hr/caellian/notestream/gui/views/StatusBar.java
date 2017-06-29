@@ -40,6 +40,11 @@ public class StatusBar extends RemoteViews implements Playable.ControlListener {
         serviceIntent.setAction(Constants.ACTION_TOGGLE_PLAY);
         servicePending = PendingIntent.getService(context, Constants.APP_REQUEST_CODE, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         setOnClickPendingIntent(R.id.buttonTogglePlay, servicePending);
+
+        serviceIntent = new Intent(context, PlayerService.class);
+        serviceIntent.setAction(Constants.ACTION_STOP);
+        servicePending = PendingIntent.getService(context, Constants.APP_REQUEST_CODE, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        setOnClickPendingIntent(R.id.buttonDismiss, servicePending);
     }
 
     @Override

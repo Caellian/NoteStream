@@ -56,6 +56,9 @@
     <!-- Playlist -->
     <string name="label_filter">Filter</string>
     <string name="label_shuffle_play">Shuffle Play</string>
+    <string name="invalid_playlist">Invalid or empty playlist.</string>
+    <string name="shuffle_empty_playlist">"Can't shuffle play empty playlist!</string>
+    <string name="null_player_service">Player service is null.</string>
 
     <!-- Player -->
     <string name="title_player">Player</string>
@@ -65,6 +68,7 @@
     <!-- Tag editor -->
     <string name="title_tag_editor">Tag Editor</string>
     <string name="label_save_to_file">Save to File</string>
+    <string name="edit_unsaved">Can\'t edit tags on items not saved to library!</string>
 
     <!-- Settings -->
     <string name="title_settings">Settings</string>
@@ -79,6 +83,7 @@
     <string name="label_show_album">Show album</string>
     <string name="label_show_artist">Show artist</string>
     <string name="label_edit_tags">Edit tags</string>
+    <string name="label_show_suggestions">Show suggestions</string>
 
     <!-- Order menu -->
     <string name="label_order_default">Default order</string>
@@ -87,12 +92,19 @@
     <string name="label_order_date">Order by date</string>
 
     <!-- Permissions -->
-    <string name="title_permissions">Permissions</string>
-    <string name="permissions_explanation">NoteStream depends on several system functions which require your permission. Each one of them is provided with explanation why they are needed in following few pages.\n\nNoteStream might function properly without some of them, but most are required for full functionality of NoteStream.\n\nSwipe right to go forward...</string>
-    <string name="permission_read_external">Read External Storage</string>
-    <string name="permission_write_external">Write to External Storage</string>
-    <string name="permission_run_in_background">Run in Background</string>
-    <string name="permission_data_in_background">Use Data in Background</string>
+    <string name="title_permission_optional">Permission needed</string>
+    <string name="title_permissions_optional">Permissions needed</string>
+    <string name="title_permission_mandatory">Permission required</string>
+    <string name="title_permissions_mandatory">Permissions required</string>
+    <string name="title_permission_denied">Permission denied</string>
+    <string name="title_permissions_denied">Permissions denied</string>
+    <string name="mandatory_permissions_explanation">NoteStream requires access to external storage in order to populate library with local music and access to call state so it can temporarily pause music playback when you\'re receiving a phone call. It will not function properly without these permissions. Please change your permission settings.</string>
+
+    <string name="permission_access_external">Access External Storage</string>
+    <string name="permission_access_external_explanation">NoteStream needs to access external storage in order to populate library with local music.</string>
+    <string name="permission_access_phone_state">Access Phone State</string>
+    <string name="permission_access_phone_state_explanation">NoteStream needs to access phone state so it can temporarily pause music playback when you\'re receiving a phone call.</string>
+    <string name="permission_internet">Use Internet</string>
 
     <!-- Navigation -->
     <string name="navigation_drawer_open">Open navigation drawer</string>

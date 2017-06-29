@@ -1,5 +1,6 @@
 package hr.caellian.notestream.gui;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -18,18 +19,23 @@ import java.util.TimerTask;
 
 import hr.caellian.notestream.NoteStream;
 import hr.caellian.notestream.R;
+import hr.caellian.notestream.data.MutableMediaMetadata;
 import hr.caellian.notestream.data.playable.Playable;
 import hr.caellian.notestream.data.PlayerService;
 import hr.caellian.notestream.data.playable.PlayableDownloadable;
+import hr.caellian.notestream.data.playable.PlayableYouTube;
+import hr.caellian.notestream.gui.fragments.FragmentBarPlayer;
 import hr.caellian.notestream.util.RepeatState;
 
 import static hr.caellian.notestream.util.Util.timeToString;
 
 public class ActivityPlayer extends NavigationActivity implements NavigationView.OnNavigationItemSelectedListener, Playable.ControlListener, Playable.ProgressListener {
-    // http://stackoverflow.com/questions/9481977/android-seekbar-to-control-mediaplayer-progress
-    PlayerService.PlayerServiceBinder psb = null;
 
+    PlayerService.PlayerServiceBinder psb = null;
     NavigationView suggestionsView;
+
+    // TODO: Implement album cover swiping for skipping songs.
+    // Maybe implement smooth transition?
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,12 +115,12 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
                     @Override
                     public void run() {
                         if (buttonPrevious.isPressed()) {
-                            psb.setProgress(Math.max(psb.getCurrentPosition() - 5000, 0));
+                            psb.setProgress(Math.max(psb.getProgress() - PlayerService.DEFAULT_PROGRESS_CHANGE, 0));
                         } else {
                             holdTimer.cancel();
                         }
                     }
-                }, 1000, 1000);
+                }, 1000, 500);
                 return true;
             }
         });
@@ -134,13 +140,13 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
                     @Override
                     public void run() {
                         if (buttonNext.isPressed()) {
-                            psb.setProgress(Math.min(psb.getCurrentPosition() + 5000,
+                            psb.setProgress(Math.min(psb.getProgress() + PlayerService.DEFAULT_PROGRESS_CHANGE,
                                     psb.getCurrentPlayable().getMetadata().getLength()));
                         } else {
                             holdTimer.cancel();
                         }
                     }
-                }, 1000, 1000);
+                }, 1000, 500);
                 return true;
             }
         });
@@ -148,11 +154,7 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
         findViewById(R.id.buttonTogglePlay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (psb.isPlaying()) {
-                    psb.pause();
-                } else {
-                    psb.play();
-                }
+                psb.togglePlay();
             }
         });
 
@@ -163,17 +165,44 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
             }
         });
 
+        findViewById(R.id.albumImage).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+//                findViewById(R.id.lyricsDisplay).setVisibility(findViewById(R.id.lyricsDisplay).getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+                findViewById(R.id.lyricsDisplay).setVisibility(View.VISIBLE);
+                return true;
+            }
+        });
+
+        findViewById(R.id.lyricsContainer).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                findViewById(R.id.lyricsDisplay).setVisibility(View.GONE);
+                return true;
+            }
+        });
+
         NoteStream.registerControlListener(this);
         NoteStream.registerProgressListener(this);
 
-        onProgressChanged(0);
-
         if (psb != null) {
+            onProgressChanged(psb.getProgress());
             onShuffleStateChanged(psb.doShuffle());
             onPlayStatusChanged(psb.isPlaying());
             onRepeatStateChanged(psb.getRepeatState());
             onPlayableChanged(psb.getCurrentPlayable());
         }
+        NoteStream.registerPlayerServiceListener(new NoteStream.PlayerServiceListener() {
+            @Override
+            public void onPlayerServiceConnected(PlayerService.PlayerServiceBinder psb) {
+                ActivityPlayer.this.psb = NoteStream.getInstance().getPlayerServiceBinder();
+                ActivityPlayer.this.onProgressChanged(psb.getProgress());
+                ActivityPlayer.this.onShuffleStateChanged(psb.doShuffle());
+                ActivityPlayer.this.onPlayStatusChanged(psb.isPlaying());
+                ActivityPlayer.this.onRepeatStateChanged(psb.getRepeatState());
+                ActivityPlayer.this.onPlayableChanged(psb.getCurrentPlayable());
+            }
+        });
     }
 
     public void onProgressChanged(int progress){
@@ -183,16 +212,24 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
     }
 
     public void onPlayableChanged(Playable current) {
-        ((ImageView) findViewById(R.id.albumImage)).setImageBitmap(current.getMetadata().getTrackCover());
+        MutableMediaMetadata metadata = current.getMetadata();
+        ((ImageView) findViewById(R.id.albumImage)).setImageBitmap(metadata.getCover());
 
-        TextView source = (TextView) findViewById(R.id.labelSource);
-        source.setText(current.getLocation());
+        String lyrics = metadata.getLyrics();
+        ((TextView) findViewById(R.id.textViewLyrics)).setText(lyrics);
+
+        findViewById(R.id.lyricsDisplay).setVisibility(View.GONE);
+        ((TextView) findViewById(R.id.labelSource)).setText(current.getLocation());
 
         if (current instanceof PlayableDownloadable) {
             findViewById(R.id.buttonDownload).setVisibility(View.VISIBLE);
-            suggestionsView.setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.buttonDownload).setVisibility(View.INVISIBLE);
+        }
+
+        if (current instanceof PlayableYouTube) {
+            suggestionsView.setVisibility(View.VISIBLE);
+        } else {
             suggestionsView.setVisibility(View.GONE);
         }
 
@@ -203,17 +240,21 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
             saveButton.setBackground(ContextCompat.getDrawable(ActivityPlayer.this, R.drawable.ic_add));
         }
 
-        TextView title = (TextView) findViewById(R.id.labelSongTitle);
-        title.setText(current.getMetadata().getTitle());
-        TextView author = (TextView) findViewById(R.id.labelSongAuthor);
-        author.setText(current.getMetadata().getAuthor());
+        ((TextView) findViewById(R.id.labelSongTitle)).setText(metadata.getTitle());
+        ((TextView) findViewById(R.id.labelSongAuthor)).setText(metadata.getAuthor());
 
-        //TODO: Add options menu
+        findViewById(R.id.buttonMenu).setOnClickListener(new View.OnClickListener() {
+            PlayablePopupMenu playablePopupMenu = new PlayablePopupMenu(ActivityPlayer.this, findViewById(R.id.buttonMenu), psb.getCurrentPlayable());
+            @Override
+            public void onClick(View v) {
+                playablePopupMenu.show();
+            }
+        });
 
-        ((SeekBar) findViewById(R.id.songProgressBar)).setMax(current.getMetadata().getLength());
+        ((SeekBar) findViewById(R.id.songProgressBar)).setMax(metadata.getLength());
 
         TextView length = (TextView) findViewById(R.id.labelLength);
-        length.setText(timeToString(current.getMetadata().getLength()));
+        length.setText(timeToString(metadata.getLength()));
     }
 
     @Override

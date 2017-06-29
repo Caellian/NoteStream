@@ -48,16 +48,45 @@
         android:layout_width="match_parent"
         android:layout_height="10dp"/>
 
-    <ImageView
-        android:id="@+id/albumImage"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/label_song_album"
-        android:cropToPadding="false"
-        android:scaleType="fitCenter"
-        app:srcCompat="@drawable/ic_song" />
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/albumImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/label_song_album"
+            android:cropToPadding="false"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_song" />
+
+        <ScrollView
+            android:id="@+id/lyricsDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black_dark_overlay"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/lyricsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textViewLyrics"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textAlignment="center" />
+            </LinearLayout>
+        </ScrollView>
+
+    </FrameLayout>
 
     <Space
         android:layout_width="match_parent"

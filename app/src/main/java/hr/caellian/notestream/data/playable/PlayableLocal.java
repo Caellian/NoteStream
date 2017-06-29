@@ -33,12 +33,17 @@ public class PlayableLocal implements Playable {
         if (metadata != null) {
             return metadata;
         } else {
-            return metadata = new MutableMediaMetadata(NoteStream.getInstance(), getPlayableId().substring(getPlayableId().indexOf("-") + 1));
+            return metadata = new MutableMediaMetadata(this);
         }
     }
 
     @Override
-    public String getPlayableId() {
+    public PlayableSource getPlayableSource() {
+        return PlayableSource.LOCAL;
+    }
+
+    @Override
+    public String getID() {
         return this.id;
     }
 
@@ -58,7 +63,7 @@ public class PlayableLocal implements Playable {
                 mp.setDataSource(getPath());
                 mp.prepare();
                 mp.seekTo(this.getMetadata().getStart());
-            } catch (IllegalArgumentException | IOException e) {
+            } catch (IllegalStateException | IllegalArgumentException | IOException e) {
                 Log.w(TAG, "prepare: 'setDataSource' or 'prepare' failed!", e);
                 return false;
             }
@@ -67,15 +72,12 @@ public class PlayableLocal implements Playable {
 
     @Override
     public boolean skipTo(MediaPlayer mp, int ms) {
-        if (ms >= 0 && getMetadata().getLength() < ms){
-            mp.seekTo(ms);
-            return true;
-        }
-        return false;
+        mp.seekTo(Math.max(0, Math.min(ms, getMetadata().getLength())));
+        return true;
     }
 
     public static String getId(String path) {
-        return ID_PREFIX + path.substring(path.lastIndexOf("/"), path.contains(".") ? path.lastIndexOf(".") : path.length() - 1).replaceAll("[^A-Za-z0-9]+","");
+        return ID_PREFIX + path.replaceAll("[^A-Za-z0-9]+","");
     }
 
     @Override

@@ -3,6 +3,7 @@ package hr.caellian.notestream.data.playable;
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import android.util.SparseArray;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +27,7 @@ import hr.caellian.notestream.R;
 import hr.caellian.notestream.data.MutableMediaMetadata;
 import hr.caellian.notestream.data.youtube.VideoMeta;
 import hr.caellian.notestream.data.youtube.YouTubeExtractor;
+import hr.caellian.notestream.data.youtube.YouTubeFetcher;
 import hr.caellian.notestream.data.youtube.YouTubeFile;
 
 /**
@@ -35,43 +38,35 @@ public class PlayableYouTube extends PlayableDownloadable {
     public static final String TAG = PlayableYouTube.class.getSimpleName();
 
     private static final String LOCATION = NoteStream.getInstance().getString(R.string.location_youtube);
-    private static final String ID_PREFIX = "playable-local-";
+    private static final String ID_PREFIX = "playable-youtube-";
 
-    private static final HashMap<String, String> yturls = new HashMap<>();
+    private static final HashMap<String, String> youtubeURLMap = new HashMap<>();
 
     protected final String id;
     protected String youtubeID;
-    protected String downloadURL;
     protected String extension;
-    protected boolean valid = false;
     protected transient MutableMediaMetadata metadata;
 
     public PlayableYouTube(final String youtubeID) {
         this.id = getId(youtubeID);
         this.youtubeID = youtubeID;
 
-        String youtubeLink = "http://youtube.com/watch?v=" + youtubeID;
-
-        new YouTubeExtractor(NoteStream.getInstance()) {
+        new YouTubeExtractor(youtubeID) {
             @Override
-            public void onExtractionComplete(SparseArray<YouTubeFile> ytFiles, VideoMeta videoMeta) {
-                Log.d(TAG, "Extraction complete!");
-                if (ytFiles != null) {
-                    Log.d(TAG, "ytf != null");
+            public void onPostExecute(SparseArray<YouTubeFile> files, VideoMeta videoMeta) {
+                if (files != null) {
                     int itag = 140;
-                    downloadURL = ytFiles.get(itag).getUrl();
-                    yturls.put(youtubeID, downloadURL);
-                    extension = ytFiles.get(itag).getFormat().getExt();
-                    Log.d(TAG, "urlset: " + downloadURL);
+                    youtubeURLMap.put(youtubeID, files.get(itag).getUrl());
+                    extension = files.get(itag).getFormat().getExt();
                     final MutableMediaMetadata metadata = getMetadata();
                     metadata.setTitle(videoMeta.getTitle());
                     metadata.setAuthor(videoMeta.getAuthor());
                     metadata.setLength((int) videoMeta.getVideoLength() * 1000);
+                    metadata.setEnd(metadata.getLength());
+
                     new AsyncTask<VideoMeta, Void, Boolean>() {
                         @Override
                         protected Boolean doInBackground(VideoMeta... videoMeta) {
-
-                            Log.d(TAG, "setcoverstart");
                             VideoMeta meta = videoMeta[0];
                             URL url;
                             try {
@@ -91,7 +86,7 @@ public class PlayableYouTube extends PlayableDownloadable {
                                     baos.write(byteChunk, 0, n);
                                 }
                             } catch (IOException e) {
-                                System.err.printf ("Failed while reading bytes from %s: %s", url.toExternalForm(), e.getMessage());
+                                Log.w(TAG,"Failed while reading bytes from " + url.toExternalForm(), e);
                                 return false;
                             } finally {
                                 if (is != null) {
@@ -103,15 +98,14 @@ public class PlayableYouTube extends PlayableDownloadable {
                                 }
                             }
 
-                            metadata.setCoverData(baos.toByteArray());
-
-                            Log.d(TAG, "setcoverend");
+                            metadata.setCover(baos.toByteArray());
                             return true;
                         }
                     }.execute(videoMeta);
+                    setAvailable(true);
                 }
             }
-        }.extract(youtubeLink, true, true);
+        }.execute();
     }
 
     @Override
@@ -119,16 +113,21 @@ public class PlayableYouTube extends PlayableDownloadable {
         if (metadata != null) {
             return metadata;
         } else {
-            return metadata = new MutableMediaMetadata(NoteStream.getInstance(), getPlayableId().substring(getPlayableId().indexOf("-") + 1));
+            return metadata = new MutableMediaMetadata(this);
         }
     }
 
     @Override
-    public String getPlayableId() {
+    public PlayableSource getPlayableSource() {
+        return PlayableSource.YOUTUBE;
+    }
+
+    @Override
+    public String getID() {
         return this.id;
     }
 
-    public String getYouTubeID() {
+    public String getPath() {
         return youtubeID;
     }
 
@@ -139,11 +138,10 @@ public class PlayableYouTube extends PlayableDownloadable {
 
     @Override
     public boolean prepare(final MediaPlayer mp) {
+        mp.reset();
         try {
-            Log.d(TAG, "prepare: " + downloadURL);
-            Log.d(TAG, "other: " + yturls.get(youtubeID));
-            if (downloadURL != null) {
-                mp.setDataSource(yturls.get(youtubeID));
+            if (youtubeURLMap.get(youtubeID) != null) {
+                mp.setDataSource(youtubeURLMap.get(youtubeID));
                 mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mp.prepare();
                 mp.seekTo(getMetadata().getStart());
@@ -156,16 +154,22 @@ public class PlayableYouTube extends PlayableDownloadable {
 
     @Override
     public boolean skipTo(MediaPlayer mp, int ms) {
-        if (ms >= 0 && getMetadata().getLength() < ms){
-            mp.seekTo(ms);
-            return true;
-        }
-        return false;
+        mp.seekTo(Math.max(0, Math.min(ms, getMetadata().getLength())));
+        return true;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return available;
     }
 
     public ArrayList<PlayableYouTube> getSuggestions() {
         ArrayList<PlayableYouTube> result = new ArrayList<>();
-        // TODO: Implement method
+
+        for (String id : YouTubeFetcher.getSuggestionsFor(youtubeID)) {
+            result.add(new PlayableYouTube(id));
+        }
+
         return result;
     }
 
@@ -174,10 +178,13 @@ public class PlayableYouTube extends PlayableDownloadable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             int writeExternal = NoteStream.getInstance().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        } else {
-            downloadFunction();
+            if (writeExternal != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(NoteStream.getInstance(), "Write External Storage permission not granted!", Toast.LENGTH_LONG).show();
+                return false;
+            }
         }
-        Uri uri = Uri.parse(yturls.get(youtubeID));
+
+        Uri uri = Uri.parse(youtubeURLMap.get(youtubeID));
         DownloadManager.Request request = new DownloadManager.Request(uri);
         request.setTitle(getMetadata().getTitle());
 
@@ -188,10 +195,6 @@ public class PlayableYouTube extends PlayableDownloadable {
         DownloadManager manager = (DownloadManager) NoteStream.getInstance().getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
         return true;
-    }
-
-    private void downloadFunction() {
-
     }
 
     public static String getId(String youtubeID) {
@@ -205,6 +208,6 @@ public class PlayableYouTube extends PlayableDownloadable {
         if (!(obj instanceof PlayableYouTube)) return false;
         PlayableYouTube other = (PlayableYouTube) obj;
 
-        return getYouTubeID().equals(other.getYouTubeID());
+        return getPath().equals(other.getPath());
     }
 }

@@ -9,9 +9,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.widget.Toast;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,10 +32,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     // http://www.helloandroid.com/tutorials/musicdroid-audio-player-part-ii
     // http://www.tutorialsface.com/2015/08/android-custom-notification-tutorial/
 
+    public static final int DEFAULT_PROGRESS_CHANGE = 5000;
+
     private static Timer progressTimer = new Timer();
 
     int queueSize = 0;
-    static Playlist pl = new Playlist("currentlyPlayed").clear();
+    static Playlist pl = Playlist.get(Playlist.TEMPORARY_PREFIX + "currentlyPlayed");
     static MediaPlayer mp = new MediaPlayer();
     MediaSession ms;
     static RepeatState repeatState = RepeatState.NONE;
@@ -74,6 +82,20 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
+    protected PhoneStateListener psl = new PhoneStateListener() {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            if (state == TelephonyManager.CALL_STATE_RINGING) {
+                psb.pause();
+            } else if(state == TelephonyManager.CALL_STATE_IDLE) {
+                psb.play();
+            } else if(state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                psb.pause();
+            }
+            super.onCallStateChanged(state, incomingNumber);
+        }
+    };
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
@@ -90,6 +112,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     psb.togglePlay();
                     break;
                 case Constants.ACTION_STOP:
+                    if (notification != null) {
+                        notification.cancelNotification();
+                    }
                     psb.stop();
                     break;
                 case Constants.ACTION_SWITCH_PREVIOUS:
@@ -111,6 +136,16 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     mp.setOnCompletionListener(this);
                     progressHandler = new ProgressHandler(mp);
 
+                    TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+                    if(tm != null) {
+                        tm.listen(psl, PhoneStateListener.LISTEN_CALL_STATE);
+                    }
+
+                    ms = new MediaSession(PlayerService.this, Constants.MEDIA_SESSION_TAG);
+                    ms.setCallback(new NSMediaSessionCallback());
+                    ms.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+                    ms.setActive(true);
+
                     progressTimer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
@@ -124,26 +159,16 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             }
         }
 
-        // THIS
-//        MediaSessionCompat msc = new MediaSessionCompat(this, Constants.MEDIA_SESSION_TAG);
-//        MediaControllerCompat mcc = new MediaControllerCompat(this, msc);
-//        MediaControllerCompat.setMediaController(null, mcc);
-
-        // OR THIS OR WHATEVER
-//        ms = new MediaSession(this, Constants.MEDIA_SESSION_TAG);
-//
-//        Intent psbrIntent = new Intent(this, PlayerServiceBroadcastReceiver.class);
-//        PendingIntent psbrPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), Constants.APP_PSBR_CODE, psbrIntent, 0);
-//        ms.setMediaButtonReceiver(psbrPendingIntent);
-//        ms.setFlags(FLAG_HANDLES_MEDIA_BUTTONS);
-//
-//        ms.setActive(true);
-
         return Service.START_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        if(tm != null) {
+            tm.listen(psl, PhoneStateListener.LISTEN_NONE);
+        }
+
         mp.release();
         ms.release();
         progressTimer.cancel();
@@ -156,48 +181,69 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         return psb = new PlayerServiceBinder();
     }
 
-//    public class TEST extends MediaButtonReceiver {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            final KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-//            if (event.getAction() != KeyEvent.ACTION_DOWN) return;
-//
-//            switch (event.getKeyCode()) {
-//                case KeyEvent.KEYCODE_MEDIA_STOP:
-//                    psb.stop();
-//                    break;
-//                case KeyEvent.KEYCODE_MEDIA_PLAY:
-//                    psb.play();
-//                    break;
-//                case KeyEvent.KEYCODE_HEADSETHOOK:
-//                case KeyEvent.KEYCODE_MEDIA_PAUSE:
-//                    psb.pause();
-//                    break;
-//                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-//                    if (playing) {
-//                        psb.pause();
-//                    } else {
-//                        psb.play();
-//                    }
-//                    break;
-//                case KeyEvent.KEYCODE_MEDIA_NEXT:
-//                    psb.switchNext();
-//                    break;
-//                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-//                    psb.switchPrevious();
-//                    break;
-//            }
-//        }
-//    }
+    public class NSMediaSessionCallback extends MediaSession.Callback {
+
+        @Override
+        public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
+            String intentAction = mediaButtonIntent.getAction();
+            if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
+                final KeyEvent event = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                if (event != null) {
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
+                        // RELEASE
+
+                        switch (event.getKeyCode()) {
+                            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                            case KeyEvent.KEYCODE_MEDIA_STEP_FORWARD:
+                                psb.setProgress(Math.min(psb.getProgress() + PlayerService.DEFAULT_PROGRESS_CHANGE,
+                                        psb.getCurrentPlayable().getMetadata().getLength()));
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_STEP_BACKWARD:
+                                psb.setProgress(Math.max(psb.getProgress() - PlayerService.DEFAULT_PROGRESS_CHANGE, 0));
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_STOP:
+                                psb.stop();
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_PLAY:
+                                psb.play();
+                                break;
+                            case KeyEvent.KEYCODE_HEADSETHOOK:
+                            case KeyEvent.KEYCODE_SPACE:
+                            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                                psb.pause();
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                                if (playing) {
+                                    psb.pause();
+                                } else {
+                                    psb.play();
+                                }
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
+                            case KeyEvent.KEYCODE_MEDIA_NEXT:
+                                psb.switchNext();
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
+                            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                                psb.switchPrevious();
+                                break;
+                        }
+                    }
+                }
+            }
+            return super.onMediaButtonEvent(mediaButtonIntent);
+        }
+    }
 
     public class PlayerServiceBinder extends Binder {
 
-        public void shufflePlay(Playlist playlist) {
+        public Playlist shufflePlay(Playlist playlist) {
+            Playlist old = pl;
             if (playlist != null && !playlist.isEmpty()) {
                 mp.stop();
                 pl.clear();
                 pl.add(playlist);
-                pl.skipTo(playlist.getCurrentPlayable());
+                pl.skipTo(old.getCurrentPlayable());
                 pl.setShuffle(true);
                 pl.getCurrentPlayable().prepare(mp);
 
@@ -206,6 +252,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 }
                 play();
             }
+            return old;
         }
 
         public Playlist playPlaylist(Playlist playlist) {
@@ -241,7 +288,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }
 
         public Playlist play(final Playable playable) {
-            return playPlaylist(new Playlist("temporary-" + playable.getMetadata().trackId, Arrays.asList(playable)));
+            return playPlaylist(Playlist.get(Playlist.TEMPORARY_PREFIX + playable.getID(), Collections.singletonList(playable)));
         }
 
         public void playNext(Playable playable) {
@@ -263,6 +310,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 for (Playable.ControlListener controlListener : NoteStream.CONTROL_LISTENERS) {
                     controlListener.onPlayStatusChanged(true);
                 }
+                if (!NoteStream.CONTROL_LISTENERS.contains(notification)) NoteStream.registerControlListener(notification);
             }
             return old;
         }
@@ -388,11 +436,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             return null;
         }
 
-
-        public int getCurrentPosition() {
-            return mp.getCurrentPosition();
-        }
-
         public void setProgress(int progress) {
             getCurrentPlayable().skipTo(mp, progress);
         }
@@ -402,7 +445,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }
 
         public boolean isEmpty() {
-            return pl == null;
+            return pl == null || pl.isEmpty();
         }
 
         public boolean isPlaying() {

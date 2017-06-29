@@ -53,12 +53,8 @@ public class NoteStreamNotification implements Playable.ControlListener {
         builder = new Notification.Builder(context);
         builder.setContentTitle(context.getString(R.string.app_name));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            builder.setCustomContentView(statusBar);
-            builder.setCustomBigContentView(statusBarLarge);
-        } else {
-            builder.setContent(statusBar);
-        }
+        builder.setCustomContentView(statusBar);
+        builder.setCustomBigContentView(statusBarLarge);
 
         builder.setContentIntent(pendingIntent);
         builder.setSmallIcon(R.drawable.ic_service_icon);
@@ -69,16 +65,13 @@ public class NoteStreamNotification implements Playable.ControlListener {
 
     public NoteStreamNotification rebuild() {
         notification = builder.build();
-        if (playing) notification.flags |= Notification.FLAG_NO_CLEAR;
-        notification.flags |= Notification.FLAG_ONGOING_EVENT;
-
-        if (playing) {
-            parentService.startForeground(Constants.APP_NOTIFICATION_ID, notification);
-        } else {
-            parentService.stopForeground(false);
-            nm.notify(Constants.APP_NOTIFICATION_ID, notification);
-        }
+        parentService.startForeground(Constants.APP_NOTIFICATION_ID, notification);
         return this;
+    }
+
+    public void cancelNotification() {
+        NoteStream.CONTROL_LISTENERS.remove(this);
+        parentService.stopForeground(true);
     }
 
     public Notification getNotification() {

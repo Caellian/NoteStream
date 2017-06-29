@@ -6,6 +6,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.Menu;
 
+import hr.caellian.notestream.NoteStream;
+
 /**
  * Created by caellyan on 17/06/17.
  */
@@ -28,10 +30,15 @@ public class Util {
         }
     }
 
+    public static Bitmap drawableToBitmap(int drawableID) {
+        return drawableToBitmap(drawableID, -1, -1);
+    }
 
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap = null;
+    public static Bitmap drawableToBitmap(int drawableID, int width, int height) {
+        Drawable drawable = NoteStream.getInstance().getResources().getDrawable(drawableID, null);
+        Bitmap bitmap;
+        width = Math.max(width, drawable.getIntrinsicWidth());
+        height = Math.max(height, drawable.getIntrinsicHeight());
 
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
@@ -43,7 +50,7 @@ public class Util {
         if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
         } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         }
 
         Canvas canvas = new Canvas(bitmap);

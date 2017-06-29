@@ -3,6 +3,7 @@ package hr.caellian.notestream.gui.fragments;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -29,15 +30,14 @@ import hr.caellian.notestream.util.RepeatState;
 public class FragmentBarPlayer extends Fragment implements Playable.ControlListener, Playable.ProgressListener{
 
     View view;
-
-    PlayerService.PlayerServiceBinder psb = null;
+    PlayerService.PlayerServiceBinder psb = NoteStream.getInstance().getPlayerServiceBinder();
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.bar_playing, container, false);
 
-        view.findViewById(R.id.buttonShowPlayer).setOnClickListener(new View.OnClickListener() {
+        view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(view.getContext(), ActivityPlayer.class);
@@ -64,12 +64,12 @@ public class FragmentBarPlayer extends Fragment implements Playable.ControlListe
                     @Override
                     public void run() {
                         if (buttonPrevious.isPressed()) {
-                            psb.setProgress(Math.max(psb.getCurrentPosition() - 5000, 0));
+                            psb.setProgress(Math.max(psb.getProgress() - 5000, 0));
                         } else {
                             holdTimer.cancel();
                         }
                     }
-                }, 1000, 1000);
+                }, 1000, 500);
                 return true;
             }
         });
@@ -89,13 +89,13 @@ public class FragmentBarPlayer extends Fragment implements Playable.ControlListe
                     @Override
                     public void run() {
                         if (buttonNext.isPressed()) {
-                            psb.setProgress(Math.min(psb.getCurrentPosition() + 5000,
+                            psb.setProgress(Math.min(psb.getProgress() + 5000,
                                     psb.getCurrentPlayable().getMetadata().getLength()));
                         } else {
                             holdTimer.cancel();
                         }
                     }
-                }, 1000, 1000);
+                }, 1000, 500);
                 return true;
             }
         });
@@ -103,31 +103,37 @@ public class FragmentBarPlayer extends Fragment implements Playable.ControlListe
         view.findViewById(R.id.buttonTogglePlay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (psb.isPlaying()) {
-                    psb.pause();
-                } else {
-                    psb.play();
-                }
+                psb.togglePlay();
             }
         });
 
         if(psb == null || psb.isEmpty()) {
             view.setVisibility(View.GONE);
+        } else {
+            onProgressChanged(psb.getProgress());
+            onPlayableChanged(psb.getCurrentPlayable());
+            onPlayStatusChanged(psb.isPlaying());
         }
 
         NoteStream.registerControlListener(this);
         NoteStream.registerProgressListener(this);
-
-        final Timer bindTimer = new Timer();
-        bindTimer.scheduleAtFixedRate(new TimerTask() {
+        NoteStream.registerPlayerServiceListener(new NoteStream.PlayerServiceListener() {
             @Override
-            public void run() {
-                if (NoteStream.getInstance().getPlayerServiceBinder() != null) {
-                    psb = NoteStream.getInstance().getPlayerServiceBinder();
-                    bindTimer.cancel();
+            public void onPlayerServiceConnected(PlayerService.PlayerServiceBinder psb) {
+                FragmentBarPlayer.this.psb = psb;
+                if (!psb.isEmpty() && psb.getCurrentPlayable() != null) {
+                    FragmentBarPlayer.this.onProgressChanged(psb.getProgress());
+                    FragmentBarPlayer.this.onPlayableChanged(psb.getCurrentPlayable());
+                    FragmentBarPlayer.this.onPlayStatusChanged(psb.isPlaying());
+                    view.setVisibility(View.VISIBLE);
                 }
             }
-        }, 1000, 1000);
+
+            @Override
+            public void onPlayerServiceDisconnected() {
+                view.setVisibility(View.GONE);
+            }
+        });
         return view;
     }
 
@@ -137,7 +143,7 @@ public class FragmentBarPlayer extends Fragment implements Playable.ControlListe
     }
 
     @Override
-    public void onPlayableChanged(Playable current) {
+    public void onPlayableChanged(@NonNull Playable current) {
         ((TextView) view.findViewById(R.id.labelSongTitle)).setText(current.getMetadata().getTitle());
         ((TextView) view.findViewById(R.id.labelSongAuthor)).setText(current.getMetadata().getAuthor());
         ((ProgressBar) view.findViewById(R.id.songProgressBar)).setMax(current.getMetadata().getLength());
