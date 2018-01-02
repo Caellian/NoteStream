@@ -12,14 +12,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import hr.caellian.id3lib.MP3File;
-import hr.caellian.id3lib.TagException;
-import hr.caellian.id3lib.id3.AbstractID3v2;
-import hr.caellian.id3lib.id3.FrameBodyPIC;
-import hr.caellian.id3lib.id3.ID3v2_4;
-import hr.caellian.id3lib.id3.ID3v2_4Frame;
-import hr.caellian.id3lib.lyrics3.AbstractLyrics3;
-import hr.caellian.id3lib.lyrics3.Lyrics3v2;
 import hr.caellian.notestream.NoteStream;
 import hr.caellian.notestream.R;
 import hr.caellian.notestream.data.playable.Playable;
@@ -153,16 +145,15 @@ public class MutableMediaMetadata extends HashMap<String, Object> {
             setLength(Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)));
             setEnd(getLength());
 
-            try {
-                // TODO: Fix access permission for RandomAccessFile - replace it?
-                MP3File file = new MP3File(sourceLocation);
-                AbstractLyrics3 lyrics3Tag = file.getLyrics3Tag();
-                if (lyrics3Tag != null) setLyrics(lyrics3Tag.getSongLyric());
-            } catch (IOException | TagException e) {
-                Log.w(TAG, "Unable to set lyrics!", e);
-            } catch (UnsupportedOperationException e) {
-                Log.w(TAG, "UnsupportedOperationException: ", e);
-            }
+//            try {
+//                MP3File file = new MP3File(sourceLocation);
+//                AbstractLyrics3 lyrics3Tag = file.getLyrics3Tag();
+//                if (lyrics3Tag != null) setLyrics(lyrics3Tag.getSongLyric());
+//            } catch (IOException | TagException e) {
+//                Log.w(TAG, "Unable to set lyrics!", e);
+//            } catch (UnsupportedOperationException e) {
+//                Log.w(TAG, "UnsupportedOperationException: ", e);
+//            }
 
             setCover(mmr.getEmbeddedPicture());
             mmr.release();
@@ -172,40 +163,40 @@ public class MutableMediaMetadata extends HashMap<String, Object> {
     }
 
     public void applyTo(String fileLocation) {
-        try {
-            RandomAccessFile raf = new RandomAccessFile(fileLocation, "rw");
-            MP3File file = new MP3File(fileLocation);
-            // Try to protect any existing data our program doesn't understand:
-            AbstractID3v2 sourceTag = file.getID3v2Tag() != null ? file.getID3v2Tag() : new ID3v2_4();
-
-            Lyrics3v2 tag = new Lyrics3v2();
-            tag.setSongTitle(getTitle());
-            tag.setLeadArtist(getAuthor());
-            tag.setAlbumTitle(getAlbum());
-            tag.setYearReleased(String.valueOf(getYear()));
-            tag.setTrackNumberOnAlbum(String.valueOf(getTrack()));
-            tag.setSongGenre(getGenre());
-            tag.setSongLyric(getLyrics());
-
-            final byte textEncoding = 3;
-            final String imageFormat = "png";
-            final byte pictureType = 3;
-            final String description = "Cover image";
-
-            Bitmap cover = getCover();
-            int size = cover.getByteCount();
-            ByteBuffer buffer = ByteBuffer.allocate(size);
-            cover.copyPixelsToBuffer(buffer);
-            final byte[] data = buffer.array();
-
-            FrameBodyPIC pictureFrameBody = new FrameBodyPIC(textEncoding, imageFormat, pictureType, description, data);
-            sourceTag.setFrame(new ID3v2_4Frame(pictureFrameBody));
-
-            sourceTag.append(tag);
-            sourceTag.write(raf);
-        } catch (IOException | TagException e) {
-            Log.w(TAG, "Unable to store metadata to file!", e);
-        }
+//        try {
+//            RandomAccessFile raf = new RandomAccessFile(fileLocation, "rw");
+//            MP3File file = new MP3File(fileLocation);
+//            // Try to protect any existing data our program doesn't understand:
+//            AbstractID3v2 sourceTag = file.getID3v2Tag() != null ? file.getID3v2Tag() : new ID3v2_4();
+//
+//            Lyrics3v2 tag = new Lyrics3v2();
+//            tag.setSongTitle(getTitle());
+//            tag.setLeadArtist(getAuthor());
+//            tag.setAlbumTitle(getAlbum());
+//            tag.setYearReleased(String.valueOf(getYear()));
+//            tag.setTrackNumberOnAlbum(String.valueOf(getTrack()));
+//            tag.setSongGenre(getGenre());
+//            tag.setSongLyric(getLyrics());
+//
+//            final byte textEncoding = 3;
+//            final String imageFormat = "png";
+//            final byte pictureType = 3;
+//            final String description = "Cover image";
+//
+//            Bitmap cover = getCover();
+//            int size = cover.getByteCount();
+//            ByteBuffer buffer = ByteBuffer.allocate(size);
+//            cover.copyPixelsToBuffer(buffer);
+//            final byte[] data = buffer.array();
+//
+//            FrameBodyPIC pictureFrameBody = new FrameBodyPIC(textEncoding, imageFormat, pictureType, description, data);
+//            sourceTag.setFrame(new ID3v2_4Frame(pictureFrameBody));
+//
+//            sourceTag.append(tag);
+//            sourceTag.write(raf);
+//        } catch (IOException | TagException e) {
+//            Log.w(TAG, "Unable to store metadata to file!", e);
+//        }
     }
 
     public Playable getParent() {

@@ -25,7 +25,7 @@ public class ActivityArtists extends TableActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(null);
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         ((TextView) findViewById(R.id.labelTableTitle)).setText(R.string.label_artists);

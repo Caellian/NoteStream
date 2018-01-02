@@ -63,7 +63,7 @@ public class FragmentCategoryTile extends Fragment {
                     }
                 }
             }
-        };
+        }
 
         if (icon != null) ((ImageView) view.findViewById(R.id.imageTileIcon)).setImageBitmap(icon);
 

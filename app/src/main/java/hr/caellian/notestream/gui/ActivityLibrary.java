@@ -44,7 +44,7 @@ public class ActivityLibrary extends NavigationActivity implements Library.Libra
         super.onCreate(null);
         setContentView(R.layout.activity_library);
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_library);
 

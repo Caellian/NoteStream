@@ -36,7 +36,7 @@ public class DialogCancelOk extends Dialog {
 
 
         ((TextView) findViewById(R.id.labelTitle)).setText(title);
-        TextView labelDescription = (TextView) findViewById(R.id.labelDescription);
+        TextView labelDescription = findViewById(R.id.labelDescription);
         labelDescription.setText(description);
 //        labelDescription.setJustify(true); // TODO: Uncomment if it gets ported to support library.
 

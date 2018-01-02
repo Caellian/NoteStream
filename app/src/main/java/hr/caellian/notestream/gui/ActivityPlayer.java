@@ -46,9 +46,9 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
         findViewById(R.id.labelSongTitle).setSelected(true);
         findViewById(R.id.labelSongAuthor).setSelected(true);
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        suggestionsView = (NavigationView) findViewById(R.id.suggestions_view);
+        suggestionsView = findViewById(R.id.suggestions_view);
         suggestionsView.setNavigationItemSelectedListener(this);
 
         findViewById(R.id.buttonDownload).setOnClickListener(new View.OnClickListener() {
@@ -60,7 +60,7 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
             }
         });
 
-        final Button saveButton = (Button) findViewById(R.id.buttonLibraryAdd);
+        final Button saveButton = findViewById(R.id.buttonLibraryAdd);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,8 +97,8 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
             }
         });
 
-        final Button buttonPrevious = (Button) findViewById(R.id.buttonPrevious);
-        final Button buttonNext = (Button) findViewById(R.id.buttonNext);
+        final Button buttonPrevious = findViewById(R.id.buttonPrevious);
+        final Button buttonNext = findViewById(R.id.buttonNext);
 
         buttonPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,7 +206,7 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
     }
 
     public void onProgressChanged(int progress){
-        TextView source = (TextView) findViewById(R.id.labelCurrentTime);
+        TextView source = findViewById(R.id.labelCurrentTime);
         source.setText(timeToString(progress));
         ((SeekBar) findViewById(R.id.songProgressBar)).setProgress(progress);
     }
@@ -233,7 +233,7 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
             suggestionsView.setVisibility(View.GONE);
         }
 
-        final Button saveButton = (Button) findViewById(R.id.buttonLibraryAdd);
+        final Button saveButton = findViewById(R.id.buttonLibraryAdd);
         if (NoteStream.getInstance().library.isSaved(psb.getCurrentPlayable())) {
             saveButton.setBackground(ContextCompat.getDrawable(ActivityPlayer.this, R.drawable.ic_check));
         } else {
@@ -253,7 +253,7 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
 
         ((SeekBar) findViewById(R.id.songProgressBar)).setMax(metadata.getLength());
 
-        TextView length = (TextView) findViewById(R.id.labelLength);
+        TextView length = findViewById(R.id.labelLength);
         length.setText(timeToString(metadata.getLength()));
     }
 
@@ -294,7 +294,7 @@ public class ActivityPlayer extends NavigationActivity implements NavigationView
     public void onBackPressed() {
         super.onBackPressed();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.player_layout);
+        DrawerLayout drawer = findViewById(R.id.player_layout);
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END);
         } else {

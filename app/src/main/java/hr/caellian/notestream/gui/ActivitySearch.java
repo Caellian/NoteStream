@@ -42,7 +42,7 @@ public class ActivitySearch extends NavigationActivity {
         super.onCreate(null);
         setContentView(R.layout.activity_search);
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         findViewById(R.id.buttonClearSearch).setOnClickListener(new View.OnClickListener() {

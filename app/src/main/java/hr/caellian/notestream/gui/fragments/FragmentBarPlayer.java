@@ -46,8 +46,8 @@ public class FragmentBarPlayer extends Fragment implements Playable.ControlListe
             }
         });
 
-        final Button buttonPrevious = (Button) view.findViewById(R.id.buttonPrevious);
-        final Button buttonNext = (Button) view.findViewById(R.id.buttonNext);
+        final Button buttonPrevious = view.findViewById(R.id.buttonPrevious);
+        final Button buttonNext = view.findViewById(R.id.buttonNext);
 
         buttonPrevious.setOnClickListener(new View.OnClickListener() {
             @Override

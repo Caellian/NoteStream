@@ -49,7 +49,7 @@ public class ActivityPlaylist extends NavigationActivity implements Library.Libr
         super.onCreate(null);
         setContentView(R.layout.activity_playlist);
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         final Playlist playlist = Playlist.get(getIntent().getStringExtra(Constants.EXTRA_PLAYLIST));
@@ -96,7 +96,7 @@ public class ActivityPlaylist extends NavigationActivity implements Library.Libr
             }
         });
 
-        final Button orderButton = (Button) findViewById(R.id.buttonOrder);
+        final Button orderButton = findViewById(R.id.buttonOrder);
         orderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

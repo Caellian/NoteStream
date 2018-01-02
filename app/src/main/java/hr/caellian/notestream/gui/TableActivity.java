@@ -26,7 +26,7 @@ public class TableActivity extends NavigationActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table);
 
-        tableContent = (TableLayout) findViewById(R.id.tableContent);
+        tableContent = findViewById(R.id.tableContent);
     }
 
     protected TableRow addTableRow() {
