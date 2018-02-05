@@ -26,7 +26,7 @@ class ActivitySearch : NavigationActivity() {
     private var fragmentCounter = 0
     protected val searchItems = ArrayList<FragmentItemPlayable>()
 
-    protected override val drawerLayout: DrawerLayout?
+    override val drawerLayout: DrawerLayout?
         get() = findViewById<View>(R.id.search_layout) as DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {

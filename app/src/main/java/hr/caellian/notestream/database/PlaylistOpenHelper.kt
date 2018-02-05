@@ -5,12 +5,13 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 import hr.caellian.notestream.data.Playlist
+import hr.caellian.notestream.lib.Constants
 
 /**
  * Created by tinsv on 30/06/2017.
  */
 
-class PlaylistOpenHelper(context: Context, internal var parent: Playlist, factory: SQLiteDatabase.CursorFactory?) : SQLiteOpenHelper(context, if (parent.id.startsWith(Playlist.TEMPORARY_PREFIX)) null else PLAYLIST_TABLE_PREFIX + parent.id, factory, DATABASE_VERSION) {
+class PlaylistOpenHelper(context: Context, internal var parent: Playlist, factory: SQLiteDatabase.CursorFactory?) : SQLiteOpenHelper(context, if (parent.id.startsWith(Constants.PLAYLIST_TEMPORARY_PREFIX)) null else PLAYLIST_TABLE_PREFIX + parent.id, factory, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
         //        String createQuery = "CREATE TABLE " + PLAYLIST_TABLE_PREFIX + parent.getId() + " (";

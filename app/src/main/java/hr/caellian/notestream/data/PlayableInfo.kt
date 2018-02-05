@@ -17,6 +17,9 @@ import hr.caellian.notestream.data.playable.PlayableSource
 import hr.caellian.notestream.database.PlaylistOpenHelper
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.Util
+import android.media.ThumbnailUtils
+
+
 
 /**
  * Created by caellyan on 24/06/17.
@@ -34,11 +37,19 @@ data class PlayableInfo(var parent: Playable) {
     var year: Int? = null
     var track: Int? = null
     var genre: String? = null
+    var rating: Int = 5
     var lyrics: String? = null
 
     var start: Int? = null
     var end: Int? = null
     var length: Int? = null
+    var coverPath: String = ""
+        set(value) {
+            if (value.isNotEmpty()) {
+                field = value
+                cover = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(value), 512, 512)
+            }
+        }
     var cover: Bitmap = DEFAULT_COVER
 
     init {

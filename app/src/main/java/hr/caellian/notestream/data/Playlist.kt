@@ -21,22 +21,47 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
     val playlist = ArrayList<Playable>(0)
     val shuffledPlaylist = ArrayList<Playable>(0)
-    @Transient private val dbHelper: PlaylistOpenHelper?
 
-    private var label: String? = null
-    private var capacity = 1
-    private var currentPlayable = 0
-    private var shuffledCurrent = 0
-    private var shuffle = false
+    var label: String = ""
+        set(value) {
+            NoteStream.instance?.nsdb?.updatePlaylist(this)
+            field = value
+        }
+    var author: String = ""
+        set(value) {
+            NoteStream.instance?.nsdb?.updatePlaylist(this)
+            field = value
+        }
+    var capacity = 1
+        private set(value) {
+            NoteStream.instance?.nsdb?.updatePlaylist(this)
+            field = value
+        }
+    var currentPlayable = 0
+        private set
+    var shuffledCurrent = 0
+        private set
+    var shuffle = false
+        set(value) {
+            if (shuffle) {
+                Collections.shuffle(shuffledPlaylist)
+                shuffledCurrent = playlist.indexOf(getCurrentPlayable())
+            } else {
+                currentPlayable = playlist.indexOf(getCurrentPlayable())
+            }
+            field = shuffle
+        }
 
     val firstPlayable: Playable
-        get() = if (doShuffle()) shuffledPlaylist[0] else playlist[0]
+        get() = if (shuffle) shuffledPlaylist[0] else playlist[0]
 
     val lastPlayable: Playable
-        get() = if (doShuffle()) shuffledPlaylist[shuffledPlaylist.size - 1] else playlist[playlist.size - 1]
+        get() = if (shuffle) shuffledPlaylist[shuffledPlaylist.size - 1] else playlist[playlist.size - 1]
 
     val isEmpty: Boolean
         get() = playlist.isEmpty()
+
+    private val timestamps = mutableMapOf<Playable, Long>()
 
     val coverBitmaps: Array<Bitmap>
         get() = playlist.filter { it.info.cover != PlayableInfo.DEFAULT_COVER }
@@ -44,17 +69,14 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
                 .subList(0, 4)
                 .toTypedArray()
 
-    init {
-        dbHelper = PlaylistOpenHelper(NoteStream.instance!!, this, null)
-    }
-
     fun add(other: Iterable<Playable>?): Playlist {
         if (other == null) return this
 
         for (playable in other) {
             playlist.add(playable)
             shuffledPlaylist.add(playable)
-            addPlayableToDB(playable)
+            timestamps[playable] = System.currentTimeMillis()
+            NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
             NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
         }
 
@@ -67,7 +89,8 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
         playlist.add(playable)
         shuffledPlaylist.add(playable)
-        addPlayableToDB(playable)
+        timestamps[playable] = System.currentTimeMillis()
+        NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
         NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
 
         trimToCapacity(false)
@@ -80,7 +103,8 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
         playlist.add(index, playable)
         shuffledPlaylist.add(index, playable)
-        addPlayableToDB(playable)
+        timestamps[playable] = System.currentTimeMillis()
+        NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
         NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
 
         trimToCapacity(false)
@@ -92,8 +116,8 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
         playlist.add(currentPlayable + position, playable)
         shuffledPlaylist.add(shuffledCurrent + position, playable)
-        // TODO: Handle this correctly!
-        addPlayableToDB(playable)
+        timestamps[playable] = System.currentTimeMillis()
+        NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
         NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
         trimToCapacity(true)
 
@@ -114,9 +138,9 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
             playlist.remove(playable)
             shuffledPlaylist.remove(playable)
+            timestamps.remove(playable)
+            NoteStream.instance?.nsdb?.removePlayableFrom(playable, this)
             NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playable, this)
-
-            dbHelper!!.writableDatabase.execSQL("DELETE FROM " + dbHelper.databaseName + " WHERE " + Constants.TRACK_ID + "='" + playable.id + "';")
         }
         return this
     }
@@ -131,15 +155,13 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
         playlist.clear()
         shuffledPlaylist.clear()
+        timestamps.clear()
 
-        if (dbHelper != null && dbHelper.databaseName != null)
-            dbHelper.writableDatabase.execSQL("DELETE FROM " + dbHelper.databaseName)
+        NoteStream.instance?.nsdb?.clearPlaylist(this)
         return this
     }
 
-    fun size(): Int {
-        return playlist.size
-    }
+    fun size() = playlist.size
 
     fun skipTo(playable: Playable): Boolean {
         if (shuffle) {
@@ -168,16 +190,6 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
             return playlist[currentPlayable]
         }
         return null
-    }
-
-    fun setShuffle(shuffle: Boolean) {
-        if (shuffle) {
-            Collections.shuffle(shuffledPlaylist)
-            shuffledCurrent = playlist.indexOf(getCurrentPlayable())
-        } else {
-            currentPlayable = playlist.indexOf(getCurrentPlayable())
-        }
-        this.shuffle = shuffle
     }
 
     fun switchPrevious(): Playable? {
@@ -218,66 +230,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
     }
 
     fun getPlayable(id: String): Playable? {
-        for (playable in playlist) {
-            if (playable.id == id) return playable
-        }
-        return null
-    }
-
-    fun doShuffle(): Boolean {
-        return shuffle
-    }
-
-    fun getLabel(): String? {
-        return label
-    }
-
-    fun setLabel(label: String): Playlist {
-        this.label = label
-        return this
-    }
-
-    protected fun addPlayableToDB(playable: Playable) {
-//        object : AsyncTask<Void, Void, Void>() {
-//            override fun doInBackground(vararg params: Void): Void? {
-//                try {
-//                    if (dbHelper!!.databaseName == null) return null
-//                    var dbStatement = "INSERT OR REPLACE INTO " + dbHelper.databaseName + " ("
-//                    var values = ""
-//                    for ((key) in PlayableInfo.properties) {
-//                        dbStatement += key + ", "
-//                        values += "?, "
-//                    }
-//                    values = values.substring(0, values.length - 2)
-//                    dbStatement = dbStatement.substring(0, dbStatement.length - 2) + ") VALUES (" + values + ");"
-//                    val statement = dbHelper.writableDatabase.compileStatement(dbStatement)
-//
-//                    var current = 1
-//                    for ((key, value1) in PlayableInfo.properties) {
-//                        val value = playable.info[key]
-//                        if (value == null) {
-//                            statement.bindNull(current++)
-//                            continue
-//                        }
-//                        when (value1) {
-//                            Constants.SQL_TYPE_NULL -> statement.bindNull(current++)
-//                            Constants.SQL_TYPE_INTEGER ->
-//                                statement.bindLong(current++, java.lang.Long.valueOf((value as Int).toLong())!!)
-//                            Constants.SQL_TYPE_REAL -> statement.bindDouble(current++, value as Double)
-//                            Constants.SQL_TYPE_TEXT -> statement.bindString(current++, value as String?)
-//                            Constants.SQL_TYPE_BLOB -> statement.bindBlob(current++, value as ByteArray?)
-//                        }
-//                    }
-//                    statement.execute()
-//                } catch (e: NullPointerException) {
-//                    Log.e(TAG, "add: Unable to add playable to DB!", e)
-//                } catch (e: ClassCastException) {
-//                    Log.e(TAG, "add: Unable to add playable to DB!", e)
-//                }
-//
-//                return null
-//            }
-//        }.execute()
+        return playlist.firstOrNull { it.id == id }
     }
 
     protected fun trimToCapacity(fromEnd: Boolean) {
@@ -297,7 +250,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
     }
 
     fun filtered(filter: String): Playlist {
-        val result = Playlist(TEMPORARY_PREFIX + FILTERED_PREFIX + id)
+        val result = Playlist(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_FILTERED_PREFIX + id)
         result.clear()
 
         for (playable in this) {
@@ -326,8 +279,8 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
                 }
             }
             SORT_BY_DATE -> Collections.sort(playlist) { o1, o2 ->
-                val o1t = NoteStream.instance?.library?.getTimestampAdded(o1)
-                val o2t = NoteStream.instance?.library?.getTimestampAdded(o2)
+                val o1t = timestamps[o1]
+                val o2t = timestamps[o2]
 
                 if (o1t != null && o2t != null) {
                     if (ascending) {
@@ -364,53 +317,17 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
         private val TAG = Playlist::class.java.simpleName
         private val initialized = HashMap<String, Playlist>()
 
-        val SORT_BY_TITLE = 1
-        val SORT_BY_AUTHOR = 2
-        val SORT_BY_DATE = 3
+        const val SORT_BY_TITLE = 1
+        const val SORT_BY_AUTHOR = 2
+        const val SORT_BY_DATE = 3
 
-        val TEMPORARY_PREFIX = "temporary_"
-        val FILTERED_PREFIX = "filtered_"
-        val GENRE_PREFIX = "genre_"
-        val ARTIST_PREFIX = "author_"
-        val ALBUM_PREFIX = "album_"
-
-        fun get(id: String, data: Iterable<Playable> = ArrayList(), capacity: Int = 512): Playlist {
+        fun get(id: String, author: String = "", label: String = "", capacity: Int = 512, data: Iterable<Playable> = ArrayList()): Playlist {
             if (initialized.containsKey(id)) {
                 return initialized[id]!!
             } else {
                 val result = Playlist(id)
 
-//                if (!id.startsWith(TEMPORARY_PREFIX) && result.dbHelper != null) {
-//                    val db = result.dbHelper.readableDatabase
-//                    val c = db.rawQuery("SELECT * FROM " + result.dbHelper.databaseName, null)
-//                    var row = 0
-//                    while (c.moveToPosition(row++)) {
-//                        try {
-//                            // TODO: For some reason file path is stored in field for source type tag.
-//                            val sourcePos = result.dbHelper.tableColumns[PlayableInfo.SOURCE] ?: continue
-//                            val source = PlayableSource.getByID(c.getString(sourcePos))
-//                            if (source != null) {
-//                                val toAdd = source.construct(c.getString(result.dbHelper.tableColumns[PlayableInfo.PATH]!!))
-//                                if (toAdd != null) {
-//                                    toAdd.info.setFromDatabase(result.dbHelper, c)
-//                                    result.playlist.add(toAdd)
-//                                }
-//                            }
-//                        } catch (e: IllegalAccessException) {
-//                            Log.w(TAG, "Ignoring corrupted playable!", e)
-//                            e.printStackTrace()
-//                        } catch (e: InvocationTargetException) {
-//                            Log.w(TAG, "Ignoring corrupted playable!", e)
-//                            e.printStackTrace()
-//                        } catch (e: InstantiationException) {
-//                            Log.w(TAG, "Ignoring corrupted playable!", e)
-//                            e.printStackTrace()
-//                        }
-//
-//                    }
-//
-//                    c.close()
-//                }
+                NoteStream.instance?.nsdb?.registerPlaylist(result, id, author, label, capacity)
 
                 if (result.playlist.isEmpty()) {
                     result.add(data)
@@ -418,7 +335,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
                 result.shuffledPlaylist.addAll(result.playlist)
                 result.capacity = Math.max(1, capacity)
 
-                initialized.put(id, result)
+                initialized[id] = result
                 return result
             }
         }

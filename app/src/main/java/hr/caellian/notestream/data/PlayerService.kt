@@ -209,7 +209,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                 pl.clear()
                 pl.add(playlist)
                 pl.skipTo(old.getCurrentPlayable()!!)
-                pl.setShuffle(true)
+                pl.shuffle = true
                 pl.getCurrentPlayable()!!.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
@@ -253,7 +253,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         }
 
         fun play(playable: Playable): Playlist {
-            return playPlaylist(Playlist.get(Playlist.TEMPORARY_PREFIX + playable.id, listOf(playable)))
+            return playPlaylist(Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + playable.id, data = listOf(playable)))
         }
 
         fun playNext(playable: Playable) {
@@ -370,9 +370,9 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
         fun setShuffle(shuffle: Boolean): Boolean {
             if (!pl.isEmpty) {
-                val old = pl.doShuffle()
+                val old = pl.shuffle
                 if (old != shuffle) queueSize = 0
-                pl.setShuffle(shuffle)
+                pl.shuffle = shuffle
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onShuffleStateChanged(shuffle)
                 }
@@ -382,7 +382,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         }
 
         fun doShuffle(): Boolean {
-            return pl.doShuffle()
+            return pl.shuffle
         }
     }
 
@@ -392,7 +392,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         val DEFAULT_PROGRESS_CHANGE = 5000
 
         private val progressTimer = Timer()
-        internal var pl = Playlist.get(Playlist.TEMPORARY_PREFIX + "currentlyPlayed")
+        internal var pl = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + "currentlyPlayed")
         internal var mp = MediaPlayer()
         internal var repeatState = RepeatState.NONE
 

@@ -1,27 +1,15 @@
 <resources>
     <!-- App info -->
     <string name="app_name">NoteStream</string>
-    <string name="app_version_number">0.0.1</string>
-    <string name="author">Tin Svagelj (a.k.a. Caellian)</string>
-    <string name="contact">tin.svagelj.email@gmail.com</string>
-    <string name="title_activity_selection">Selection</string>
 
     <!-- Common defaults -->
-    <string name="song_title_marker">Title:</string>
     <string name="song_title_default">Title</string>
-    <string name="song_author_marker">Author:</string>
     <string name="song_author_default">Author</string>
-    <string name="song_album_marker">Album:</string>
     <string name="song_album_default">Album</string>
-    <string name="song_year_marker">Year:</string>
     <string name="song_year_default">Year</string>
-    <string name="song_track_marker">Track:</string>
     <string name="song_track_default">Track</string>
-    <string name="category_marker">Category:</string>
     <string name="category_default">Category</string>
     <string name="song_genre_marker">Genre:</string>
-    <string name="song_genre_default">Genre</string>
-    <string name="song_time_marker">Time:</string>
     <string name="song_time_default">00:00</string>
     <string name="start_marker">Start:</string>
     <string name="end_marker">End:</string>
@@ -45,7 +33,7 @@
     <!-- Playable locations -->
     <string name="location_local">Local File</string>
     <string name="location_youtube">YouTube</string>
-    <string name="location_unknown">Unknown</string>
+    <string name="location_unknown">Unknown Location</string>
 
     <!-- Titles & headers -->
     <string name="title_library">Library</string>
@@ -57,7 +45,7 @@
     <string name="label_filter">Filter</string>
     <string name="label_shuffle_play">Shuffle Play</string>
     <string name="invalid_playlist">Invalid or empty playlist.</string>
-    <string name="shuffle_empty_playlist">"Can't shuffle play empty playlist!</string>
+    <string name="shuffle_empty_playlist">Can\'t shuffle play empty playlist!</string>
     <string name="null_player_service">Player service is null.</string>
 
     <!-- Player -->

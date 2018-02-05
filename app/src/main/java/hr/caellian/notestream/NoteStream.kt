@@ -28,6 +28,7 @@ import hr.caellian.notestream.data.playable.Playable
 class NoteStream : Application() {
     var psb: PlayerService.PlayerServiceBinder? = null
     var library: Library? = null
+    var nsdb = NoteStreamDB()
 
     override fun onCreate() {
         instance = this

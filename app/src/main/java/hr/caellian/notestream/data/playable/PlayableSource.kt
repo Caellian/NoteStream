@@ -8,7 +8,7 @@ import hr.caellian.notestream.R
  * Created by tinsv on 03/07/2017.
  */
 
-enum class PlayableSource private constructor(id: String, private val displayName: Int) {
+enum class PlayableSource(id: String, private val displayName: Int) {
     LOCAL("local", R.string.location_local),
     YOUTUBE("remote-youtube", R.string.location_youtube),
     OTHER("unknown", R.string.location_unknown);

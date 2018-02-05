@@ -13,6 +13,7 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.lib.Constants
 
 /**
  * Created by caellyan on 17/06/17.
@@ -31,11 +32,9 @@ class Library {
     var savedMusic = Playlist.get("savedMusic")
     var hiddenMusic = Playlist.get("hiddenMusic")
     var favoriteMusic = Playlist.get("favoriteMusic")
-            .setLabel(NoteStream.instance?.getString(R.string.label_favorites) ?: "Favorites")
+            .also { it.label = NoteStream.instance?.getString(R.string.label_favorites) ?: "Favorites" }
 
-    var lastListened = Playlist.get("lastListened", ArrayList(21), 20)
-
-    protected var addedTimestamps = HashMap<String, Long>()
+    var lastListened = Playlist.get("lastListened", capacity = 20)
 
     init {
 
@@ -46,19 +45,6 @@ class Library {
             playlists = pref?.getStringSet("playlists", playlists) as HashSet<String>
         }
 
-        if (pref.contains("addedTimestamps")) {
-            try {
-                addedTimestamps = HashMap() // ObjectSerializer.deserialize(pref.getString("addedTimestamps", "")) as HashMap<String, Long>
-            } catch (e: IOException) {
-                addedTimestamps = HashMap()
-            } catch (e: ClassCastException) {
-                addedTimestamps = HashMap()
-            } catch (e: NullPointerException) {
-                addedTimestamps = HashMap()
-            }
-
-        }
-
         for (playable in savedMusic) {
             val metadata = playable.info
             val album = metadata.album
@@ -66,17 +52,17 @@ class Library {
             val genre = metadata.genre
 
             if (!albums.containsKey(album)) {
-                albums.put(album!!, Playlist.get(Playlist.TEMPORARY_PREFIX + Playlist.ALBUM_PREFIX + album))
+                albums.put(album!!, Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_ALBUM_PREFIX + album))
             }
             albums[album]?.add(playable)
 
             if (!artists.containsKey(artist)) {
-                artists.put(artist!!, Playlist.get(Playlist.TEMPORARY_PREFIX + Playlist.ARTIST_PREFIX + artist))
+                artists.put(artist!!, Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_ARTIST_PREFIX + artist))
             }
             artists[artist]?.add(playable)
 
             if (!genres.containsKey(genre)) {
-                genres.put(genre!!, Playlist.get(Playlist.TEMPORARY_PREFIX + Playlist.GENRE_PREFIX + genre))
+                genres.put(genre!!, Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_GENRE_PREFIX + genre))
             }
             genres[genre]?.add(playable)
         }
@@ -102,7 +88,6 @@ class Library {
             if (!result) return false
 
             savedMusic.add(playable)
-            addedTimestamps.put(playable.id, System.currentTimeMillis() / 1000)
             try {
                 pref?.edit()?.putString("addedTimestamps", "" /* ObjectSerializer.serialize(addedTimestamps)*/)?.apply()
             } catch (e: IOException) {
@@ -123,7 +108,6 @@ class Library {
             if (!result) return false
 
             savedMusic.remove(playable)
-            addedTimestamps.remove(playable.id)
             try {
                 pref?.edit()?.putString("addedTimestamps", "" /* ObjectSerializer.serialize(addedTimestamps)*/)?.apply()
             } catch (e: IOException) {
@@ -140,12 +124,6 @@ class Library {
 
     fun isSaved(playable: Playable?): Boolean {
         return savedMusic.playlist.contains(playable)
-    }
-
-    fun getTimestampAdded(playable: Playable?): Long? {
-        return if (addedTimestamps.containsKey(playable?.id)) {
-            addedTimestamps[playable?.id]
-        } else 0
     }
 
     /**

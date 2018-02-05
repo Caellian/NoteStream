@@ -11,6 +11,7 @@ import android.widget.TextView
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.gui.fragments.FragmentCategoryTile
+import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.Genre
 
 /**
@@ -32,13 +33,13 @@ class ActivityGenres : TableActivity() {
         var counter = 0
         var row = addTableRow()
         for ((id, name, resourceIcon) in Genre.genres) {
-            val genrePlaylist = Playlist.get(Playlist.TEMPORARY_PREFIX + Playlist.GENRE_PREFIX + id)
+            val genrePlaylist = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_GENRE_PREFIX + id)
             val fragment = FragmentCategoryTile.newInstance(
                     true,
                     resourceIcon,
                     name,
                     genrePlaylist)
-            ft.add(row.id, fragment, Playlist.GENRE_PREFIX + id)
+            ft.add(row.id, fragment, Constants.PLAYLIST_GENRE_PREFIX + id)
             counter = ++counter % 2
             if (counter == 0) row = addTableRow()
         }

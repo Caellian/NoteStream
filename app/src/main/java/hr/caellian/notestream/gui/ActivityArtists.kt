@@ -12,6 +12,7 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.gui.fragments.FragmentCategoryTile
+import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.Util
 
 /**
@@ -38,7 +39,7 @@ class ActivityArtists : TableActivity() {
                     R.drawable.ic_artist,
                     artist.key,
                     artist.value)
-            ft.add(row.id, fragment, Playlist.ARTIST_PREFIX + artist.key)
+            ft.add(row.id, fragment, Constants.PLAYLIST_ARTIST_PREFIX + artist.key)
             counter = ++counter % 2
             if (counter == 0) row = addTableRow()
         }

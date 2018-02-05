@@ -214,25 +214,25 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
 
     override fun onPlayStatusChanged(playing: Boolean) {
         if (!playing) {
-            (findViewById<View>(R.id.buttonTogglePlay) as View?)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_play_circle)
+            findViewById<View>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_play_circle)
         } else {
-            (findViewById<View>(R.id.buttonTogglePlay) as View?)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_pause_circle)
+            findViewById<View>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_pause_circle)
         }
     }
 
     override fun onShuffleStateChanged(currentState: Boolean) {
         if (currentState) {
-            (findViewById<View>(R.id.buttonShuffle) as View?)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle_on)
+            findViewById<View>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle_on)
         } else {
-            (findViewById<View>(R.id.buttonShuffle) as View?)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle)
+            findViewById<View>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle)
         }
     }
 
     override fun onRepeatStateChanged(currentState: RepeatState) {
         when (currentState) {
-            RepeatState.NONE -> (findViewById<View>(R.id.buttonRepeat) as View?)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat)
-            RepeatState.ALL -> (findViewById<View>(R.id.buttonRepeat) as View?)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_on)
-            RepeatState.ONE -> (findViewById<View>(R.id.buttonRepeat) as View?)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_one)
+            RepeatState.NONE -> findViewById<View>(R.id.buttonRepeat)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat)
+            RepeatState.ALL -> findViewById<View>(R.id.buttonRepeat)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_on)
+            RepeatState.ONE -> findViewById<View>(R.id.buttonRepeat)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_one)
         }
     }
 

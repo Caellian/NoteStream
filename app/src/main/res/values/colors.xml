@@ -4,7 +4,6 @@
     <color name="colorPrimaryDark">#0c1623</color>
     <color name="colorAccent">#006fff</color>
     <color name="guiGrey">#4b5059</color>
-    <color name="guiGreen">#00a413</color>
     <color name="backgroundDark">#151515</color>
 
     <color name="black_overlay">#66000000</color>

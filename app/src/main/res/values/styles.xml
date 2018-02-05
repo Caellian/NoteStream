@@ -9,10 +9,6 @@
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
     <style name="FullscreenTheme" parent="AppTheme">
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
@@ -24,10 +20,6 @@
 
     <style name="NoteStreamButtonShuffle" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/button_shuffle</item>
-    </style>
-
-    <style name="NoteStreamButtonAdd" parent="Widget.AppCompat.Button.Borderless">
-        <item name="android:background">@drawable/button_green_round</item>
     </style>
 
     <style name="NoteStreamButtonDefault" parent="Widget.AppCompat.Button.Borderless">

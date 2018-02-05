@@ -8,6 +8,7 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.gui.fragments.FragmentCategoryTile
+import hr.caellian.notestream.lib.Constants
 
 /**
  * Created by tinsv on 10/07/2017.
@@ -33,7 +34,7 @@ class ActivityAlbums : TableActivity() {
                     R.drawable.ic_album,
                     album.key,
                     album.value)
-            ft.add(row.id, fragment, Playlist.ALBUM_PREFIX + album.key)
+            ft.add(row.id, fragment, Constants.PLAYLIST_ALBUM_PREFIX + album.key)
             counter = ++counter % 2
             if (counter == 0) row = addTableRow()
         }
