@@ -13,6 +13,8 @@ import android.provider.Settings
 import android.support.design.widget.NavigationView
 import android.support.v4.widget.DrawerLayout
 import android.view.View
+import android.widget.Button
+import android.widget.TextView
 
 import java.util.ArrayList
 
@@ -38,63 +40,63 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
     internal var lastListenedAdded = ArrayList<FragmentPlayableTile>()
 
     override val drawerLayout: DrawerLayout?
-        get() = findViewById<View>(R.id.library_layout) as DrawerLayout
+        get() = findViewById(R.id.library_layout)
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(null)
         setContentView(R.layout.activity_library)
 
         navigationView = findViewById(R.id.nav_view)
-        navigationView!!.setNavigationItemSelectedListener(this)
-        navigationView!!.setCheckedItem(R.id.nav_library)
+        navigationView?.setNavigationItemSelectedListener(this)
+        navigationView?.setCheckedItem(R.id.nav_library)
 
-        findViewById<View>(R.id.buttonSearch).setOnClickListener {
+        findViewById<Button>(R.id.buttonSearch).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivitySearch::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             startActivity(intent)
         }
 
-        findViewById<View>(R.id.labelFavorites).setOnClickListener {
+        findViewById<TextView>(R.id.labelFavorites).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityPlaylist::class.java)
             intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance?.library?.favoriteMusic?.id)
             startActivity(intent)
         }
 
-        findViewById<View>(R.id.labelPlaylists).setOnClickListener {
+        findViewById<TextView>(R.id.labelPlaylists).setOnClickListener {
             // TODO: Open list of playlists in library.
         }
 
-        findViewById<View>(R.id.labelGenres).setOnClickListener {
+        findViewById<TextView>(R.id.labelGenres).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityGenres::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             startActivity(intent)
         }
 
-        findViewById<View>(R.id.labelSongs).setOnClickListener {
+        findViewById<TextView>(R.id.labelSongs).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityPlaylist::class.java)
             intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance?.library?.savedMusic?.id)
             startActivity(intent)
         }
 
-        findViewById<View>(R.id.labelAlbums).setOnClickListener {
+        findViewById<TextView>(R.id.labelAlbums).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityAlbums::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             startActivity(intent)
         }
 
-        findViewById<View>(R.id.labelArtists).setOnClickListener {
+        findViewById<TextView>(R.id.labelArtists).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityArtists::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             startActivity(intent)
         }
 
-        findViewById<View>(R.id.labelHidden).setOnClickListener {
+        findViewById<TextView>(R.id.labelHidden).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityPlaylist::class.java)
             intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance?.library?.hiddenMusic?.id)
             startActivity(intent)
         }
 
-        findViewById<View>(R.id.labelClear).setOnClickListener { NoteStream.instance?.library?.lastListened?.clear() }
+        findViewById<TextView>(R.id.labelClear).setOnClickListener { NoteStream.instance?.library?.lastListened?.clear() }
 
         NoteStream.registerLibraryListener(this)
 

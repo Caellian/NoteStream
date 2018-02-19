@@ -28,11 +28,9 @@ import hr.caellian.notestream.data.playable.Playable
 class NoteStream : Application() {
     var psb: PlayerService.PlayerServiceBinder? = null
     var library: Library? = null
-    var nsdb = NoteStreamDB()
 
     override fun onCreate() {
         instance = this
-        nsdb = NoteStreamDB()
 
         //Initialise player service for later use.
         val psi = Intent(this, PlayerService::class.java)
@@ -110,12 +108,12 @@ class NoteStream : Application() {
                     OuterLoop@ while (cur.moveToNext()) {
                         val path = cur.getString(cur.getColumnIndex(MediaStore.Audio.Media.DATA))
 
-                        for (playable in library.localMusic.playlist) {
-                            if (playable.id == PlayableLocal.getId(path)) continue@OuterLoop
-                        }
+                        if (library.localMusic.playlist.any { it.id == PlayableLocal.getId(path) }) continue@OuterLoop
 
                         val playable = PlayableLocal(path)
-                        playable.info.setFromSource(path)
+                        if (!playable.info.setFromDatabase()) {
+                            playable.info.setFromSource(path)
+                        }
                         library.localMusic.add(playable)
                         library.savedMusic.add(playable)
                     }

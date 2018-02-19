@@ -22,7 +22,7 @@ import hr.caellian.notestream.util.Util
 class FragmentCategoryTile : Fragment() {
     internal var view: View? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         view = inflater.inflate(R.layout.category_tile, container, false)
 
         val useTiledDisplay = arguments.getBoolean(Constants.EXTRA_TILES)
@@ -34,23 +34,23 @@ class FragmentCategoryTile : Fragment() {
         val label = arguments.getString(Constants.EXTRA_LABEL)
 
         if (background.isNotEmpty() && !useTiledDisplay) {
-            (view?.findViewById<View>(R.id.imageTileBackground) as ImageView?)?.setImageBitmap(background[0])
+            view?.findViewById<ImageView>(R.id.imageTileBackground)?.setImageBitmap(background[0])
         } else if (background.isNotEmpty()) {
-            (view?.findViewById<View>(R.id.imageTileBackgroundA) as ImageView?)?.setImageBitmap(background[0])
+            view?.findViewById<ImageView>(R.id.imageTileBackgroundA)?.setImageBitmap(background[0])
             if (background.size > 1) {
-                (view?.findViewById<View>(R.id.imageTileBackgroundB) as ImageView?)?.setImageBitmap(background[1])
+                view?.findViewById<ImageView>(R.id.imageTileBackgroundB)?.setImageBitmap(background[1])
                 if (background.size > 2) {
-                    (view?.findViewById<View>(R.id.imageTileBackgroundC) as ImageView?)?.setImageBitmap(background[2])
+                    view?.findViewById<ImageView>(R.id.imageTileBackgroundC)?.setImageBitmap(background[2])
                     if (background.size > 3) {
-                        (view?.findViewById<View>(R.id.imageTileBackgroundD) as ImageView?)?.setImageBitmap(background[3])
+                        view?.findViewById<ImageView>(R.id.imageTileBackgroundD)?.setImageBitmap(background[3])
                     }
                 }
             }
         }
 
-        (view?.findViewById<View>(R.id.imageTileIcon) as ImageView?)?.setImageBitmap(icon)
+        view?.findViewById<ImageView>(R.id.imageTileIcon)?.setImageBitmap(icon)
 
-        (view?.findViewById<View>(R.id.labelTileCategory) as TextView?)?.text = label
+        view?.findViewById<TextView>(R.id.labelTileCategory)?.text = label
 
         view?.setOnClickListener {
             val intent = Intent(view?.context, ActivityPlaylist::class.java)

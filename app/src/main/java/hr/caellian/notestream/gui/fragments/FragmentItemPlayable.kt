@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 
 import hr.caellian.notestream.NoteStream
@@ -21,30 +22,33 @@ import hr.caellian.notestream.lib.Constants
  */
 
 class FragmentItemPlayable : FragmentPlayableMediator() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle): View? {
-        val view = inflater.inflate(R.layout.playable_item, container, false)
-        defaultTextColor = (view.findViewById<View>(R.id.labelSongTitle) as TextView?)?.currentTextColor ?: 0
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.playable_item, container, false)
+        defaultTextColor = view.findViewById<TextView>(R.id.labelSongTitle).currentTextColor
+
+        return view
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         val playable = playable
 
-        if (playable is PlayableRemote? && playable?.available?.not() == true) {
+        if (playable is PlayableRemote && !playable.available) {
             NoteStream.registerAvailabilityListener(this)
-            view.visibility = View.GONE
+            this.view.visibility = View.GONE
         } else {
             updateView()
         }
-
-        return view
     }
 
     override fun updateView() {
         val playlist = playlist
         val playable = playable ?: return
 
-        (view!!.findViewById<View>(R.id.labelSongTitle) as TextView).text = playable.info.title
-        (view!!.findViewById<View>(R.id.labelSongAuthor) as TextView).text = playable.info.author
+        view?.findViewById<TextView>(R.id.labelSongTitle)?.text = playable.title
+        view?.findViewById<TextView>(R.id.labelSongAuthor)?.text = playable.author
 
-        view!!.findViewById<View>(R.id.labelSongTitle).setOnClickListener(View.OnClickListener {
+        view?.findViewById<TextView>(R.id.labelSongTitle)?.setOnClickListener(View.OnClickListener {
             if (playable is PlayableRemote && !playable.available) {
                 return@OnClickListener
             }
@@ -63,7 +67,7 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
             startActivity(intent)
         })
 
-        view?.findViewById<View>(R.id.buttonSongOptions)?.setOnClickListener(object : View.OnClickListener {
+        view?.findViewById<Button>(R.id.buttonSongOptions)?.setOnClickListener(object : View.OnClickListener {
             internal var playablePopupMenu = PlayablePopupMenu(view!!.context, view!!, playable)
             override fun onClick(v: View) {
                 playablePopupMenu.show()

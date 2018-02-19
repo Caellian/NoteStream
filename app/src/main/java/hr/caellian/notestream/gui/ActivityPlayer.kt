@@ -1,5 +1,6 @@
 package hr.caellian.notestream.gui
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.support.design.widget.NavigationView
 import android.support.v4.content.ContextCompat
@@ -33,7 +34,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
     internal var suggestionsView: NavigationView? = null
 
     override val drawerLayout: DrawerLayout?
-        get() = findViewById<View>(R.id.player_layout) as DrawerLayout
+        get() = findViewById(R.id.player_layout)
 
     // TODO: Implement album cover swiping for skipping songs.
     // Maybe implement smooth transition?
@@ -43,15 +44,15 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         setContentView(R.layout.activity_player)
         psb = NoteStream.instance?.psb
 
-        findViewById<View>(R.id.labelSongTitle).isSelected = true
-        findViewById<View>(R.id.labelSongAuthor).isSelected = true
+        findViewById<TextView>(R.id.labelSongTitle).isSelected = true
+        findViewById<TextView>(R.id.labelSongAuthor).isSelected = true
 
         navigationView = findViewById(R.id.nav_view)
         navigationView?.setNavigationItemSelectedListener(this)
         suggestionsView = findViewById(R.id.suggestions_view)
         suggestionsView?.setNavigationItemSelectedListener(this)
 
-        findViewById<View>(R.id.buttonDownload).setOnClickListener {
+        findViewById<Button>(R.id.buttonDownload).setOnClickListener {
             if (psb?.currentPlayable is PlayableDownloadable?) {
                 (psb?.currentPlayable as PlayableDownloadable?)?.download()
             }
@@ -68,10 +69,10 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             }
         }
 
-        (findViewById<View>(R.id.songProgressBar) as SeekBar).setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+        findViewById<SeekBar>(R.id.songProgressBar).setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    psb!!.progress = progress
+                    psb?.progress = progress
                 }
             }
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -80,7 +81,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         })
 
 
-        findViewById<View>(R.id.buttonShuffle).setOnClickListener { psb?.setShuffle(psb?.doShuffle() == true) }
+        findViewById<Button>(R.id.buttonShuffle).setOnClickListener { psb?.setShuffle(psb?.doShuffle() == true) }
 
         val buttonPrevious = findViewById<Button>(R.id.buttonPrevious)
         val buttonNext = findViewById<Button>(R.id.buttonNext)
@@ -118,11 +119,11 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             true
         }
 
-        findViewById<View>(R.id.buttonTogglePlay).setOnClickListener { psb!!.togglePlay() }
+        findViewById<Button>(R.id.buttonTogglePlay).setOnClickListener { psb!!.togglePlay() }
 
-        findViewById<View>(R.id.buttonRepeat).setOnClickListener { psb!!.toggleRepeat() }
+        findViewById<Button>(R.id.buttonRepeat).setOnClickListener { psb!!.toggleRepeat() }
 
-        findViewById<View>(R.id.albumImage).setOnLongClickListener {
+        findViewById<ImageView>(R.id.albumImage).setOnLongClickListener {
             //                findViewById(R.id.lyricsDisplay).setVisibility(findViewById(R.id.lyricsDisplay).getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
             findViewById<View>(R.id.lyricsDisplay).visibility = View.VISIBLE
             true
@@ -158,23 +159,23 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
     override fun onProgressChanged(progress: Int) {
         val source = findViewById<TextView>(R.id.labelCurrentTime)
         source.text = timeToString(progress)
-        (findViewById<View>(R.id.songProgressBar) as SeekBar).progress = progress
+        findViewById<SeekBar>(R.id.songProgressBar).progress = progress
     }
 
     override fun onPlayableChanged(current: Playable?) {
         val metadata = current?.info
-        (findViewById<View>(R.id.albumImage) as ImageView?)?.setImageBitmap(metadata?.cover)
+        findViewById<ImageView>(R.id.albumImage).setImageBitmap(metadata?.cover)
 
         val lyrics = metadata?.lyrics
-        (findViewById<View>(R.id.textViewLyrics) as TextView?)?.text = lyrics
+        (findViewById<TextView>(R.id.textViewLyrics)).text = lyrics
 
         findViewById<View>(R.id.lyricsDisplay).visibility = View.GONE
-        (findViewById<View>(R.id.labelSource) as TextView?)?.text = current?.location
+        (findViewById<TextView>(R.id.labelSource)).text = current?.location
 
         if (current is PlayableDownloadable) {
-            findViewById<View>(R.id.buttonDownload).visibility = View.VISIBLE
+            findViewById<Button>(R.id.buttonDownload).visibility = View.VISIBLE
         } else {
-            findViewById<View>(R.id.buttonDownload).visibility = View.INVISIBLE
+            findViewById<Button>(R.id.buttonDownload).visibility = View.INVISIBLE
         }
 
         if (current is PlayableYouTube) {
@@ -190,10 +191,10 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             saveButton.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_add)
         }
 
-        (findViewById<View>(R.id.labelSongTitle) as TextView?)?.text = metadata?.title
-        (findViewById<View>(R.id.labelSongAuthor) as TextView?)?.text = metadata?.author
+        (findViewById<TextView>(R.id.labelSongTitle)).text = metadata?.title
+        (findViewById<TextView>(R.id.labelSongAuthor)).text = metadata?.author
 
-        findViewById<View>(R.id.buttonMenu).setOnClickListener(object : View.OnClickListener {
+        findViewById<Button>(R.id.buttonMenu).setOnClickListener(object : View.OnClickListener {
             internal var playablePopupMenu: PlayablePopupMenu? = null
 
             override fun onClick(v: View) {
@@ -206,7 +207,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             }
         })
 
-        (findViewById<View>(R.id.songProgressBar) as SeekBar).max = metadata?.length ?: 0
+        findViewById<SeekBar>(R.id.songProgressBar).max = metadata?.length ?: 0
 
         val length = findViewById<TextView>(R.id.labelLength)
         length.text = timeToString(metadata?.length ?: 0)
@@ -214,25 +215,25 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
 
     override fun onPlayStatusChanged(playing: Boolean) {
         if (!playing) {
-            findViewById<View>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_play_circle)
+            (findViewById<Button>(R.id.buttonTogglePlay)).background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_play_circle)
         } else {
-            findViewById<View>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_pause_circle)
+            (findViewById<Button>(R.id.buttonTogglePlay)).background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_pause_circle)
         }
     }
 
     override fun onShuffleStateChanged(currentState: Boolean) {
         if (currentState) {
-            findViewById<View>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle_on)
+            (findViewById<Button>(R.id.buttonShuffle)).background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle_on)
         } else {
-            findViewById<View>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle)
+            (findViewById<Button>(R.id.buttonShuffle)).background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_shuffle)
         }
     }
 
     override fun onRepeatStateChanged(currentState: RepeatState) {
         when (currentState) {
-            RepeatState.NONE -> findViewById<View>(R.id.buttonRepeat)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat)
-            RepeatState.ALL -> findViewById<View>(R.id.buttonRepeat)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_on)
-            RepeatState.ONE -> findViewById<View>(R.id.buttonRepeat)?.background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_one)
+            RepeatState.NONE -> (findViewById<Button>(R.id.buttonRepeat)).background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat)
+            RepeatState.ALL -> (findViewById<Button>(R.id.buttonRepeat)).background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_on)
+            RepeatState.ONE -> (findViewById<Button>(R.id.buttonRepeat)).background = ContextCompat.getDrawable(this@ActivityPlayer, R.drawable.ic_repeat_one)
         }
     }
 

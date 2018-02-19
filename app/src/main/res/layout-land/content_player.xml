@@ -130,10 +130,10 @@
                         android:focusableInTouchMode="true"
                         android:gravity="center"
                         android:marqueeRepeatLimit="marquee_forever"
-                        android:maxLines="1"
                         android:scrollHorizontally="true"
                         android:text="@string/song_title_default"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:singleLine="true" />
 
                     <TextView
                         android:id="@+id/labelSongAuthor"
@@ -144,10 +144,10 @@
                         android:focusableInTouchMode="true"
                         android:gravity="center"
                         android:marqueeRepeatLimit="marquee_forever"
-                        android:maxLines="1"
                         android:scrollHorizontally="true"
                         android:text="@string/song_author_default"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        android:singleLine="true" />
 
                 </LinearLayout>
 

@@ -45,14 +45,14 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
     internal var playlistAdded = ArrayList<FragmentItemPlayable>()
 
     override val drawerLayout: DrawerLayout?
-        get() = findViewById<View>(R.id.playlist_layout) as DrawerLayout
+        get() = findViewById(R.id.playlist_layout)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(null)
         setContentView(R.layout.activity_playlist)
 
         navigationView = findViewById(R.id.nav_view)
-        navigationView!!.setNavigationItemSelectedListener(this)
+        navigationView?.setNavigationItemSelectedListener(this)
 
         val playlist = Playlist.get(intent.getStringExtra(Constants.EXTRA_PLAYLIST))
         this.playlist = playlist
@@ -65,7 +65,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
         findViewById<View>(R.id.buttonShufflePlay).setOnClickListener {
             if (psb == null) {
                 Toast.makeText(this@ActivityPlaylist, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
-            } else if (playlist != null && !playlist.isEmpty) {
+            } else if (!playlist.isEmpty) {
                 psb!!.shufflePlay(playlist)
 
                 val intent = Intent(this@ActivityPlaylist, ActivityPlayer::class.java)
@@ -76,7 +76,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
             }
         }
 
-        (findViewById<View>(R.id.textFilter) as EditText).addTextChangedListener(object : TextWatcher {
+        findViewById<EditText>(R.id.textFilter).addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
 
             }

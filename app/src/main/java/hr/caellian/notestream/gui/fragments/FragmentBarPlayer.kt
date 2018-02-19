@@ -27,8 +27,8 @@ import hr.caellian.notestream.util.RepeatState
 
 class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.ProgressListener {
     internal var psb = NoteStream.instance?.psb
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle): View? {
+    
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.bar_playing, container, false)
 
         view.setOnClickListener {
@@ -73,7 +73,7 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
             true
         }
 
-        view.findViewById<View>(R.id.buttonTogglePlay).setOnClickListener { psb!!.togglePlay() }
+        view.findViewById<Button>(R.id.buttonTogglePlay).setOnClickListener { psb!!.togglePlay() }
 
         if (psb == null || psb!!.isEmpty) {
             view.visibility = View.GONE
@@ -104,22 +104,22 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
     }
 
     override fun onProgressChanged(progress: Int) {
-        (view.findViewById<View>(R.id.songProgressBar) as ProgressBar).progress = progress
+        view.findViewById<ProgressBar>(R.id.songProgressBar).progress = progress
     }
 
     override fun onPlayableChanged(current: Playable?) {
-        (view.findViewById<View>(R.id.labelSongTitle) as TextView).text = current?.info?.title
-        (view.findViewById<View>(R.id.labelSongAuthor) as TextView).text = current?.info?.author
-        (view.findViewById<View>(R.id.songProgressBar) as ProgressBar).max = current?.info?.length!!
+        view.findViewById<TextView>(R.id.labelSongTitle).text = current?.info?.title
+        view.findViewById<TextView>(R.id.labelSongAuthor).text = current?.info?.author
+        view.findViewById<ProgressBar>(R.id.songProgressBar).max = current?.info?.length!!
         onProgressChanged(0)
         view.visibility = View.VISIBLE
     }
 
     override fun onPlayStatusChanged(playing: Boolean) {
         if (!playing) {
-            view.findViewById<View>(R.id.buttonTogglePlay).background = ContextCompat.getDrawable(view.context, R.drawable.ic_play_circle)
+            view.findViewById<Button>(R.id.buttonTogglePlay).background = ContextCompat.getDrawable(view.context, R.drawable.ic_play_circle)
         } else {
-            view.findViewById<View>(R.id.buttonTogglePlay).background = ContextCompat.getDrawable(view.context, R.drawable.ic_pause_circle)
+            view.findViewById<Button>(R.id.buttonTogglePlay).background = ContextCompat.getDrawable(view.context, R.drawable.ic_pause_circle)
         }
     }
 

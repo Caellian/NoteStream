@@ -47,24 +47,27 @@ class Library {
 
         for (playable in savedMusic) {
             val metadata = playable.info
-            val album = metadata.album
-            val artist = metadata.author
-            val genre = metadata.genre
 
-            if (!albums.containsKey(album)) {
-                albums.put(album!!, Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_ALBUM_PREFIX + album))
+            metadata.album?.also {
+                if (!albums.containsKey(it)) {
+                    albums[it] = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_ALBUM_PREFIX + it)
+                }
+                albums[it]?.add(playable)
             }
-            albums[album]?.add(playable)
 
-            if (!artists.containsKey(artist)) {
-                artists.put(artist!!, Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_ARTIST_PREFIX + artist))
+            metadata.author?.also {
+                if (!artists.containsKey(it)) {
+                    artists[it] = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_ARTIST_PREFIX + it)
+                }
+                artists[it]?.add(playable)
             }
-            artists[artist]?.add(playable)
 
-            if (!genres.containsKey(genre)) {
-                genres.put(genre!!, Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_GENRE_PREFIX + genre))
+            metadata.genre?.also {
+                if (!genres.containsKey(it)) {
+                    genres[it] = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_GENRE_PREFIX + it)
+                }
+                genres[it]?.add(playable)
             }
-            genres[genre]?.add(playable)
         }
     }
 

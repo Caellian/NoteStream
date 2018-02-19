@@ -1,45 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="60dp"
     android:padding="10dp"
-    android:gravity="center"
-    android:orientation="horizontal">
+    android:gravity="center">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/loadingView"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
 
         <TextView
-            android:id="@+id/labelSongTitle"
-            android:layout_width="match_parent"
+            android:id="@+id/textView"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/song_title_default"
-            android:textSize="18sp" />
+            android:layout_weight="1"
+            android:text="@string/label_loading" />
+    </LinearLayout>
 
-        <TextView
-            android:id="@+id/labelSongAuthor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/song_author_default"
-            android:textColor="@color/guiGrey"
-            android:textSize="14sp" />
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/playableView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/labelSongTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/song_title_default"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/labelSongAuthor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/song_author_default"
+                android:textColor="@color/guiGrey"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonSongOptions"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/ic_more_vert"
+            android:padding="5dp" />
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/buttonSongOptions"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:background="@drawable/ic_more_vert"
-        android:padding="5dp" />
-
-</LinearLayout>
+</FrameLayout>

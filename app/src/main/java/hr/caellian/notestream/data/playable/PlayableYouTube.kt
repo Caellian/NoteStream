@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.DownloadManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -27,7 +28,9 @@ import hr.caellian.notestream.data.youtube.ThumbnailDecoder
  * Created by caellyan on 22/06/17.
  */
 
-class PlayableYouTube(youtubeID: String) : PlayableDownloadable() {
+class PlayableYouTube(val youtubeID: String,
+                      override var title: String = NoteStream.instance!!.getString(R.string.unknown_title),
+                      override var author: String = NoteStream.instance!!.getString(R.string.unknown_artist)) : PlayableDownloadable() {
 
     override val id: String = getId(youtubeID)
     override val path: String = youtubeID
@@ -36,46 +39,54 @@ class PlayableYouTube(youtubeID: String) : PlayableDownloadable() {
     protected var extension: String? = null
 
     override val info: PlayableInfo = PlayableInfo(this)
+        get() {
+            if (!available && !Extractor.working) {
+                Extractor(this, field).execute(youtubeID)
+            }
+
+            return field
+        }
 
     override val playableSource: PlayableSource = PlayableSource.YOUTUBE
     override val location: String = playableSource.localizedDisplayName()
 
-    internal class Extractor(private val parent: PlayableYouTube) : YouTubeExtractor(NoteStream.instance) {
+    internal class Extractor(private val parent: PlayableYouTube, private val info: PlayableInfo) : YouTubeExtractor(NoteStream.instance) {
+        companion object {
+            var working = false
+        }
+
+        override fun onPreExecute() {
+            if (working) {
+                cancel(true)
+            } else {
+                working = true
+            }
+        }
+
         public override fun onExtractionComplete(files: SparseArray<YtFile>?, videoMeta: VideoMeta) {
             if (files != null) {
                 val itag = 140
                 parent.youtubeURL = files.get(itag).url
                 parent.extension = files.get(itag).format.ext
-
-                val info = parent.info
-                if (info.title == null) {
-                    info.title = videoMeta.title
-                }
-                if (info.author == null) {
-                    info.author = videoMeta.author
-                }
-                if (info.length == null) {
-                    info.length = videoMeta.videoLength.toInt() * 1000
-                }
-                if (info.end == null) {
-                    info.end = info.length
-                }
-
-                val decoder = ThumbnailDecoder({ result ->
-                    if (info.cover == PlayableInfo.DEFAULT_COVER) {
-                        info.cover = result
-                    }
-                })
-                decoder.execute(videoMeta)
-
                 parent.available = true
+
+                info.title = info.title ?: videoMeta.title
+                info.author = info.author ?: videoMeta.author
+                info.length = info.length ?: videoMeta.videoLength.toInt() * 1000
+                if (info.end != 0) {
+                    info.end = info.length!!
+                }
+
+                if (info.cover == PlayableInfo.DEFAULT_COVER) {
+                    val decoder = ThumbnailDecoder({ result ->
+                        info.cover = result
+                    })
+                    decoder.execute(videoMeta)
+                }
+
+                working = false
             }
         }
-    }
-
-    init {
-        val ytExtractor = Extractor(this)
-        ytExtractor.execute(youtubeID)
     }
 
     override fun prepare(mp: MediaPlayer): Boolean {
@@ -83,9 +94,9 @@ class PlayableYouTube(youtubeID: String) : PlayableDownloadable() {
         try {
             youtubeURL?.also {
                 mp.setDataSource(it)
-                mp.setAudioStreamType(AudioManager.STREAM_MUSIC)
+                mp.setAudioAttributes(AudioAttributes.Builder().setFlags(AudioAttributes.CONTENT_TYPE_MUSIC or AudioAttributes.USAGE_MEDIA).build())
                 mp.prepare()
-                mp.seekTo(info.start ?: 0)
+                mp.seekTo(info.start)
             }
         } catch (e: IOException) {
             return false

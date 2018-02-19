@@ -26,7 +26,7 @@ class ActivityArtists : TableActivity() {
         navigationView = findViewById(R.id.nav_view)
         navigationView?.setNavigationItemSelectedListener(this)
 
-        (findViewById<View>(R.id.labelTableTitle) as TextView).setText(R.string.label_artists)
+        findViewById<TextView>(R.id.labelTableTitle).setText(R.string.label_artists)
 
         val fm = fragmentManager
         val ft = fm.beginTransaction()

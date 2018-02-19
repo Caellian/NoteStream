@@ -18,6 +18,8 @@ interface Playable : Serializable {
     val playableSource: PlayableSource
     val path: String
     val location: String
+    var title: String
+    var author: String
 
     fun prepare(mp: MediaPlayer): Boolean
 

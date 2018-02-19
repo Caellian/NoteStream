@@ -10,6 +10,7 @@ import java.util.HashMap
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableRemote
+import hr.caellian.notestream.database.NoteStreamDB
 import hr.caellian.notestream.database.PlaylistOpenHelper
 import hr.caellian.notestream.lib.Constants
 
@@ -24,17 +25,17 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
     var label: String = ""
         set(value) {
-            NoteStream.instance?.nsdb?.updatePlaylist(this)
+            NoteStreamDB.updatePlaylist(this)
             field = value
         }
     var author: String = ""
         set(value) {
-            NoteStream.instance?.nsdb?.updatePlaylist(this)
+            NoteStreamDB.updatePlaylist(this)
             field = value
         }
     var capacity = 1
         private set(value) {
-            NoteStream.instance?.nsdb?.updatePlaylist(this)
+            NoteStreamDB.updatePlaylist(this)
             field = value
         }
     var currentPlayable = 0
@@ -76,7 +77,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
             playlist.add(playable)
             shuffledPlaylist.add(playable)
             timestamps[playable] = System.currentTimeMillis()
-            NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
+            NoteStreamDB.addPlayableTo(playable, this)
             NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
         }
 
@@ -90,7 +91,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
         playlist.add(playable)
         shuffledPlaylist.add(playable)
         timestamps[playable] = System.currentTimeMillis()
-        NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
+        NoteStreamDB.addPlayableTo(playable, this)
         NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
 
         trimToCapacity(false)
@@ -104,7 +105,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
         playlist.add(index, playable)
         shuffledPlaylist.add(index, playable)
         timestamps[playable] = System.currentTimeMillis()
-        NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
+        NoteStreamDB.addPlayableTo(playable, this)
         NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
 
         trimToCapacity(false)
@@ -117,7 +118,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
         playlist.add(currentPlayable + position, playable)
         shuffledPlaylist.add(shuffledCurrent + position, playable)
         timestamps[playable] = System.currentTimeMillis()
-        NoteStream.instance?.nsdb?.addPlayableTo(playable, this)
+        NoteStreamDB.addPlayableTo(playable, this)
         NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
         trimToCapacity(true)
 
@@ -139,7 +140,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
             playlist.remove(playable)
             shuffledPlaylist.remove(playable)
             timestamps.remove(playable)
-            NoteStream.instance?.nsdb?.removePlayableFrom(playable, this)
+            NoteStreamDB.removePlayableFrom(playable, this)
             NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playable, this)
         }
         return this
@@ -157,7 +158,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
         shuffledPlaylist.clear()
         timestamps.clear()
 
-        NoteStream.instance?.nsdb?.clearPlaylist(this)
+        NoteStreamDB.clearPlaylist(this)
         return this
     }
 
@@ -327,7 +328,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
             } else {
                 val result = Playlist(id)
 
-                NoteStream.instance?.nsdb?.registerPlaylist(result, id, author, label, capacity)
+                NoteStreamDB.registerPlaylist(result, id, author, label, capacity)
 
                 if (result.playlist.isEmpty()) {
                     result.add(data)

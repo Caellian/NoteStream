@@ -34,9 +34,9 @@ abstract class FragmentPlayableMediator : Fragment(), Playable.ControlListener, 
     override fun onPlayableChanged(current: Playable?) {
         val playable = playable
         if (current == playable) {
-            (view!!.findViewById<View>(R.id.labelSongTitle) as TextView).setTextColor(ContextCompat.getColor(view!!.context, R.color.colorAccent))
+            view?.findViewById<TextView>(R.id.labelSongTitle)?.setTextColor(ContextCompat.getColor(view!!.context, R.color.colorAccent))
         } else {
-            (view!!.findViewById<View>(R.id.labelSongTitle) as TextView).setTextColor(defaultTextColor)
+            view?.findViewById<TextView>(R.id.labelSongTitle)?.setTextColor(defaultTextColor)
         }
     }
 

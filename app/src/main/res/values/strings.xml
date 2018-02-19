@@ -30,10 +30,16 @@
     <string name="label_share">Share</string>
     <string name="label_delete">Delete</string>
 
+    <string name="label_loading">Loading…</string>
+
     <!-- Playable locations -->
     <string name="location_local">Local File</string>
     <string name="location_youtube">YouTube</string>
     <string name="location_unknown">Unknown Location</string>
+
+    <!-- Playable locations -->
+    <string name="unknown_title">Untitled</string>
+    <string name="unknown_artist">Unknown</string>
 
     <!-- Titles & headers -->
     <string name="title_library">Library</string>

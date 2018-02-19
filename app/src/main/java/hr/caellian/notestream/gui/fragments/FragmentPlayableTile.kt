@@ -23,9 +23,9 @@ import hr.caellian.notestream.lib.Constants
 
 class FragmentPlayableTile : FragmentPlayableMediator() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.playable_tile, container, false)
-        defaultTextColor = (view!!.findViewById<View>(R.id.labelSongTitle) as TextView).currentTextColor
+        defaultTextColor = view?.findViewById<TextView>(R.id.labelSongTitle)?.currentTextColor ?: 0
 
         val playable = playable
 
@@ -43,9 +43,9 @@ class FragmentPlayableTile : FragmentPlayableMediator() {
         val playlist = playlist
         val playable = playable ?: return
 
-        (view!!.findViewById<View>(R.id.tileBG) as ImageView).setImageBitmap(playable.info.cover)
-        (view!!.findViewById<View>(R.id.labelSongTitle) as TextView).text = playable.info.title
-        (view!!.findViewById<View>(R.id.labelSongAuthor) as TextView).text = playable.info.author
+        view?.findViewById<ImageView>(R.id.tileBG)?.setImageBitmap(playable.info.cover)
+        view?.findViewById<TextView>(R.id.labelSongTitle)?.text = playable.info.title
+        view?.findViewById<TextView>(R.id.labelSongAuthor)?.text = playable.info.author
 
         view!!.setOnClickListener(View.OnClickListener {
             if (playable is PlayableRemote && !playable.available) {

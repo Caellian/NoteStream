@@ -1,24 +1,19 @@
 package hr.caellian.notestream.data
 
-import android.database.Cursor
+import android.database.sqlite.SQLiteException
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.util.Log
 
-import java.util.HashMap
-import java.util.LinkedHashMap
-
-import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.PlayableSource
-import hr.caellian.notestream.database.PlaylistOpenHelper
-import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.Util
 import android.media.ThumbnailUtils
-
+import hr.caellian.notestream.database.NoteStreamDB
+import hr.caellian.notestream.lib.Constants
+import kotlin.concurrent.thread
 
 
 /**
@@ -26,7 +21,6 @@ import android.media.ThumbnailUtils
  */
 
 data class PlayableInfo(var parent: Playable) {
-
     val id: String = parent.id
     val source: PlayableSource = parent.playableSource
     val path: String = parent.path
@@ -40,9 +34,13 @@ data class PlayableInfo(var parent: Playable) {
     var rating: Int = 5
     var lyrics: String? = null
 
-    var start: Int? = null
-    var end: Int? = null
-    var length: Int? = null
+    var start: Int = 0
+    var end: Int = 0
+        get() {
+            if (field == 0 && length != 0) field = length
+            return field
+        }
+    var length: Int = 0
     var coverPath: String = ""
         set(value) {
             if (value.isNotEmpty()) {
@@ -52,17 +50,43 @@ data class PlayableInfo(var parent: Playable) {
         }
     var cover: Bitmap = DEFAULT_COVER
 
+    private var inited = false
+
     init {
         setFromDatabase()
     }
 
-    fun setFromDatabase() {
-        if (parent is PlayableLocal) {
-            setFromSource(parent.path)
+    fun setFromDatabase(): Boolean {
+        try {
+            val data = NoteStreamDB.getPlayableData(parent)
+            if (data.isEmpty()) {
+                inited = false
+                return false
+            }
+            title = data[Constants.TRACK_TITLE] as String?
+            parent.title = data[Constants.TRACK_TITLE] as String? ?: parent.title
+            author = data[Constants.TRACK_AUTHOR] as String?
+            parent.author = data[Constants.TRACK_AUTHOR] as String? ?: parent.author
+            album = data[Constants.TRACK_ALBUM] as String?
+            year = data[Constants.TRACK_YEAR] as Int?
+            track = data[Constants.TRACK_TRACK] as Int?
+            genre = data[Constants.TRACK_GENRE] as String?
+            rating = data[Constants.TRACK_RATING] as Int? ?: rating
+            lyrics = data[Constants.TRACK_LYRICS] as String?
+
+            start = data[Constants.TRACK_START] as Int? ?: start
+            end = data[Constants.TRACK_END] as Int? ?: end
+            length = data[Constants.TRACK_LENGTH] as Int? ?: length
+            (data[Constants.TRACK_COVER_PATH] as String?)?. also { coverPath = it }
+            inited = true
+        } catch (e: SQLiteException) {
+            inited = false
         }
+
+        return inited
     }
 
-    fun setFromSource(sourceLocation: String) {
+    fun setFromSource(sourceLocation: String): Boolean {
         val mmr = MediaMetadataRetriever()
         try {
             mmr.setDataSource(sourceLocation)
@@ -85,7 +109,9 @@ data class PlayableInfo(var parent: Playable) {
             }
 
             title = nTitle
+            parent.title = title ?: parent.title
             author = nAuthor
+            parent.author = author ?: parent.author
             album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
             mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)?.also {
                 Regex.fromLiteral("\\d+").find(it)?.also { year = Integer.parseInt(it.value) }
@@ -95,18 +121,21 @@ data class PlayableInfo(var parent: Playable) {
             }
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
             length = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))
-            end = length
+            end = length!!
 
             // TODO: Read lyrics from file!
 
-            mmr.embeddedPicture?.also {
-                cover = BitmapFactory.decodeByteArray(it, 0, it.size)
+            thread {
+                mmr.embeddedPicture?.also {
+                    cover = BitmapFactory.decodeByteArray(it, 0, it.size)
+                }
+                mmr.release()
             }
-            mmr.release()
         } catch (e: IllegalArgumentException) {
             mmr.release()
         }
-
+        inited = true
+        return inited
     }
 
     companion object {

@@ -24,7 +24,7 @@ open class TableActivity : NavigationActivity() {
     internal var currentRow = 0
 
     override val drawerLayout: DrawerLayout?
-        get() = findViewById<View>(R.id.table_layout) as DrawerLayout?
+        get() = findViewById(R.id.table_layout)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
