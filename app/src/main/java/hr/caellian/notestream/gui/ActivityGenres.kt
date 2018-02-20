@@ -1,13 +1,7 @@
 package hr.caellian.notestream.gui
 
-import android.app.FragmentManager
-import android.app.FragmentTransaction
 import android.os.Bundle
-import android.support.design.widget.NavigationView
-import android.view.View
-import android.widget.TableRow
 import android.widget.TextView
-
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.gui.fragments.FragmentCategoryTile

@@ -7,13 +7,11 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.os.Build
-
-import hr.caellian.notestream.gui.views.StatusBar
-import hr.caellian.notestream.gui.views.StatusBarLarge
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.gui.views.StatusBar
+import hr.caellian.notestream.gui.views.StatusBarLarge
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 

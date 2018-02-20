@@ -60,7 +60,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
     private class ProgressHandler(internal var mp: MediaPlayer) : Handler() {
 
         override fun handleMessage(msg: Message) {
-            if (mp.currentPosition > pl.getCurrentPlayable()?.info?.end ?: pl.getCurrentPlayable()?.info?.length!! && mp.currentPosition < pl.getCurrentPlayable()!!.info.end!! + 1000) {
+            if (mp.currentPosition > pl.getCurrentPlayable()?.info?.end ?: pl.getCurrentPlayable()?.info?.length!! && mp.currentPosition < pl.getCurrentPlayable()!!.info.end + 1000) {
                 psb!!.switchNext()
             } else {
                 for (progressListener in NoteStream.PROGRESS_LISTENERS) {
@@ -97,7 +97,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                     val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
                     tm?.listen(psl, PhoneStateListener.LISTEN_CALL_STATE)
 
-                    ms = MediaSession(this@PlayerService, Constants.MEDIA_SESSION_TAG)
+                    ms = MediaSession(this, Constants.MEDIA_SESSION_TAG)
                     ms?.setCallback(NSMediaSessionCallback())
                     ms?.isActive = true
 
@@ -162,7 +162,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
                         when (event.keyCode) {
                             KeyEvent.KEYCODE_MEDIA_FAST_FORWARD, KeyEvent.KEYCODE_MEDIA_STEP_FORWARD -> psb!!.progress = Math.min(psb!!.progress + PlayerService.DEFAULT_PROGRESS_CHANGE,
-                                    psb!!.currentPlayable!!.info.length!!)
+                                    psb!!.currentPlayable!!.info.length)
                             KeyEvent.KEYCODE_MEDIA_STEP_BACKWARD -> psb!!.progress = Math.max(psb!!.progress - PlayerService.DEFAULT_PROGRESS_CHANGE, 0)
                             KeyEvent.KEYCODE_MEDIA_STOP -> psb!!.stop()
                             KeyEvent.KEYCODE_MEDIA_PLAY -> psb!!.play()
@@ -389,7 +389,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
     companion object {
         // http://www.tutorialsface.com/2015/08/android-custom-notification-tutorial/
 
-        val DEFAULT_PROGRESS_CHANGE = 5000
+        const val DEFAULT_PROGRESS_CHANGE = 5000
 
         private val progressTimer = Timer()
         internal var pl = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + "currentlyPlayed")

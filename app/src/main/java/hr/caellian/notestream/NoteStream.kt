@@ -10,16 +10,13 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.provider.MediaStore
-
-import java.util.ArrayList
-
-import hr.caellian.notestream.data.playable.PlayableRemote
-import hr.caellian.notestream.database.NoteStreamDB
-import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.data.Library
-import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.data.playable.PlayableLocal
+import hr.caellian.notestream.data.playable.PlayableRemote
+import hr.caellian.notestream.lib.Constants
+import java.util.*
 
 /**
  * Created by caellyan on 16/06/17.
@@ -40,7 +37,7 @@ class NoteStream : Application() {
             override fun onServiceConnected(name: ComponentName, service: IBinder) {
                 psb = service as PlayerService.PlayerServiceBinder
                 for (psbListener in PSB_LISTENERS) {
-                    psbListener.onPlayerServiceConnected(psb)
+                    psbListener.onPlayerServiceConnected(psb!!)
                 }
             }
 
@@ -62,13 +59,12 @@ class NoteStream : Application() {
     }
 
     abstract class PlayerServiceListener {
-        abstract fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder?)
+        abstract fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder)
         open fun onPlayerServiceDisconnected() {}
     }
 
     companion object {
         var instance: NoteStream? = null
-        var nsdb: NoteStreamDB? = null
 
         val PSB_LISTENERS = ArrayList<PlayerServiceListener>()
         val PROGRESS_LISTENERS = ArrayList<Playable.ProgressListener>()
@@ -77,7 +73,11 @@ class NoteStream : Application() {
         val AVAILABILITY_LISTENERS = ArrayList<PlayableRemote.AvailabilityListener>()
 
         fun registerPlayerServiceListener(listener: PlayerServiceListener) {
-            PSB_LISTENERS.add(listener)
+            if (instance?.psb == null) {
+                PSB_LISTENERS.add(listener)
+            } else {
+                listener.onPlayerServiceConnected(instance?.psb!!)
+            }
         }
 
         fun registerProgressListener(listener: Playable.ProgressListener) {

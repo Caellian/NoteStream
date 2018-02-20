@@ -4,13 +4,10 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v4.widget.DrawerLayout
 import android.view.Gravity
-import android.view.View
 import android.widget.TableLayout
 import android.widget.TableRow
-
-import java.util.ArrayList
-
 import hr.caellian.notestream.R
+import java.util.*
 
 /**
  * Created by caellyan on 26/06/17.

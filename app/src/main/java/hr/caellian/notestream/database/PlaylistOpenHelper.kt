@@ -53,7 +53,7 @@ class PlaylistOpenHelper(context: Context, internal var parent: Playlist, factor
     }
 
     companion object {
-        private val DATABASE_VERSION = 1
-        private val PLAYLIST_TABLE_PREFIX = "playlist_"
+        private const val DATABASE_VERSION = 1
+        private const val PLAYLIST_TABLE_PREFIX = "playlist_"
     }
 }

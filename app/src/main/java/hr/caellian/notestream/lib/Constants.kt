@@ -1,7 +1,5 @@
 package hr.caellian.notestream.lib
 
-import android.os.Build
-
 /**
  * Created by caellyan on 21/06/17.
  */

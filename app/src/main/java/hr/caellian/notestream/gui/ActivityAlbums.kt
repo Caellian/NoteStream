@@ -1,9 +1,7 @@
 package hr.caellian.notestream.gui
 
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
-
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Playlist

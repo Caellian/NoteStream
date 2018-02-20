@@ -3,9 +3,7 @@ package hr.caellian.notestream.util
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.view.Menu
-
 import hr.caellian.notestream.NoteStream
 
 /**

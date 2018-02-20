@@ -1,18 +1,13 @@
 package hr.caellian.notestream.data
 
 import android.graphics.Bitmap
-
-import java.io.Serializable
-import java.util.ArrayList
-import java.util.Collections
-import java.util.HashMap
-
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableRemote
 import hr.caellian.notestream.database.NoteStreamDB
-import hr.caellian.notestream.database.PlaylistOpenHelper
 import hr.caellian.notestream.lib.Constants
+import java.io.Serializable
+import java.util.*
 
 /**
  * Created by caellyan on 16/04/17.
@@ -234,7 +229,7 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
         return playlist.firstOrNull { it.id == id }
     }
 
-    protected fun trimToCapacity(fromEnd: Boolean) {
+    private fun trimToCapacity(fromEnd: Boolean) {
         if (fromEnd) {
             while (playlist.size >= capacity) {
                 val removed = playlist.removeAt(playlist.size - 1)

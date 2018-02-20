@@ -1,6 +1,5 @@
 package hr.caellian.notestream.database
 
-import android.database.ContentObserver
 import android.database.CursorIndexOutOfBoundsException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
@@ -13,36 +12,32 @@ import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.lib.Constants.DB_PLAYABLES_ID
 import hr.caellian.notestream.lib.Constants.DB_PLAYLIST_INFO_ID
-
-import hr.caellian.notestream.lib.Constants.TRACK_ID
-import hr.caellian.notestream.lib.Constants.TRACK_TIMESTAMP
-import hr.caellian.notestream.lib.Constants.TRACK_PRIORITY
-
 import hr.caellian.notestream.lib.Constants.DB_PLAYLIST_PREFIX
 import hr.caellian.notestream.lib.Constants.PLAYLIST_AUTHOR
 import hr.caellian.notestream.lib.Constants.PLAYLIST_CAPACITY
 import hr.caellian.notestream.lib.Constants.PLAYLIST_ID
 import hr.caellian.notestream.lib.Constants.PLAYLIST_LABEL
-
-import hr.caellian.notestream.lib.Constants.SQL_TYPE_INTEGER
-import hr.caellian.notestream.lib.Constants.SQL_TYPE_TEXT
 import hr.caellian.notestream.lib.Constants.SQL_NOT_NULL
 import hr.caellian.notestream.lib.Constants.SQL_PRIMARY_KEY
+import hr.caellian.notestream.lib.Constants.SQL_TYPE_INTEGER
+import hr.caellian.notestream.lib.Constants.SQL_TYPE_TEXT
 import hr.caellian.notestream.lib.Constants.TRACK_ALBUM
 import hr.caellian.notestream.lib.Constants.TRACK_AUTHOR
 import hr.caellian.notestream.lib.Constants.TRACK_COVER_PATH
 import hr.caellian.notestream.lib.Constants.TRACK_END
 import hr.caellian.notestream.lib.Constants.TRACK_GENRE
+import hr.caellian.notestream.lib.Constants.TRACK_ID
 import hr.caellian.notestream.lib.Constants.TRACK_LENGTH
 import hr.caellian.notestream.lib.Constants.TRACK_LYRICS
 import hr.caellian.notestream.lib.Constants.TRACK_PATH
+import hr.caellian.notestream.lib.Constants.TRACK_PRIORITY
 import hr.caellian.notestream.lib.Constants.TRACK_RATING
 import hr.caellian.notestream.lib.Constants.TRACK_SOURCE
 import hr.caellian.notestream.lib.Constants.TRACK_START
+import hr.caellian.notestream.lib.Constants.TRACK_TIMESTAMP
 import hr.caellian.notestream.lib.Constants.TRACK_TITLE
 import hr.caellian.notestream.lib.Constants.TRACK_TRACK
 import hr.caellian.notestream.lib.Constants.TRACK_YEAR
-import java.util.logging.Handler
 
 /**
  * Created by caellian on 02/01/18.
@@ -132,7 +127,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                 "(\"${p.id}\", \"${p.playableSource}\", \"${p.path}\", \"${pInfo.title ?: ""}\", " +
                 "\"${pInfo.author ?: ""}\", \"${pInfo.album ?: ""}\", ${pInfo.year ?: 0}, ${pInfo.track ?: 0}, " +
                 "\"${pInfo.genre ?: ""}\", ${pInfo.rating}, \"${pInfo.lyrics ?: ""}\", ${pInfo.start}, " +
-                "${pInfo.end}, ${pInfo.length ?: 0}, \"${pInfo.coverPath}\");"
+                "${pInfo.end}, ${pInfo.length}, \"${pInfo.coverPath}\");"
 
         try {
             writableDatabase.execSQL(statement)

@@ -1,31 +1,24 @@
 package hr.caellian.notestream.gui
 
 import android.Manifest
-import android.app.AlertDialog
-import android.app.FragmentManager
-import android.app.FragmentTransaction
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.support.design.widget.NavigationView
 import android.support.v4.widget.DrawerLayout
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-
-import java.util.ArrayList
-
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Library
-import hr.caellian.notestream.gui.dialog.DialogCancelOk
-import hr.caellian.notestream.gui.fragments.FragmentPlayableTile
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.gui.dialog.DialogCancelOk
+import hr.caellian.notestream.gui.fragments.FragmentPlayableTile
 import hr.caellian.notestream.lib.Constants
+import java.util.*
 
 /**
  * Created by caellyan on 18/06/17.
@@ -125,7 +118,7 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
         }
     }
 
-    protected fun showRequiredPermissionsDialogue() {
+    private fun showRequiredPermissionsDialogue() {
         val dialog = DialogCancelOk(this@ActivityLibrary,
                 getString(R.string.title_permissions_mandatory),
                 getString(R.string.mandatory_permissions_explanation),
@@ -142,7 +135,7 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
         dialog.show()
     }
 
-    protected fun populateLibrary() {
+    private fun populateLibrary() {
         NoteStream.instance?.populateLibrary(this)
 
         val fm = fragmentManager
@@ -209,13 +202,7 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        var finished = true
-        for (n in permissions.indices) {
-            if (grantResults[n] != PackageManager.PERMISSION_GRANTED) {
-                finished = false
-
-            }
-        }
+        val finished = permissions.indices.none { grantResults[it] != PackageManager.PERMISSION_GRANTED }
 
         if (finished) {
             populateLibrary()

@@ -64,7 +64,7 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
                 override fun run() {
                     if (buttonNext.isPressed) {
                         psb!!.progress = Math.min(psb!!.progress + 5000,
-                                psb!!.currentPlayable!!.info.length!!)
+                                psb!!.currentPlayable!!.info.length)
                     } else {
                         holdTimer.cancel()
                     }
@@ -86,9 +86,9 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
         NoteStream.registerControlListener(this)
         NoteStream.registerProgressListener(this)
         NoteStream.registerPlayerServiceListener(object : NoteStream.PlayerServiceListener() {
-            override fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder?) {
+            override fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder) {
                 this@FragmentBarPlayer.psb = psb
-                if (!psb!!.isEmpty && psb.currentPlayable != null) {
+                if (!psb.isEmpty && psb.currentPlayable != null) {
                     this@FragmentBarPlayer.onProgressChanged(psb.progress)
                     this@FragmentBarPlayer.onPlayableChanged(psb.currentPlayable!!)
                     this@FragmentBarPlayer.onPlayStatusChanged(psb.isPlaying)

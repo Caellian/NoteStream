@@ -3,17 +3,13 @@ package hr.caellian.notestream.data
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-
-import java.io.IOException
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.HashSet
-
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.lib.Constants
+import java.io.IOException
+import java.util.*
 
 /**
  * Created by caellyan on 17/06/17.

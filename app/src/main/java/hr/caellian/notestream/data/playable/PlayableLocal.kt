@@ -46,7 +46,7 @@ class PlayableLocal(override val path: String,
     }
 
     override fun skipTo(mp: MediaPlayer, ms: Int): Boolean {
-        mp.seekTo(Math.max(0, Math.min(ms, info.length ?: 0)))
+        mp.seekTo(Math.max(0, Math.min(ms, info.length)))
         return true
     }
 
@@ -59,9 +59,9 @@ class PlayableLocal(override val path: String,
     }
 
     companion object {
-        val TAG = PlayableLocal::class.java.simpleName
+        val TAG: String = PlayableLocal::class.java.simpleName
 
-        private val ID_PREFIX = "playable-local-"
+        private const val ID_PREFIX = "playable-local-"
 
         fun getId(path: String): String {
             return ID_PREFIX + path.replace("[^A-Za-z0-9]+".toRegex(), "")

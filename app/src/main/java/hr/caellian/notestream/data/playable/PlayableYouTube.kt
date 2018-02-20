@@ -5,17 +5,11 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.util.SparseArray
 import android.widget.Toast
-
-import java.io.IOException
-import java.util.HashMap
-
 import at.huber.youtubeExtractor.VideoMeta
 import at.huber.youtubeExtractor.YouTubeExtractor
 import at.huber.youtubeExtractor.YtFile
@@ -23,6 +17,7 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.PlayableInfo
 import hr.caellian.notestream.data.youtube.ThumbnailDecoder
+import java.io.IOException
 
 /**
  * Created by caellyan on 22/06/17.
@@ -35,8 +30,8 @@ class PlayableYouTube(val youtubeID: String,
     override val id: String = getId(youtubeID)
     override val path: String = youtubeID
 
-    protected var youtubeURL: String? = null
-    protected var extension: String? = null
+    private var youtubeURL: String? = null
+    private var extension: String? = null
 
     override val info: PlayableInfo = PlayableInfo(this)
         get() {
@@ -72,9 +67,9 @@ class PlayableYouTube(val youtubeID: String,
 
                 info.title = info.title ?: videoMeta.title
                 info.author = info.author ?: videoMeta.author
-                info.length = info.length ?: videoMeta.videoLength.toInt() * 1000
+                info.length = info.length
                 if (info.end != 0) {
-                    info.end = info.length!!
+                    info.end = info.length
                 }
 
                 if (info.cover == PlayableInfo.DEFAULT_COVER) {
@@ -106,7 +101,7 @@ class PlayableYouTube(val youtubeID: String,
     }
 
     override fun skipTo(mp: MediaPlayer, ms: Int): Boolean {
-        mp.seekTo(Math.max(0, Math.min(ms, info.length ?: 0)))
+        mp.seekTo(Math.max(0, Math.min(ms, info.length)))
         return true
     }
 
@@ -152,7 +147,7 @@ class PlayableYouTube(val youtubeID: String,
     }
 
     companion object {
-        private val ID_PREFIX = "playable-youtube-"
+        private const val ID_PREFIX = "playable-youtube-"
 
         fun getId(youtubeID: String): String {
             return ID_PREFIX + youtubeID

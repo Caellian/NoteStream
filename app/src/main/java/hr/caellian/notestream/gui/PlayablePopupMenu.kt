@@ -6,13 +6,11 @@ import android.support.v7.widget.PopupMenu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.MimeTypeMap
-
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.PlayerService
-import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableDownloadable
+import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.PlayableYouTube
 import hr.caellian.notestream.lib.Constants
 

@@ -4,15 +4,13 @@ import android.database.sqlite.SQLiteException
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-
+import android.media.ThumbnailUtils
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
-import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.PlayableSource
-import hr.caellian.notestream.util.Util
-import android.media.ThumbnailUtils
 import hr.caellian.notestream.database.NoteStreamDB
 import hr.caellian.notestream.lib.Constants
+import hr.caellian.notestream.util.Util
 import kotlin.concurrent.thread
 
 
@@ -63,21 +61,21 @@ data class PlayableInfo(var parent: Playable) {
                 inited = false
                 return false
             }
-            title = data[Constants.TRACK_TITLE] as String?
-            parent.title = data[Constants.TRACK_TITLE] as String? ?: parent.title
-            author = data[Constants.TRACK_AUTHOR] as String?
-            parent.author = data[Constants.TRACK_AUTHOR] as String? ?: parent.author
-            album = data[Constants.TRACK_ALBUM] as String?
-            year = data[Constants.TRACK_YEAR] as Int?
-            track = data[Constants.TRACK_TRACK] as Int?
-            genre = data[Constants.TRACK_GENRE] as String?
-            rating = data[Constants.TRACK_RATING] as Int? ?: rating
-            lyrics = data[Constants.TRACK_LYRICS] as String?
+            title = data[Constants.TRACK_TITLE] as? String?
+            parent.title = data[Constants.TRACK_TITLE] as? String? ?: parent.title
+            author = data[Constants.TRACK_AUTHOR] as? String?
+            parent.author = data[Constants.TRACK_AUTHOR] as? String? ?: parent.author
+            album = data[Constants.TRACK_ALBUM] as? String?
+            year = data[Constants.TRACK_YEAR] as? Int?
+            track = data[Constants.TRACK_TRACK] as? Int?
+            genre = data[Constants.TRACK_GENRE] as? String?
+            rating = data[Constants.TRACK_RATING] as? Int? ?: rating
+            lyrics = data[Constants.TRACK_LYRICS] as? String?
 
-            start = data[Constants.TRACK_START] as Int? ?: start
-            end = data[Constants.TRACK_END] as Int? ?: end
-            length = data[Constants.TRACK_LENGTH] as Int? ?: length
-            (data[Constants.TRACK_COVER_PATH] as String?)?. also { coverPath = it }
+            start = data[Constants.TRACK_START] as? Int? ?: start
+            end = data[Constants.TRACK_END] as? Int? ?: end
+            length = data[Constants.TRACK_LENGTH] as? Int? ?: length
+            (data[Constants.TRACK_COVER_PATH] as? String?)?. also { coverPath = it }
             inited = true
         } catch (e: SQLiteException) {
             inited = false
@@ -121,7 +119,7 @@ data class PlayableInfo(var parent: Playable) {
             }
             genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
             length = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))
-            end = length!!
+            end = length
 
             // TODO: Read lyrics from file!
 

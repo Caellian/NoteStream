@@ -1,19 +1,16 @@
 package hr.caellian.notestream.gui
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.widget.DrawerLayout
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
-
-import java.util.ArrayList
-
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
+import java.util.*
 
 /**
  * Created by caellyan on 25/06/17.
@@ -24,7 +21,7 @@ class ActivitySearch : NavigationActivity() {
     val resultsPlaylist = Playlist.get("searchResults")
 
     private var fragmentCounter = 0
-    protected val searchItems = ArrayList<FragmentItemPlayable>()
+    private val searchItems = ArrayList<FragmentItemPlayable>()
 
     override val drawerLayout: DrawerLayout?
         get() = findViewById<View>(R.id.search_layout) as DrawerLayout
