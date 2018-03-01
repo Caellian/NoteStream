@@ -152,5 +152,9 @@ class PlayableYouTube(val youtubeID: String,
         fun getId(youtubeID: String): String {
             return ID_PREFIX + youtubeID
         }
+
+        fun getSearch(data: String): PlayableYouTube? {
+            return null
+        }
     }
 }

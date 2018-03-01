@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.TextView
 
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.Library
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableRemote
@@ -17,7 +17,7 @@ import hr.caellian.notestream.util.RepeatState
  * Created by tinsv on 30/06/2017.
  */
 
-abstract class FragmentPlayableMediator : Fragment(), Playable.ControlListener, Library.LibraryListener, PlayableRemote.AvailabilityListener {
+abstract class FragmentPlayableMediator : Fragment(), Playable.ControlListener, NoteStreamData.LibraryListener, PlayableRemote.AvailabilityListener {
     protected var defaultTextColor: Int = 0
 
     val playlist: Playlist

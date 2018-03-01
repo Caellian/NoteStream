@@ -15,7 +15,7 @@ import java.util.ArrayList
 
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.Library
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.PlayerService
@@ -26,7 +26,7 @@ import hr.caellian.notestream.lib.Constants
  * Created by caellyan on 16/06/17.
  */
 
-class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
+class ActivityPlaylist : NavigationActivity(), NoteStreamData.LibraryListener {
 
     internal var active = true
     internal var playlist: Playlist? = null
@@ -51,21 +51,21 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
         this.playlist = playlist
 
         if (playlist == null || playlist.size() == 0) {
-            Toast.makeText(this@ActivityPlaylist, getString(R.string.invalid_playlist), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.invalid_playlist), Toast.LENGTH_SHORT).show()
             finish()
         }
 
         findViewById<View>(R.id.buttonShufflePlay).setOnClickListener {
             if (psb == null) {
-                Toast.makeText(this@ActivityPlaylist, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
             } else if (!playlist.isEmpty) {
                 psb!!.shufflePlay(playlist)
 
-                val intent = Intent(this@ActivityPlaylist, ActivityPlayer::class.java)
+                val intent = Intent(this, ActivityPlayer::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)
             } else {
-                Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -87,13 +87,13 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
         val orderButton = findViewById<Button>(R.id.buttonOrder)
         orderButton.setOnClickListener {
-            val popup = PopupMenu(this@ActivityPlaylist, orderButton)
+            val popup = PopupMenu(this, orderButton)
             popup.menuInflater.inflate(R.menu.menu_order, popup.menu)
 
             popup.setOnMenuItemClickListener { item ->
                 setOrder(item.itemId)
 
-                val intent = Intent(this@ActivityPlaylist, ActivityPlaylist::class.java)
+                val intent = Intent(this, ActivityPlaylist::class.java)
                 intent.putExtra(Constants.EXTRA_PLAYLIST, playlist)
                 startActivity(intent)
                 finish()

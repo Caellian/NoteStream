@@ -12,7 +12,7 @@ import android.widget.Button
 import android.widget.TextView
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.Library
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.Playlist
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.gui.dialog.DialogCancelOk
@@ -24,7 +24,7 @@ import java.util.*
  * Created by caellyan on 18/06/17.
  */
 
-class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
+class ActivityLibrary : NavigationActivity(), NoteStreamData.LibraryListener {
 
     internal var active = true
 

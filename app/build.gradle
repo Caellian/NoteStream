@@ -39,10 +39,18 @@ dependencies {
     compile "com.android.support:design:$supportVersion"
     compile "com.android.support:percent:$supportVersion"
 
+    compile 'com.google.android.gms:play-services-auth:11.8.0'
+    compile 'com.google.apis:google-api-services-youtube:v3-rev192-1.23.0'
+
     compile 'com.github.evgenyneu:js-evaluator-for-android:v2.0.0'
     compile 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
 
+    compile 'com.akexorcist:RoundCornerProgressBar:2.0.3'
+    compile 'me.relex:circleindicator:1.2.2@aar'
+
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
     testCompile 'junit:junit:4.12'
+    testCompile 'com.google.code.findbugs:jsr305:3.0.2'
 }

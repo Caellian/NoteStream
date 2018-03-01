@@ -10,7 +10,9 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.provider.MediaStore
-import hr.caellian.notestream.data.Library
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableLocal
@@ -24,7 +26,7 @@ import java.util.*
 
 class NoteStream : Application() {
     var psb: PlayerService.PlayerServiceBinder? = null
-    var library: Library? = null
+    var library: NoteStreamData? = null
 
     override fun onCreate() {
         instance = this
@@ -53,7 +55,7 @@ class NoteStream : Application() {
     fun populateLibrary(activity: Activity) {
         val storageCheck = activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
         if (storageCheck == PackageManager.PERMISSION_GRANTED) {
-            library = Library()
+            library = NoteStreamData()
             addLocalContentToLibrary(activity, library!!)
         }
     }
@@ -69,7 +71,7 @@ class NoteStream : Application() {
         val PSB_LISTENERS = ArrayList<PlayerServiceListener>()
         val PROGRESS_LISTENERS = ArrayList<Playable.ProgressListener>()
         val CONTROL_LISTENERS = ArrayList<Playable.ControlListener>()
-        val LIBRARY_LISTENERS = ArrayList<Library.LibraryListener>()
+        val LIBRARY_LISTENERS = ArrayList<NoteStreamData.LibraryListener>()
         val AVAILABILITY_LISTENERS = ArrayList<PlayableRemote.AvailabilityListener>()
 
         fun registerPlayerServiceListener(listener: PlayerServiceListener) {
@@ -88,7 +90,7 @@ class NoteStream : Application() {
             CONTROL_LISTENERS.add(listener)
         }
 
-        fun registerLibraryListener(listener: Library.LibraryListener) {
+        fun registerLibraryListener(listener: NoteStreamData.LibraryListener) {
             LIBRARY_LISTENERS.add(listener)
         }
 
@@ -96,7 +98,7 @@ class NoteStream : Application() {
             AVAILABILITY_LISTENERS.add(listener)
         }
 
-        private fun addLocalContentToLibrary(context: Context, library: Library) {
+        private fun addLocalContentToLibrary(context: Context, library: NoteStreamData) {
             val extUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
             val selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0"
             val sortOrder = MediaStore.Audio.Media.TITLE + " ASC"

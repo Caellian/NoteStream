@@ -5,6 +5,7 @@ package hr.caellian.notestream.lib
  */
 
 object Constants {
+    const val SIGN_IN_CODE = 9001
     const val APP_REQUEST_CODE = 6678
     const val APP_PSBR_CODE = 7727
 

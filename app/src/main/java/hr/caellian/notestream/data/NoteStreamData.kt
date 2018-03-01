@@ -15,7 +15,7 @@ import java.util.*
  * Created by caellyan on 17/06/17.
  */
 
-class Library {
+class NoteStreamData {
     private val pref: SharedPreferences? = NoteStream.instance?.getSharedPreferences("library", Context.MODE_PRIVATE)
 
     var playlists = HashSet<String>()
@@ -164,6 +164,6 @@ class Library {
     }
 
     companion object {
-        private val TAG = Library::class.java.simpleName
+        private val TAG = NoteStreamData::class.java.simpleName
     }
 }

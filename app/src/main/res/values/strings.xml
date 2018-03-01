@@ -106,5 +106,6 @@
 
     <!-- Unsorted -->
     <string name="dummy">DUMMY</string>
+    <string name="sign_in_explanation">By signing in you\'re allowing NoteStream to store your playlists and data on your Google Drive.\n\nThis optional feature makes sure all your music and preferences are always in sync.</string>
 
 </resources>
