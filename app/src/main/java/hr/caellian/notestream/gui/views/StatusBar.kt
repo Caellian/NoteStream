@@ -19,7 +19,6 @@ import hr.caellian.notestream.util.RepeatState
 class StatusBar(context: Context, packageName: String) : RemoteViews(packageName, R.layout.status_bar), Playable.ControlListener {
 
     init {
-
         val playerIntent = Intent(context, ActivityPlayer::class.java)
         playerIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         val playerPending = PendingIntent.getActivity(context, Constants.APP_REQUEST_CODE, playerIntent, PendingIntent.FLAG_UPDATE_CURRENT)

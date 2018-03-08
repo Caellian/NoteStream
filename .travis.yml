@@ -1,5 +1,15 @@
 language: android
+sudo: required
+jdk: oraclejdk8
 android:
   components:
     - build-tools-26.0.2
     - android-26
+  licenses:
+    - android-sdk-preview-license-.+
+    - android-sdk-license-.+
+    - google-gdk-license-.+
+before_install:
+  - mv ./licenses "$ANDROID_HOME/licenses"
+  - chmod +x gradlew
+  - ./gradlew dependencies || true
