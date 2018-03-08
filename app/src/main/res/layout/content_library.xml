@@ -236,10 +236,6 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
-
             <View
                 android:id="@+id/view"
                 android:layout_width="match_parent"
@@ -294,5 +290,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        tools:layout="@layout/bar_playing" />
+        tools:layout="@layout/fragment_bar_player" />
 </LinearLayout>

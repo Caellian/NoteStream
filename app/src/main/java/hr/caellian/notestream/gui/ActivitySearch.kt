@@ -78,7 +78,7 @@ class ActivitySearch : NavigationActivity() {
         for (playable in resultsPlaylist) {
             val fragment = FragmentItemPlayable.newInstance(playable, resultsPlaylist)
             searchItems.add(fragment)
-            ft.add(R.id.foundContent, fragment, "playable-" + fragmentCounter++)
+            ft.add(R.id.foundContent, fragment, "argumentPlayable-" + fragmentCounter++)
         }
         ft.commit()
     }

@@ -29,7 +29,7 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
     internal var psb = NoteStream.instance?.psb
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.bar_playing, container, false)
+        val view = inflater.inflate(R.layout.fragment_bar_player, container, false)
 
         view.setOnClickListener {
             val intent = Intent(view.context, ActivityPlayer::class.java)
@@ -77,10 +77,6 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
 
         if (psb == null || psb!!.isEmpty) {
             view.visibility = View.GONE
-        } else {
-            onProgressChanged(psb!!.progress)
-            onPlayableChanged(psb!!.currentPlayable!!)
-            onPlayStatusChanged(psb!!.isPlaying)
         }
 
         NoteStream.registerControlListener(this)
@@ -109,7 +105,7 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
 
     override fun onPlayableChanged(current: Playable?) {
         view.findViewById<TextView>(R.id.labelSongTitle).text = current?.info?.title
-        view.findViewById<TextView>(R.id.labelSongAuthor).text = current?.info?.author
+        view.findViewById<TextView>(R.id.labelTileDescription).text = current?.info?.author
         view.findViewById<ProgressBar>(R.id.songProgressBar).max = current?.info?.length!!
         onProgressChanged(0)
         view.visibility = View.VISIBLE
@@ -123,11 +119,6 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
         }
     }
 
-    override fun onShuffleStateChanged(currentState: Boolean) {
-
-    }
-
-    override fun onRepeatStateChanged(currentState: RepeatState) {
-
-    }
+    override fun onShuffleStateChanged(currentState: Boolean) {}
+    override fun onRepeatStateChanged(currentState: RepeatState) {}
 }

@@ -38,7 +38,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         psb = NoteStream.instance?.psb
 
         findViewById<TextView>(R.id.labelSongTitle).isSelected = true
-        findViewById<TextView>(R.id.labelSongAuthor).isSelected = true
+        findViewById<TextView>(R.id.labelTileDescription).isSelected = true
 
         navigationView = findViewById(R.id.nav_view)
         navigationView?.setNavigationItemSelectedListener(this)
@@ -74,7 +74,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         })
 
 
-        findViewById<Button>(R.id.buttonShuffle).setOnClickListener { psb?.setShuffle(psb?.doShuffle() == true) }
+        findViewById<Button>(R.id.buttonShuffle)?.setOnClickListener { psb?.setShuffle(psb?.doShuffle() == true) }
 
         val buttonPrevious = findViewById<Button>(R.id.buttonPrevious)
         val buttonNext = findViewById<Button>(R.id.buttonNext)
@@ -179,7 +179,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         }
 
         (findViewById<TextView>(R.id.labelSongTitle)).text = metadata.title
-        (findViewById<TextView>(R.id.labelSongAuthor)).text = metadata.author
+        (findViewById<TextView>(R.id.labelTileDescription)).text = metadata.author
 
         findViewById<Button>(R.id.buttonMenu).setOnClickListener(object : View.OnClickListener {
             internal var playablePopupMenu: PlayablePopupMenu? = null

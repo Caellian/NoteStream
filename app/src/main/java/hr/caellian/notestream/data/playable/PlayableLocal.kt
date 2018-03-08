@@ -61,7 +61,7 @@ class PlayableLocal(override val path: String,
     companion object {
         val TAG: String = PlayableLocal::class.java.simpleName
 
-        private const val ID_PREFIX = "playable-local-"
+        private const val ID_PREFIX = "argumentPlayable-local-"
 
         fun getId(path: String): String {
             return ID_PREFIX + path.replace("[^A-Za-z0-9]+".toRegex(), "")

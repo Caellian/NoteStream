@@ -3,7 +3,6 @@ package hr.caellian.notestream.util
 import hr.caellian.notestream.R
 
 data class Genre(val id: String, val name: String, val resourceIcon: Int, val ID3ID: Long) {
-
     companion object {
         val genres: MutableList<Genre> = mutableListOf()
 

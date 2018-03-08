@@ -78,9 +78,12 @@ object Constants {
     // Extras
     const val EXTRA_ID = "hr.caellian.notestream.EXTRA_ID"
     const val EXTRA_LABEL = "hr.caellian.notestream.EXTRA_LABEL"
+    const val EXTRA_LABEL_DESCRIPTION = "hr.caellian.notestream.EXTRA_LABEL_DESCRIPTION"
     const val EXTRA_ICON = "hr.caellian.notestream.EXTRA_ICON"
     const val EXTRA_TILES = "hr.caellian.notestream.EXTRA_BACKGROUND_TILES"
     const val EXTRA_BACKGROUND = "hr.caellian.notestream.EXTRA_BACKGROUND"
+
+    const val EXTRA_DATA = "hr.caellian.notestream.EXTRA_DATA" // Represents all NoteStream data
     const val EXTRA_PLAYLIST = "hr.caellian.notestream.EXTRA_PLAYLIST"
     const val EXTRA_PLAYABLE = "hr.caellian.notestream.EXTRA_PLAYABLE"
 }

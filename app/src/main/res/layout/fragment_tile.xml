@@ -93,16 +93,30 @@
             app:srcCompat="@drawable/ic_song" />
 
         <TextView
-            android:id="@+id/labelTileCategory"
+            android:id="@+id/labelTileTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.35"
-            android:gravity="center_vertical|fill_horizontal"
+            android:layout_weight="0.15"
+            android:gravity="center_vertical|bottom"
             android:ellipsize="end"
             android:maxLines="2"
             android:text="@string/category_default"
             android:textAlignment="center"
             android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/labelTileDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15"
+            android:gravity="center_vertical|top"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/song_author_default"
+            android:textAlignment="center"
+            android:textColor="@color/guiGrey"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
     </LinearLayout>

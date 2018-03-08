@@ -1,9 +1,13 @@
 package hr.caellian.notestream.gui.fragments
 
 import android.app.Fragment
-import android.support.v4.content.ContextCompat
+import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import hr.caellian.notestream.NoteStream
 
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Library
@@ -17,67 +21,86 @@ import hr.caellian.notestream.util.RepeatState
  * Created by tinsv on 30/06/2017.
  */
 
-abstract class FragmentPlayableMediator : Fragment(), Playable.ControlListener, Library.LibraryListener, PlayableRemote.AvailabilityListener {
-    protected var defaultTextColor: Int = 0
+abstract class FragmentPlayableMediator(val orientation: Int = LinearLayout.HORIZONTAL) : Fragment(), Playable.ControlListener, Library.LibraryListener, PlayableRemote.AvailabilityListener {
 
-    val playlist: Playlist
-        get() = Playlist.get(arguments.getString(Constants.EXTRA_PLAYLIST))
-
-    val playable: Playable?
+    var argumentPlaylist: Playlist? = null
         get() {
-            val playlist = Playlist.get(arguments.getString(Constants.EXTRA_PLAYLIST))
-            return playlist.getPlayable(arguments.getString(Constants.EXTRA_PLAYABLE))
+            if (field == null) {
+                field = Playlist.get(arguments.getString(Constants.EXTRA_PLAYLIST))
+            }
+            return field
         }
 
-    protected abstract fun updateView()
+    var argumentPlayable: Playable? = null
+        get() {
+            if (field == null) {
+                field = argumentPlaylist?.getPlayable(arguments.getString(Constants.EXTRA_PLAYABLE))
+            }
+            return field
+        }
 
-    override fun onPlayableChanged(current: Playable?) {
-        val playable = playable
-        if (current == playable) {
-            view?.findViewById<TextView>(R.id.labelSongTitle)?.setTextColor(ContextCompat.getColor(view!!.context, R.color.colorAccent))
+    lateinit var contentViewFrame: FrameLayout
+    lateinit var contentView: View
+    lateinit var loadingView: LinearLayout
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view: FrameLayout = inflater.inflate(R.layout.content_loadable, container, false) as FrameLayout
+
+        contentViewFrame = view.findViewById(R.id.contentView)
+        contentView = inflateContentView(inflater, contentViewFrame, savedInstanceState)
+        contentViewFrame.addView(contentView)
+        contentViewFrame.visibility = View.GONE
+        updateView(contentView)
+
+        loadingView = view.findViewById(R.id.loadingView)
+        loadingView.orientation = orientation
+
+        return view
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        if (argumentPlayable is PlayableRemote && (argumentPlayable as PlayableRemote?)?.available != true) {
+            NoteStream.registerAvailabilityListener(this)
         } else {
-            view?.findViewById<TextView>(R.id.labelSongTitle)?.setTextColor(defaultTextColor)
+            updateView(contentView)
         }
     }
 
-    override fun onPlayStatusChanged(playing: Boolean) {
+    protected abstract fun inflateContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View
 
-    }
+    protected abstract fun updateView(rootView: View)
 
-    override fun onShuffleStateChanged(currentState: Boolean) {
+    override fun onPlayStatusChanged(playing: Boolean) {}
+    override fun onShuffleStateChanged(currentState: Boolean) {}
+    override fun onRepeatStateChanged(currentState: RepeatState) {}
 
-    }
+    override fun onPlayableAddedToPlaylist(playable: Playable, playlist: Playlist) {
+        if (playable == argumentPlayable && playlist == argumentPlaylist) {
+            if (playable is PlayableRemote && !playable.available) {
+                return
+            }
 
-    override fun onRepeatStateChanged(currentState: RepeatState) {
-
-    }
-
-    override fun onPlayableAddedToPlaylist(argPlayable: Playable, argPlaylist: Playlist) {
-        val playlist = playlist
-        val playable = playable
-
-        if (argPlayable == playable && argPlaylist == playlist) {
-            view?.visibility = View.VISIBLE
+            updateView(contentView)
+            loadingView.visibility = View.GONE
+            contentViewFrame.visibility = View.VISIBLE
         }
     }
 
-    override fun onPlayableRemovedFromPlaylist(argPlayable: Playable, argPlaylist: Playlist) {
-        val playlist = playlist
-        val playable = playable
-
-        if (argPlayable == playable && argPlaylist == playlist) {
-            view?.visibility = View.GONE
+    override fun onPlayableRemovedFromPlaylist(playable: Playable, playlist: Playlist) {
+        if (playable == argumentPlayable && playlist == argumentPlaylist) {
+            view.visibility = View.GONE
         }
     }
 
-    override fun onAvailableStateChanged(argPlayable: PlayableRemote, state: Boolean) {
-        val playable = playable
-        if (argPlayable == playable) {
+    override fun onAvailableStateChanged(playableID: String, state: Boolean) {
+        if (playableID == argumentPlayable?.id) {
             if (state) {
-                view?.visibility = View.VISIBLE
-                updateView()
+                updateView(contentView)
+                loadingView.visibility = View.GONE
+                contentViewFrame.visibility = View.VISIBLE
             } else {
-                view?.visibility = View.GONE
+                contentViewFrame.visibility = View.GONE
+                loadingView.visibility = View.VISIBLE
             }
         }
     }

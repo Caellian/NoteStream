@@ -55,18 +55,31 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
             finish()
         }
 
-        findViewById<View>(R.id.buttonShufflePlay).setOnClickListener {
-            if (psb == null) {
-                Toast.makeText(this@ActivityPlaylist, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
-            } else if (!playlist.isEmpty) {
-                psb!!.shufflePlay(playlist)
+        findViewById<View>(R.id.buttonShufflePlay)?.also {
+            it.setOnClickListener {
+                if (psb == null) {
+                    Toast.makeText(this@ActivityPlaylist, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
+                } else if (!playlist.isEmpty) {
+                    psb!!.shufflePlay(playlist)
 
-                val intent = Intent(this@ActivityPlaylist, ActivityPlayer::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                startActivity(intent)
-            } else {
-                Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@ActivityPlaylist, ActivityPlayer::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                }
+            it.setOnLongClickListener {
+                if (psb == null) {
+                    Toast.makeText(this@ActivityPlaylist, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
+                } else if (!playlist.isEmpty) {
+                    psb!!.playNext(playlist)
+                } else {
+                    Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                }
+                true
             }
+        }
+
         }
 
         findViewById<EditText>(R.id.textFilter).addTextChangedListener(object : TextWatcher {
@@ -150,7 +163,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
         for (playable in playlist!!) {
             val fragment = FragmentItemPlayable.newInstance(playable, playlist)
             playlistItems.add(fragment)
-            ft.add(R.id.playlistContent, fragment, "playable-" + fragmentCounter++)
+            ft.add(R.id.playlistContent, fragment, "argumentPlayable-" + fragmentCounter++)
         }
         ft.commit()
     }
@@ -163,7 +176,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
             val ft = fm.beginTransaction()
             for (fragmentItemPlayable in playlistAdded) {
                 playlistItems.add(fragmentItemPlayable)
-                ft.add(R.id.playlistContent, fragmentItemPlayable, "playable-" + fragmentCounter++)
+                ft.add(R.id.playlistContent, fragmentItemPlayable, "argumentPlayable-" + fragmentCounter++)
             }
             playlistAdded.clear()
             ft.commit()
@@ -192,7 +205,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
                 val fm = fragmentManager
                 val ft = fm.beginTransaction()
                 playlistItems.add(fragment)
-                ft.add(R.id.playlistContent, fragment, "playable-" + fragmentCounter++)
+                ft.add(R.id.playlistContent, fragment, "argumentPlayable-" + fragmentCounter++)
                 ft.commit()
             } else {
                 playlistAdded.add(fragment)

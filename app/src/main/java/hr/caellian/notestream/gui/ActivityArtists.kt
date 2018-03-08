@@ -5,7 +5,7 @@ import android.widget.TextView
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Playlist
-import hr.caellian.notestream.gui.fragments.FragmentCategoryTile
+import hr.caellian.notestream.gui.fragments.FragmentPlaylistTile
 import hr.caellian.notestream.lib.Constants
 
 /**
@@ -27,11 +27,7 @@ class ActivityArtists : TableActivity() {
         var counter = 0
         var row = addTableRow()
         for (artist in NoteStream.instance?.library?.artists?.entries ?: emptyList<MutableMap.MutableEntry<String, Playlist>>()) {
-            val fragment = FragmentCategoryTile.newInstance(
-                    true,
-                    R.drawable.ic_artist,
-                    artist.key,
-                    artist.value)
+            val fragment = FragmentPlaylistTile.create(artist.value, R.drawable.ic_album, true)
             ft.add(row.id, fragment, Constants.PLAYLIST_ARTIST_PREFIX + artist.key)
             counter = ++counter % 2
             if (counter == 0) row = addTableRow()

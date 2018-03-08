@@ -59,11 +59,10 @@ class Playlist private constructor(val id: String) : Iterable<Playable>, Seriali
 
     private val timestamps = mutableMapOf<Playable, Long>()
 
-    val coverBitmaps: Array<Bitmap>
-        get() = playlist.filter { it.info.cover != PlayableInfo.DEFAULT_COVER }
+    val coverBitmaps: List<Bitmap>
+        get() = playlist.filter { it.info.cover !== PlayableInfo.DEFAULT_COVER }
                 .map { it.info.cover }
                 .subList(0, 4)
-                .toTypedArray()
 
     fun add(other: Iterable<Playable>?): Playlist {
         if (other == null) return this

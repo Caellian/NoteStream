@@ -16,7 +16,7 @@ class PlaylistOpenHelper(context: Context, internal var parent: Playlist, factor
     override fun onCreate(db: SQLiteDatabase) {
         //        String createQuery = "CREATE TABLE " + PLAYLIST_TABLE_PREFIX + parent.getId() + " (";
         //
-        //        // Store serialization data and playable metadata here:
+        //        // Store serialization data and argumentPlayable metadata here:
         //        for (Map.Entry<String, String> entry : PlayableInfo.properties.entrySet()) {
         ////            if (Objects.equals(entry.getKey(), PlayableInfo.id)) {
         ////                createQuery += entry.getKey() + " PRIMARY KEY " + entry.getValue() + ", ";
@@ -45,7 +45,7 @@ class PlaylistOpenHelper(context: Context, internal var parent: Playlist, factor
         //        String extendTableQuerry = "";
         //
         //        for (Map.Entry<String, String> entry : remaining.entrySet()) {
-        //            // Add missing registered playable metadata columns
+        //            // Add missing registered argumentPlayable metadata columns
         //            extendTableQuerry += "ALTER TABLE " + PLAYLIST_TABLE_PREFIX + parent.getId() + " ADD COLUMN " + entry.getKey() + " " + entry.getValue() + " NULL; ";
         //        }
         //

@@ -206,9 +206,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
             val old = pl
             if (playlist != null && !playlist.isEmpty) {
                 mp.stop()
-                pl.clear()
-                pl.add(playlist)
-                pl.skipTo(old.getCurrentPlayable()!!)
+                pl.clear().add(playlist).skipTo(old.getCurrentPlayable()!!)
                 pl.shuffle = true
                 pl.getCurrentPlayable()!!.prepare(mp)
 
@@ -223,9 +221,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         fun playPlaylist(playlist: Playlist?): Playlist {
             val old = pl
             if (playlist != null && !playlist.isEmpty) {
-                pl.clear()
-                pl.add(playlist)
-                pl.skipTo(playlist.getCurrentPlayable()!!)
+                pl.clear().add(playlist).skipTo(playlist.getCurrentPlayable()!!)
                 pl.getCurrentPlayable()!!.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
@@ -239,9 +235,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         fun playAt(playlist: Playlist?, playable: Playable): Playlist {
             val old = pl
             if (playlist != null) {
-                pl.clear()
-                pl.add(playlist)
-                pl.skipTo(playable)
+                pl.clear().add(playlist).skipTo(playable)
                 pl.getCurrentPlayable()!!.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
@@ -258,6 +252,11 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
         fun playNext(playable: Playable) {
             pl.addNext(playable)
+        }
+
+        fun playNext(playlist: Playlist) {
+            val current = pl.getCurrentPlayable()
+            pl.clear().add(current).add(playlist)
         }
 
         fun addToQueue(playable: Playable) {
@@ -313,8 +312,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                 if (!pl.isEmpty) {
                     currentPlayable = pl.getCurrentPlayable()
                 }
-                pl.clear()
-                pl.add(playlist)
+                pl.clear().add(playlist)
                 if (currentPlayable != null) {
                     pl.skipTo(currentPlayable)
                 } else {

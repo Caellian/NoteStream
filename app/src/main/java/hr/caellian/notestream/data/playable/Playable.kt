@@ -18,6 +18,7 @@ interface Playable : Serializable {
     val playableSource: PlayableSource
     val path: String
     val location: String
+
     var title: String
     var author: String
 
@@ -27,7 +28,7 @@ interface Playable : Serializable {
 
     interface ProgressListener {
         /**
-         * Called every second while a playable is being played.
+         * Called every second while a argumentPlayable is being played.
          * @param progress current progress in milliseconds.
          */
         fun onProgressChanged(progress: Int)
@@ -35,14 +36,14 @@ interface Playable : Serializable {
 
     interface ControlListener {
         /**
-         * Called when a new playable has been selected.
-         * @param current currently selected playable.
+         * Called when a new argumentPlayable has been selected.
+         * @param current currently selected argumentPlayable.
          */
         fun onPlayableChanged(current: Playable?)
 
         /**
          * Called on play/pause button click.
-         * @param playing `true` if playable has been started, `false` if it has been paused/stopped.
+         * @param playing `true` if argumentPlayable has been started, `false` if it has been paused/stopped.
          */
         fun onPlayStatusChanged(playing: Boolean)
 

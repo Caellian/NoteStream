@@ -1,7 +1,9 @@
 package hr.caellian.notestream.gui.fragments
 
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,32 +25,23 @@ import hr.caellian.notestream.lib.Constants
 
 class FragmentItemPlayable : FragmentPlayableMediator() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.playable_item, container, false)
-        defaultTextColor = view.findViewById<TextView>(R.id.labelSongTitle).currentTextColor
+    private var defaultTextColor: Int = 0
+
+    override fun inflateContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_playable_item, container, false)
+        defaultTextColor = view.findViewById<TextView>(R.id.labelSongTitle)?.currentTextColor ?: 0
 
         return view
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        val playable = playable
+    override fun updateView(rootView: View) {
+        val playlist = argumentPlaylist ?: return
+        val playable = argumentPlayable ?: return
 
-        if (playable is PlayableRemote && !playable.available) {
-            NoteStream.registerAvailabilityListener(this)
-            this.view.visibility = View.GONE
-        } else {
-            updateView()
-        }
-    }
+        rootView.findViewById<TextView>(R.id.labelSongTitle)?.text = playable.title
+        rootView.findViewById<TextView>(R.id.labelTileDescription)?.text = playable.author
 
-    override fun updateView() {
-        val playlist = playlist
-        val playable = playable ?: return
-
-        view?.findViewById<TextView>(R.id.labelSongTitle)?.text = playable.title
-        view?.findViewById<TextView>(R.id.labelSongAuthor)?.text = playable.author
-
-        view?.findViewById<TextView>(R.id.labelSongTitle)?.setOnClickListener(View.OnClickListener {
+        rootView.setOnClickListener(View.OnClickListener {
             if (playable is PlayableRemote && !playable.available) {
                 return@OnClickListener
             }
@@ -60,15 +53,15 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
                 psb.setPlaylist(playlist)
             }
 
-            val intent = Intent(view!!.context, ActivityPlayer::class.java)
+            val intent = Intent(rootView.context, ActivityPlayer::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             intent.putExtra(Constants.EXTRA_PLAYLIST, playlist.id)
             intent.putExtra(Constants.EXTRA_PLAYABLE, playable.id)
             startActivity(intent)
         })
 
-        view?.findViewById<Button>(R.id.buttonSongOptions)?.setOnClickListener(object : View.OnClickListener {
-            internal var playablePopupMenu = PlayablePopupMenu(view!!.context, view!!, playable)
+        rootView.findViewById<Button>(R.id.buttonSongOptions)?.setOnClickListener(object : View.OnClickListener {
+            internal var playablePopupMenu = PlayablePopupMenu(rootView.context, view!!, playable)
             override fun onClick(v: View) {
                 playablePopupMenu.show()
             }
@@ -78,19 +71,47 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
         NoteStream.registerLibraryListener(this)
     }
 
-    fun filter(filter: String): Boolean {
-        val playable = playable
-        if (playable == null) {
-            view?.visibility = View.GONE
-            return false
+    override fun onPlayableChanged(current: Playable?) {
+        if (current == argumentPlayable) {
+            view?.findViewById<TextView>(R.id.labelSongTitle)?.setTextColor(ContextCompat.getColor(view!!.context, R.color.colorAccent))
+        } else {
+            view?.findViewById<TextView>(R.id.labelSongTitle)?.setTextColor(defaultTextColor)
         }
-        if (playable.info.title?.toLowerCase()?.contains(filter.toLowerCase())?.not() == true
-                && playable.info.author?.toLowerCase()?.contains(filter.toLowerCase())?.not() == true) {
-            view?.visibility = View.GONE
-            return false
+    }
+
+    fun filter(filter: String) {
+        Filter(filter).execute(this)
+    }
+
+    class Filter(private val filter: String): AsyncTask<FragmentItemPlayable, Unit, Unit>() {
+        override fun doInBackground(vararg params: FragmentItemPlayable?) {
+            if (params[0] == null || params[0]?.argumentPlayable == null) {
+                params[0]?.view?.visibility = View.GONE
+                return
+            }
+
+            if (params[0]!!.argumentPlayable is PlayableRemote) {
+                if ((params[0]!!.argumentPlayable as PlayableRemote?)?.available == true) {
+                    params[0]?.loadingView?.visibility = View.GONE
+                    params[0]?.contentViewFrame?.visibility = View.VISIBLE
+                } else {
+                    params[0]?.contentViewFrame?.visibility = View.GONE
+                    params[0]?.loadingView?.visibility = View.VISIBLE
+                }
+                return
+            }
+
+            if (params[0]?.argumentPlayable?.info?.title?.toLowerCase()?.contains(filter.toLowerCase()) == false
+                    && params[0]?.argumentPlayable?.info?.author?.toLowerCase()?.contains(filter.toLowerCase()) == false) {
+                params[0]?.view?.visibility = View.GONE
+                return
+            }
+
+            params[0]?.loadingView?.visibility = View.GONE
+            params[0]?.contentViewFrame?.visibility = View.VISIBLE
+            params[0]?.view?.visibility = View.VISIBLE
+            return
         }
-        view?.visibility = View.VISIBLE
-        return true
     }
 
     companion object {

@@ -56,6 +56,7 @@
         android:baselineAligned="false" >
 
         <FrameLayout
+            android:id="@+id/swipeArea"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -136,7 +137,7 @@
                         android:singleLine="true" />
 
                     <TextView
-                        android:id="@+id/labelSongAuthor"
+                        android:id="@+id/labelTileDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ellipsize="marquee"

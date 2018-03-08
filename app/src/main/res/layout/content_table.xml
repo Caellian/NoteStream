@@ -41,5 +41,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        tools:layout="@layout/bar_playing" />
+        tools:layout="@layout/fragment_bar_player" />
 </LinearLayout>

@@ -48,7 +48,7 @@ class StatusBar(context: Context, packageName: String) : RemoteViews(packageName
 
     override fun onPlayableChanged(current: Playable?) {
         setTextViewText(R.id.labelSongTitle, current?.info?.title)
-        setTextViewText(R.id.labelSongAuthor, current?.info?.author)
+        setTextViewText(R.id.labelTileDescription, current?.info?.author)
     }
 
     override fun onPlayStatusChanged(playing: Boolean) {

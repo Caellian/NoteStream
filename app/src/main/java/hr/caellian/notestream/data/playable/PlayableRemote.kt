@@ -11,11 +11,11 @@ abstract class PlayableRemote : Playable {
         protected set(available) {
             field = available
             for (availabilityListener in NoteStream.AVAILABILITY_LISTENERS) {
-                availabilityListener.onAvailableStateChanged(this, available)
+                availabilityListener.onAvailableStateChanged(this.id, available)
             }
         }
 
     interface AvailabilityListener {
-        fun onAvailableStateChanged(playable: PlayableRemote, state: Boolean)
+        fun onAvailableStateChanged(playableID: String, state: Boolean)
     }
 }

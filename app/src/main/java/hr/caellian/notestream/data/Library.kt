@@ -36,7 +36,7 @@ class Library {
 
         if (pref?.contains("playlists") == false) {
             playlists.add("favoriteMusic")
-            pref.edit().putStringSet("playlist", playlists).apply()
+            pref.edit().putStringSet("argumentPlaylist", playlists).apply()
         } else {
             playlists = pref?.getStringSet("playlists", playlists) as HashSet<String>
         }
@@ -70,7 +70,7 @@ class Library {
     fun createPlaylist(id: String): Playlist {
         val created = Playlist.get(id)
         playlists.add(id)
-        pref?.edit()?.putStringSet("playlist", playlists)?.apply()
+        pref?.edit()?.putStringSet("argumentPlaylist", playlists)?.apply()
         return created
     }
 
@@ -78,7 +78,7 @@ class Library {
         val deleted = Playlist.get(id)
         deleted.clear()
         playlists.remove(id)
-        pref?.edit()?.putStringSet("playlist", playlists)?.apply()
+        pref?.edit()?.putStringSet("argumentPlaylist", playlists)?.apply()
     }
 
     fun savePlayable(playable: Playable?): Boolean {
@@ -126,9 +126,9 @@ class Library {
     }
 
     /**
-     * Called when a new playable has been added to a playlist.
-     * @param playable playable added to playlist.
-     * @param playlist affected playlist.
+     * Called when a new argumentPlayable has been added to a argumentPlaylist.
+     * @param playable argumentPlayable added to argumentPlaylist.
+     * @param playlist affected argumentPlaylist.
      */
     fun onPlayableAddedToPlaylist(playable: Playable, playlist: Playlist) {
         for (libraryListener in NoteStream.LIBRARY_LISTENERS) {
@@ -137,9 +137,9 @@ class Library {
     }
 
     /**
-     * Called when a playable has been removed from a playlist.
-     * @param playable playable removed from playlist.
-     * @param playlist affected playlist.
+     * Called when a argumentPlayable has been removed from a argumentPlaylist.
+     * @param playable argumentPlayable removed from argumentPlaylist.
+     * @param playlist affected argumentPlaylist.
      */
     fun onPlayableRemovedFromPlaylist(playable: Playable, playlist: Playlist) {
         for (libraryListener in NoteStream.LIBRARY_LISTENERS) {
@@ -149,16 +149,16 @@ class Library {
 
     interface LibraryListener {
         /**
-         * Called when a new playable has been added to a playlist.
-         * @param playable playable added to playlist.
-         * @param playlist affected playlist.
+         * Called when a new argumentPlayable has been added to a argumentPlaylist.
+         * @param playable argumentPlayable added to argumentPlaylist.
+         * @param playlist affected argumentPlaylist.
          */
         fun onPlayableAddedToPlaylist(playable: Playable, playlist: Playlist)
 
         /**
-         * Called when a playable has been removed from a playlist.
-         * @param playable playable removed from playlist.
-         * @param playlist affected playlist.
+         * Called when a argumentPlayable has been removed from a argumentPlaylist.
+         * @param playable argumentPlayable removed from argumentPlaylist.
+         * @param playlist affected argumentPlaylist.
          */
         fun onPlayableRemovedFromPlaylist(playable: Playable, playlist: Playlist)
     }

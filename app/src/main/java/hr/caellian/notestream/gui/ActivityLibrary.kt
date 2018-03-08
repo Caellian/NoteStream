@@ -142,7 +142,7 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
         val ft = fm.beginTransaction()
         val lastListened = NoteStream.instance?.library?.lastListened
         for (playable in lastListened ?: emptyList<Playable>()) {
-            val fragment = FragmentPlayableTile.newInstance(playable, lastListened!!)
+            val fragment = FragmentPlayableTile.create(lastListened!!, playable)
             playlistItems.add(fragment)
             ft.add(R.id.layoutLastListened, fragment, "tile-" + fragmentCounter++)
         }
@@ -178,12 +178,12 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
     override fun onPlayableAddedToPlaylist(playable: Playable, playlist: Playlist) {
         if (playlist == NoteStream.instance?.library?.lastListened) {
             playlistItems
-                    .map { it.playable }
+                    .map { it.argumentPlayable }
                     .filter { it != null && it == playable }
                     .forEach { return }
 
-            val fragment = FragmentPlayableTile.newInstance(playable,
-                    NoteStream.instance?.library?.lastListened!!)
+            val fragment = FragmentPlayableTile.create(NoteStream.instance?.library?.lastListened!!,
+                    playable)
 
             if (active) {
                 val fm = fragmentManager

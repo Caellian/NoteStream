@@ -47,7 +47,7 @@ class PlayablePopupMenu(internal var parentContext: Context, anchor: View, inter
         when (item.itemId) {
             R.id.add_library -> NoteStream.instance?.library?.savePlayable(playable)
             R.id.add_playlist -> {
-                // TODO: Open playlist list
+                // TODO: Open argumentPlaylist list
             }
             R.id.add_favorites -> NoteStream.instance?.library?.favoriteMusic?.add(playable)
             R.id.download -> (playable as PlayableDownloadable).download()
@@ -82,7 +82,7 @@ class PlayablePopupMenu(internal var parentContext: Context, anchor: View, inter
             }
 //            R.id.edit_tags -> {
 //                val editorIntent = Intent(parentContext, ActivityTagEdit::class.java)
-//                editorIntent.putExtra(Constants.EXTRA_PLAYABLE, playable.id)
+//                editorIntent.putExtra(Constants.EXTRA_PLAYABLE, argumentPlayable.id)
 //                parentContext.startActivity(editorIntent)
 //            }
             R.id.delete -> {
@@ -93,7 +93,7 @@ class PlayablePopupMenu(internal var parentContext: Context, anchor: View, inter
                 // TODO: Show YT suggestions
             }
         }
-        // TODO: Share playable
+        // TODO: Share argumentPlayable
         return true
     }
 }
