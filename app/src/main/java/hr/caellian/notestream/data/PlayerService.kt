@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package hr.caellian.notestream.data
 
 import android.app.Service
@@ -5,23 +22,18 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.media.session.MediaSession
-import android.os.Binder
-import android.os.Handler
-import android.os.IBinder
-import android.os.Message
-import android.os.PowerManager
+import android.os.*
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
-
-import java.util.Timer
-import java.util.TimerTask
-
-import hr.caellian.notestream.gui.NoteStreamNotification
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.data.playlist.Playlist
+import hr.caellian.notestream.data.playlist.PlaylistIterator
+import hr.caellian.notestream.gui.NoteStreamNotification
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
+import java.util.*
 
 class PlayerService : Service(), MediaPlayer.OnCompletionListener {
     internal var queueSize = 0
@@ -39,17 +51,15 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
         override fun onCallStateChanged(state: Int, incomingNumber: String) {
             when (state) {
-                TelephonyManager.CALL_STATE_RINGING -> previousState = psb?.pause()?.not() ?: false
                 TelephonyManager.CALL_STATE_IDLE -> if (previousState) psb?.play()
-                TelephonyManager.CALL_STATE_OFFHOOK -> previousState = psb?.pause()?.not() ?: false
+                else -> previousState = psb?.pause()?.not() ?: false
             }
-            super.onCallStateChanged(state, incomingNumber)
         }
     }
 
     override fun onCompletion(mediaPlayer: MediaPlayer) {
         if (repeatState != RepeatState.ONE) {
-            if (pl.getCurrentPlayable() === pl.lastPlayable && repeatState != RepeatState.ALL) {
+            if (!iterator.hasNext() && repeatState != RepeatState.ALL) {
                 psb!!.pause()
             } else {
                 psb!!.switchNext()
@@ -60,7 +70,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
     private class ProgressHandler(internal var mp: MediaPlayer) : Handler() {
 
         override fun handleMessage(msg: Message) {
-            if (mp.currentPosition > pl.getCurrentPlayable()?.info?.end ?: pl.getCurrentPlayable()?.info?.length!! && mp.currentPosition < pl.getCurrentPlayable()!!.info.end + 1000) {
+            if (mp.currentPosition > iterator.current()?.info?.end ?: iterator.current()!!.info.length && mp.currentPosition < iterator.current()!!.info.end + 1000) {
                 psb!!.switchNext()
             } else {
                 for (progressListener in NoteStream.PROGRESS_LISTENERS) {
@@ -187,7 +197,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
         val currentPlayable: Playable?
             get() = if (!pl.isEmpty) {
-                pl.getCurrentPlayable()
+                iterator.current()
             } else null
 
         var progress: Int
@@ -206,9 +216,9 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
             val old = pl
             if (playlist != null && !playlist.isEmpty) {
                 mp.stop()
-                pl.clear().add(playlist).skipTo(old.getCurrentPlayable()!!)
-                pl.shuffle = true
-                pl.getCurrentPlayable()!!.prepare(mp)
+                pl = playlist
+                iterator = PlaylistIterator.Random(pl)
+                iterator.current()!!.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onPlayableChanged(currentPlayable!!)
@@ -221,8 +231,8 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         fun playPlaylist(playlist: Playlist?): Playlist {
             val old = pl
             if (playlist != null && !playlist.isEmpty) {
-                pl.clear().add(playlist).skipTo(playlist.getCurrentPlayable()!!)
-                pl.getCurrentPlayable()!!.prepare(mp)
+                pl = playlist
+                iterator.current()?.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onPlayableChanged(currentPlayable!!)
@@ -235,8 +245,8 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         fun playAt(playlist: Playlist?, playable: Playable): Playlist {
             val old = pl
             if (playlist != null) {
-                pl.clear().add(playlist).skipTo(playable)
-                pl.getCurrentPlayable()!!.prepare(mp)
+                pl = playlist
+                iterator.switchTo(playable).current()!!.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onPlayableChanged(currentPlayable!!)
@@ -251,16 +261,20 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         }
 
         fun playNext(playable: Playable) {
-            pl.addNext(playable)
+            iterator.add(playable, iterator.current + 1)
         }
 
         fun playNext(playlist: Playlist) {
-            val current = pl.getCurrentPlayable()
-            pl.clear().add(current).add(playlist)
+            val current = iterator.current()
+            pl.clear()
+            current?.let {
+                pl.add(it)
+            }
+            pl.add(playlist)
         }
 
         fun addToQueue(playable: Playable) {
-            pl.addRelative(++queueSize, playable)
+            iterator.add(playable, iterator.current + ++queueSize)
         }
 
         fun play(): Boolean {
@@ -269,12 +283,17 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                 playing = true
                 mp.start()
 
-                NoteStream.instance?.library?.lastListened?.add(currentPlayable)
+                currentPlayable?.let {
+                    NoteStream.instance?.library?.lastListened?.add(it)
+                }
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onPlayStatusChanged(true)
                 }
-                if (!NoteStream.CONTROL_LISTENERS.contains(notification!!)) NoteStream.registerControlListener(notification!!)
+
+                notification?.let {
+                    NoteStream.registerControlListener(it)
+                }
             }
             return old
         }
@@ -308,21 +327,10 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         fun setPlaylist(playlist: Playlist?): Playlist {
             val old = pl
             if (playlist != null && !playlist.isEmpty) {
-                var currentPlayable: Playable? = null
-                if (!pl.isEmpty) {
-                    currentPlayable = pl.getCurrentPlayable()
-                }
-                pl.clear().add(playlist)
-                if (currentPlayable != null) {
-                    pl.skipTo(currentPlayable)
-                } else {
-                    currentPlayable = playlist.getCurrentPlayable() ?: playlist.firstPlayable
-                    pl.skipTo(currentPlayable)
-                    currentPlayable.prepare(mp)
-                    for (controlListener in NoteStream.CONTROL_LISTENERS) {
-                        controlListener.onPlayableChanged(currentPlayable)
-                    }
-                }
+                val currentPlayable: Playable? = iterator.current()
+
+                pl = playlist
+                iterator.switchTo(currentPlayable)
             }
             return old
         }
@@ -334,7 +342,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
             } else {
                 if (queueSize > 0) queueSize++
                 if (pl.isEmpty) return false
-                pl.switchPrevious()!!.prepare(mp)
+                iterator.switchPrevious().prepare(mp)
                 if (isPlaying) play()
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onPlayableChanged(currentPlayable!!)
@@ -346,7 +354,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         fun switchNext(): Boolean {
             if (queueSize > 0) queueSize--
             if (pl.isEmpty) return false
-            pl.switchNext()!!.prepare(mp)
+            iterator.switchNext().prepare(mp)
             if (isPlaying) play()
             for (controlListener in NoteStream.CONTROL_LISTENERS) {
                 controlListener.onPlayableChanged(currentPlayable!!)
@@ -368,9 +376,9 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
         fun setShuffle(shuffle: Boolean): Boolean {
             if (!pl.isEmpty) {
-                val old = pl.shuffle
+                val old = iterator is PlaylistIterator.Random
                 if (old != shuffle) queueSize = 0
-                pl.shuffle = shuffle
+                iterator.setRandom(shuffle)
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onShuffleStateChanged(shuffle)
                 }
@@ -380,17 +388,24 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         }
 
         fun doShuffle(): Boolean {
-            return pl.shuffle
+            return iterator is PlaylistIterator.Random
         }
     }
 
     companion object {
         // http://www.tutorialsface.com/2015/08/android-custom-notification-tutorial/
-
         const val DEFAULT_PROGRESS_CHANGE = 5000
 
         private val progressTimer = Timer()
-        internal var pl = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + "currentlyPlayed")
+
+        internal var pl = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + "currentPlaylist")
+            set(value) {
+                val index = value.playlist.indexOf(iterator.current())
+                field.clear().add(value)
+                iterator.reassign(value).switchTo(index)
+            }
+        var iterator: PlaylistIterator = PlaylistIterator.Title(pl)
+
         internal var mp = MediaPlayer()
         internal var repeatState = RepeatState.NONE
 

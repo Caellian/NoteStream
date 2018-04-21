@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package hr.caellian.notestream.data
 
 import android.database.sqlite.SQLiteException
@@ -7,38 +24,29 @@ import android.media.MediaMetadataRetriever
 import android.media.ThumbnailUtils
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
-import hr.caellian.notestream.data.playable.PlayableSource
 import hr.caellian.notestream.database.NoteStreamDB
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.Util
 import kotlin.concurrent.thread
 
+data class PlayableInfo(var parent: Playable, private val data: Map<String, Any>? = null) {
+    var title: String? = data?.get(Constants.TRACK_TITLE)?.toString()
+    var author: String? = data?.get(Constants.TRACK_AUTHOR)?.toString()
 
-/**
- * Created by caellyan on 24/06/17.
- */
+    var album: String? = data?.get(Constants.TRACK_ALBUM)?.toString()
+    var year: Int? = data?.get(Constants.TRACK_YEAR) as? Int
+    var track: Int? = data?.get(Constants.TRACK_TRACK) as? Int
+    var genre: String? = data?.get(Constants.TRACK_GENRE)?.toString()
+    var rating: Int = data?.get(Constants.TRACK_RATING) as? Int ?: 5
+    var lyrics: String? = data?.get(Constants.TRACK_LYRICS)?.toString()
 
-data class PlayableInfo(var parent: Playable) {
-    val id: String = parent.id
-    val source: PlayableSource = parent.playableSource
-    val path: String = parent.path
-
-    var title: String? = null
-    var author: String? = null
-    var album: String? = null
-    var year: Int? = null
-    var track: Int? = null
-    var genre: String? = null
-    var rating: Int = 5
-    var lyrics: String? = null
-
-    var start: Int = 0
-    var end: Int = 0
+    var start: Int = data?.get(Constants.TRACK_START) as? Int ?: 0
+    var end: Int = data?.get(Constants.TRACK_END) as? Int ?: 0
         get() {
             if (field == 0 && length != 0) field = length
             return field
         }
-    var length: Int = 0
+    var length: Int = data?.get(Constants.TRACK_LENGTH) as? Int ?: 0
     var coverPath: String = ""
         set(value) {
             if (value.isNotEmpty()) {
@@ -51,7 +59,7 @@ data class PlayableInfo(var parent: Playable) {
     private var inited = false
 
     init {
-        setFromDatabase()
+        if (data == null) setFromDatabase()
     }
 
     fun setFromDatabase(): Boolean {
@@ -61,10 +69,13 @@ data class PlayableInfo(var parent: Playable) {
                 inited = false
                 return false
             }
+
             title = data[Constants.TRACK_TITLE] as? String?
             parent.title = data[Constants.TRACK_TITLE] as? String? ?: parent.title
+
             author = data[Constants.TRACK_AUTHOR] as? String?
             parent.author = data[Constants.TRACK_AUTHOR] as? String? ?: parent.author
+
             album = data[Constants.TRACK_ALBUM] as? String?
             year = data[Constants.TRACK_YEAR] as? Int?
             track = data[Constants.TRACK_TRACK] as? Int?
@@ -75,7 +86,7 @@ data class PlayableInfo(var parent: Playable) {
             start = data[Constants.TRACK_START] as? Int? ?: start
             end = data[Constants.TRACK_END] as? Int? ?: end
             length = data[Constants.TRACK_LENGTH] as? Int? ?: length
-            (data[Constants.TRACK_COVER_PATH] as? String?)?. also { coverPath = it }
+            (data[Constants.TRACK_COVER_PATH] as? String?)?.also { coverPath = it }
             inited = true
         } catch (e: SQLiteException) {
             inited = false

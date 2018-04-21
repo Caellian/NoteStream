@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package hr.caellian.notestream.data.playable
 
 import android.Manifest
@@ -17,33 +34,23 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.PlayableInfo
 import hr.caellian.notestream.data.youtube.ThumbnailDecoder
+import hr.caellian.notestream.lib.Constants
 import java.io.IOException
-
-/**
- * Created by caellyan on 22/06/17.
- */
 
 class PlayableYouTube(val youtubeID: String,
                       override var title: String = NoteStream.instance!!.getString(R.string.unknown_title),
-                      override var author: String = NoteStream.instance!!.getString(R.string.unknown_artist)) : PlayableDownloadable() {
+                      override var author: String = NoteStream.instance!!.getString(R.string.unknown_artist),
+                      data: Map<String, Any>? = null) : PlayableDownloadable() {
 
-    override val id: String = getId(youtubeID)
+    override val id: String = data?.get(Constants.TRACK_ID)?.toString() ?: getId(youtubeID)
     override val path: String = youtubeID
 
-    private var youtubeURL: String? = null
+    private var downloadURL: String? = null
     private var extension: String? = null
 
-    override val info: PlayableInfo = PlayableInfo(this)
-        get() {
-            if (!available && !Extractor.working) {
-                Extractor(this, field).execute(youtubeID)
-            }
-
-            return field
-        }
+    override val info: PlayableInfo = PlayableInfo(this, data)
 
     override val playableSource: PlayableSource = PlayableSource.YOUTUBE
-    override val location: String = playableSource.localizedDisplayName()
 
     internal class Extractor(private val parent: PlayableYouTube, private val info: PlayableInfo) : YouTubeExtractor(NoteStream.instance) {
         companion object {
@@ -61,13 +68,17 @@ class PlayableYouTube(val youtubeID: String,
         public override fun onExtractionComplete(files: SparseArray<YtFile>?, videoMeta: VideoMeta) {
             if (files != null) {
                 val itag = 140
-                parent.youtubeURL = files.get(itag).url
+                parent.downloadURL = files.get(itag).url
                 parent.extension = files.get(itag).format.ext
                 parent.available = true
 
+                parent.title = videoMeta.title
+                parent.author = videoMeta.author
+
                 info.title = info.title ?: videoMeta.title
                 info.author = info.author ?: videoMeta.author
-                info.length = info.length
+
+                info.length = videoMeta.videoLength.toInt()
                 if (info.end != 0) {
                     info.end = info.length
                 }
@@ -84,10 +95,16 @@ class PlayableYouTube(val youtubeID: String,
         }
     }
 
+    override fun makeAvailable() {
+        if (!available && !Extractor.working) {
+            Extractor(this, info).execute(youtubeID)
+        }
+    }
+
     override fun prepare(mp: MediaPlayer): Boolean {
         mp.reset()
         try {
-            youtubeURL?.also {
+            downloadURL?.also {
                 mp.setDataSource(it)
                 mp.setAudioAttributes(AudioAttributes.Builder().setFlags(AudioAttributes.CONTENT_TYPE_MUSIC or AudioAttributes.USAGE_MEDIA).build())
                 mp.prepare()
@@ -105,37 +122,31 @@ class PlayableYouTube(val youtubeID: String,
         return true
     }
 
-    //    public ArrayList<PlayableYouTube> getSuggestions() {
-    //        ArrayList<PlayableYouTube> result = new ArrayList<>();
-    //
-    //        for (String id : YouTubeFetcher.getSuggestionsFor(youtubeID)) {
-    //            result.add(new PlayableYouTube(id));
-    //        }
-    //
-    //        return result;
-    //    }
-
-    override fun download(): Boolean {
+    override fun download(): PlayableLocal? {
         val writeExternal = NoteStream.instance?.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
         if (writeExternal != PackageManager.PERMISSION_GRANTED) {
+            //TODO: Localize
             Toast.makeText(NoteStream.instance, "Write External Storage permission not granted!", Toast.LENGTH_LONG).show()
-            return false
+            return null
         }
 
-        val uri = Uri.parse(youtubeURL)
+        val uri = Uri.parse(downloadURL)
         val request = DownloadManager.Request(uri)
-        request.setTitle("${NoteStream.instance?.getString(R.string.app_name) ?: "NoteStream"} " +
-                "${NoteStream.instance?.getString(R.string.label_download) ?: "Download"}: " +
-                (info.title ?: "<unknown>"))
+        //TODO: Localize
+        request.setTitle("${NoteStream.instance?.getString(R.string.app_name)
+                ?: "NoteStream"} ${NoteStream.instance?.getString(R.string.label_download)
+                ?: "Download"}: $title")
 
         request.allowScanningByMediaScanner()
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, info.title + "." + extension)
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, "$title.$extension")
 
         val manager = NoteStream.instance?.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
         manager?.enqueue(request)
-        return true
+
+        // TODO: Return PlayableLocal
+        return null
     }
 
     override fun equals(other: Any?): Boolean {

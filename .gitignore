@@ -1,6 +1,3 @@
-
-# Created by https://www.gitignore.io/api/java,gradle,android,androidstudio
-
 ### Android ###
 # Built application files
 *.apk
@@ -105,22 +102,8 @@ obj/
 *.iws
 /out/
 
-# User-specific configurations
-.idea/libraries/
-.idea/.name
-.idea/compiler.xml
-.idea/copyright/profiles_settings.xml
-.idea/encodings.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/scopes/scope_settings.xml
-.idea/vcs.xml
-.idea/jsLibraryMappings.xml
-.idea/datasources.xml
-.idea/dataSources.ids
-.idea/sqlDataSources.xml
-.idea/dynamic.xml
-.idea/uiDesigner.xml
+# Directory configuration
+.idea
 
 # Keystore files
 
@@ -202,4 +185,5 @@ gradle-app.setting
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 
-# End of https://www.gitignore.io/api/java,gradle,android,androidstudio
+# Linux directory color
+.directory

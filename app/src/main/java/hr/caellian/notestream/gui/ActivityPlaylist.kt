@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package hr.caellian.notestream.gui
 
 import android.content.Intent
@@ -10,21 +27,16 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-
-import java.util.ArrayList
-
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.Library
-import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
-import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.PlayerService
-import hr.caellian.notestream.data.Playlist
+import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.data.playlist.Playlist
+import hr.caellian.notestream.data.playlist.PlaylistIterator
+import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
 import hr.caellian.notestream.lib.Constants
-
-/**
- * Created by caellyan on 16/06/17.
- */
+import java.util.*
 
 class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
@@ -50,35 +62,35 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
         val playlist = Playlist.get(intent.getStringExtra(Constants.EXTRA_PLAYLIST))
         this.playlist = playlist
 
-        if (playlist == null || playlist.size() == 0) {
-            Toast.makeText(this@ActivityPlaylist, getString(R.string.invalid_playlist), Toast.LENGTH_SHORT).show()
+        if (playlist.size() == 0) {
+            Toast.makeText(this, getString(R.string.invalid_playlist), Toast.LENGTH_SHORT).show()
             finish()
         }
 
         findViewById<View>(R.id.buttonShufflePlay)?.also {
             it.setOnClickListener {
                 if (psb == null) {
-                    Toast.makeText(this@ActivityPlaylist, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
                 } else if (!playlist.isEmpty) {
                     psb!!.shufflePlay(playlist)
 
-                    val intent = Intent(this@ActivityPlaylist, ActivityPlayer::class.java)
+                    val intent = Intent(this, ActivityPlayer::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
                 }
-            it.setOnLongClickListener {
-                if (psb == null) {
-                    Toast.makeText(this@ActivityPlaylist, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
-                } else if (!playlist.isEmpty) {
-                    psb!!.playNext(playlist)
-                } else {
-                    Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                it.setOnLongClickListener {
+                    if (psb == null) {
+                        Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
+                    } else if (!playlist.isEmpty) {
+                        psb!!.playNext(playlist)
+                    } else {
+                        Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                    }
+                    true
                 }
-                true
             }
-        }
 
         }
 
@@ -105,18 +117,13 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
             popup.setOnMenuItemClickListener { item ->
                 setOrder(item.itemId)
-
-                val intent = Intent(this@ActivityPlaylist, ActivityPlaylist::class.java)
-                intent.putExtra(Constants.EXTRA_PLAYLIST, playlist)
-                startActivity(intent)
-                finish()
-                true
             }
 
             popup.show()
         }
 
-        setPlaylist(playlist)
+        this.playlist = playlist
+        setIterator(PlaylistIterator.Title(playlist))
 
         NoteStream.registerPlayerServiceListener(object : NoteStream.PlayerServiceListener() {
             override fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder) {
@@ -128,29 +135,27 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
     fun setOrder(order: Int): Boolean {
         when (order) {
             R.id.order_title -> if (previousOrder != order) {
-                setPlaylist(playlist!!.sort(Playlist.SORT_BY_TITLE, true))
+                setIterator(PlaylistIterator.Title(playlist ?: Playlist.Empty))
             } else {
-                setPlaylist(playlist!!.sort(Playlist.SORT_BY_TITLE, false))
+                setIterator(PlaylistIterator.Title(playlist ?: Playlist.Empty, false))
             }
             R.id.order_author -> if (previousOrder != order) {
-                setPlaylist(playlist!!.sort(Playlist.SORT_BY_AUTHOR, true))
+                setIterator(PlaylistIterator.Author(playlist ?: Playlist.Empty))
             } else {
-                setPlaylist(playlist!!.sort(Playlist.SORT_BY_AUTHOR, false))
+                setIterator(PlaylistIterator.Author(playlist ?: Playlist.Empty, false))
             }
             R.id.order_date -> if (previousOrder != order) {
-                setPlaylist(playlist!!.sort(Playlist.SORT_BY_DATE, true))
+                setIterator(PlaylistIterator.Time(playlist ?: Playlist.Empty))
             } else {
-                setPlaylist(playlist!!.sort(Playlist.SORT_BY_DATE, false))
+                setIterator(PlaylistIterator.Time(playlist ?: Playlist.Empty, false))
             }
-            else -> setPlaylist(playlist!!.sort(Playlist.SORT_BY_TITLE, true))
+            else -> setIterator(PlaylistIterator.Title(playlist ?: Playlist.Empty))
         }
         previousOrder = order
         return true
     }
 
-    fun setPlaylist(playlist: Playlist?) {
-        this.playlist = playlist
-
+    fun setIterator(iterator: PlaylistIterator) {
         val fm = fragmentManager
         var ft = fm.beginTransaction()
         for (playlistItem in playlistItems) {
@@ -160,10 +165,10 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
         ft = fm.beginTransaction()
         playlistItems.clear()
-        for (playable in playlist!!) {
-            val fragment = FragmentItemPlayable.newInstance(playable, playlist)
+        for (playable in iterator) {
+            val fragment = FragmentItemPlayable.newInstance(playable, playlist ?: Playlist.Empty)
             playlistItems.add(fragment)
-            ft.add(R.id.playlistContent, fragment, "argumentPlayable-" + fragmentCounter++)
+            ft.add(R.id.playlistContent, fragment, "plFragment-" + fragmentCounter++)
         }
         ft.commit()
     }

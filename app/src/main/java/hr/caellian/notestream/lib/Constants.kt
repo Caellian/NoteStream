@@ -1,8 +1,21 @@
-package hr.caellian.notestream.lib
-
-/**
- * Created by caellyan on 21/06/17.
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+package hr.caellian.notestream.lib
 
 object Constants {
     const val APP_REQUEST_CODE = 6678
@@ -13,6 +26,7 @@ object Constants {
     const val MEDIA_SESSION_TAG = "NSMediaSession"
 
     // Playlist
+    const val PLAYLIST_EMPTY_ID = "empty"
     const val PLAYLIST_TEMPORARY_PREFIX = "temporary_"
     const val PLAYLIST_FILTERED_PREFIX = "filtered_"
     const val PLAYLIST_GENRE_PREFIX = "genre_"
@@ -51,7 +65,6 @@ object Constants {
     const val PLAYLIST_AUTHOR = "PL_AUTHOR"
     const val PLAYLIST_CAPACITY = "PL_CAPACITY"
 
-    const val TRACK_PRIORITY = "PRIORITY"
     const val TRACK_TIMESTAMP = "ADDED_ON"
 
     // SQL
@@ -86,4 +99,7 @@ object Constants {
     const val EXTRA_DATA = "hr.caellian.notestream.EXTRA_DATA" // Represents all NoteStream data
     const val EXTRA_PLAYLIST = "hr.caellian.notestream.EXTRA_PLAYLIST"
     const val EXTRA_PLAYABLE = "hr.caellian.notestream.EXTRA_PLAYABLE"
+
+    // Bundle data
+    const val BUNDLE_LYRICS_VISIBLE = "hr.caellian.notestream.BUNDLE_LYRICS_VISIBLE"
 }

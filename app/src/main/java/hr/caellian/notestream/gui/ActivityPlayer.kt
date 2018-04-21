@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package hr.caellian.notestream.gui
 
 import android.os.Bundle
@@ -17,6 +34,7 @@ import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableDownloadable
 import hr.caellian.notestream.data.playable.PlayableYouTube
+import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 import hr.caellian.notestream.util.Util.timeToString
 import java.util.*
@@ -33,9 +51,13 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
     // Maybe implement smooth transition?
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(null)
         setContentView(R.layout.activity_player)
         psb = NoteStream.instance?.psb
+
+        if (savedInstanceState?.getBoolean(Constants.BUNDLE_LYRICS_VISIBLE) == true) {
+            findViewById<View>(R.id.lyricsDisplay).visibility = View.VISIBLE
+        }
 
         findViewById<TextView>(R.id.labelSongTitle).isSelected = true
         findViewById<TextView>(R.id.labelTileDescription).isSelected = true
@@ -56,25 +78,29 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             if (NoteStream.instance?.library?.isSaved(psb?.currentPlayable) == true) {
                 NoteStream.instance?.library?.removePlayable(psb?.currentPlayable)
                 saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_add)
+                psb!!.switchNext()
             } else {
                 NoteStream.instance?.library?.savePlayable(psb?.currentPlayable)
                 saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_check)
             }
         }
 
-        findViewById<SeekBar>(R.id.songProgressBar).setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+        findViewById<SeekBar>(R.id.songProgressBar).setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     psb?.progress = progress
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
 
 
-        findViewById<Button>(R.id.buttonShuffle)?.setOnClickListener { psb?.setShuffle(psb?.doShuffle() == true) }
+        findViewById<Button>(R.id.buttonShuffle)?.setOnClickListener {
+            psb!!.setShuffle(psb!!.doShuffle())
+        }
 
         val buttonPrevious = findViewById<Button>(R.id.buttonPrevious)
         val buttonNext = findViewById<Button>(R.id.buttonNext)
@@ -102,7 +128,8 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             holdTimer.scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     if (buttonNext.isPressed) {
-                        psb?.progress = Math.min(psb?.progress ?: 0 + PlayerService.DEFAULT_PROGRESS_CHANGE,
+                        psb?.progress = Math.min(psb?.progress ?: 0
+                        +PlayerService.DEFAULT_PROGRESS_CHANGE,
                                 psb?.currentPlayable?.info?.length ?: 0)
                     } else {
                         holdTimer.cancel()
@@ -117,18 +144,20 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         findViewById<Button>(R.id.buttonRepeat).setOnClickListener { psb!!.toggleRepeat() }
 
         findViewById<ImageView>(R.id.albumImage).setOnLongClickListener {
-            //                findViewById(R.id.lyricsDisplay).setVisibility(findViewById(R.id.lyricsDisplay).getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
             findViewById<View>(R.id.lyricsDisplay).visibility = View.VISIBLE
             true
         }
 
-        findViewById<View>(R.id.lyricsContainer).setOnLongClickListener {
-            findViewById<View>(R.id.lyricsDisplay).visibility = View.GONE
-            true
+
+        setOf(findViewById<View>(R.id.lyricsDisplay),
+                findViewById(R.id.lyricsContainer),
+                findViewById(R.id.textViewLyrics)).forEach {
+            it.setOnLongClickListener {
+                findViewById<View>(R.id.lyricsDisplay).visibility = View.GONE
+                true
+            }
         }
 
-        NoteStream.registerControlListener(this)
-        NoteStream.registerProgressListener(this)
         NoteStream.registerPlayerServiceListener(object : NoteStream.PlayerServiceListener() {
             override fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder) {
                 this@ActivityPlayer.psb = psb
@@ -139,6 +168,18 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
                 this@ActivityPlayer.onPlayableChanged(psb.currentPlayable!!)
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NoteStream.CONTROL_LISTENERS += this
+        NoteStream.PROGRESS_LISTENERS += this
+    }
+
+    override fun onPause() {
+        super.onPause()
+        NoteStream.CONTROL_LISTENERS -= this
+        NoteStream.PROGRESS_LISTENERS -= this
     }
 
     override fun onProgressChanged(progress: Int) {
@@ -157,7 +198,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         (findViewById<TextView>(R.id.textViewLyrics)).text = lyrics
 
         findViewById<View>(R.id.lyricsDisplay).visibility = View.GONE
-        (findViewById<TextView>(R.id.labelSource)).text = current.location
+        (findViewById<TextView>(R.id.labelSource)).text = current.playableSource.localizedDisplayName()
 
         if (current is PlayableDownloadable) {
             findViewById<Button>(R.id.buttonDownload).visibility = View.VISIBLE
@@ -200,6 +241,14 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         length.text = timeToString(metadata.length)
     }
 
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.run {
+            putBoolean(Constants.BUNDLE_LYRICS_VISIBLE, findViewById<View>(R.id.lyricsDisplay).visibility == View.VISIBLE)
+        }
+
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onPlayStatusChanged(playing: Boolean) {
         if (!playing) {
             (findViewById<Button>(R.id.buttonTogglePlay)).background = ContextCompat.getDrawable(this, R.drawable.ic_play_circle)
@@ -217,16 +266,10 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
     }
 
     override fun onRepeatStateChanged(currentState: RepeatState) {
-        when (currentState) {
-            RepeatState.NONE -> (findViewById<Button>(R.id.buttonRepeat)).background = ContextCompat.getDrawable(this, R.drawable.ic_repeat)
-            RepeatState.ALL -> (findViewById<Button>(R.id.buttonRepeat)).background = ContextCompat.getDrawable(this, R.drawable.ic_repeat_on)
-            RepeatState.ONE -> (findViewById<Button>(R.id.buttonRepeat)).background = ContextCompat.getDrawable(this, R.drawable.ic_repeat_one)
-        }
+        (findViewById<Button>(R.id.buttonRepeat)).background = currentState.getDrawable(this)
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-
         val drawer = findViewById<DrawerLayout>(R.id.player_layout)
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END)

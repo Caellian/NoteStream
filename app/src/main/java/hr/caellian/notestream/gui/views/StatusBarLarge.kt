@@ -1,20 +1,32 @@
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package hr.caellian.notestream.gui.views
 
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.gui.ActivityPlayer
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
-
-/**
- * Created by caellyan on 24/06/17.
- */
 
 class StatusBarLarge(context: Context, packageName: String) : RemoteViews(packageName, R.layout.status_bar_expanded), Playable.ControlListener {
 
@@ -78,10 +90,6 @@ class StatusBarLarge(context: Context, packageName: String) : RemoteViews(packag
     }
 
     override fun onRepeatStateChanged(currentState: RepeatState) {
-        when (currentState) {
-            RepeatState.NONE -> setInt(R.id.buttonRepeat, "setBackgroundResource", R.drawable.ic_repeat)
-            RepeatState.ALL -> setInt(R.id.buttonRepeat, "setBackgroundResource", R.drawable.ic_repeat_on)
-            RepeatState.ONE -> setInt(R.id.buttonRepeat, "setBackgroundResource", R.drawable.ic_repeat_one)
-        }
+        setInt(R.id.buttonRepeat, "setBackgroundResource", currentState.drawable)
     }
 }

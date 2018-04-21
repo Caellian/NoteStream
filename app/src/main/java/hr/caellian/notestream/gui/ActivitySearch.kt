@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2018 Tin Svagelj
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package hr.caellian.notestream.gui
 
 import android.os.Bundle
@@ -8,13 +25,10 @@ import android.view.View
 import android.widget.EditText
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.Playlist
+import hr.caellian.notestream.data.playlist.Playlist
+import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
 import java.util.*
-
-/**
- * Created by caellyan on 25/06/17.
- */
 
 class ActivitySearch : NavigationActivity() {
     internal var showingResults = false
@@ -46,7 +60,8 @@ class ActivitySearch : NavigationActivity() {
                 val searched = charSequence.toString()
 
                 resultsPlaylist.clear()
-                resultsPlaylist.add(NoteStream.instance?.library?.localMusic?.filtered(searched))
+                resultsPlaylist.add(NoteStream.instance?.library?.localMusic?.filtered(searched)
+                        ?: Playlist.Empty)
 
 //                object : AsyncTask<Void, Void, Void>() {
 //                    override fun doInBackground(params: Array<Void>): Void? {
@@ -75,7 +90,7 @@ class ActivitySearch : NavigationActivity() {
 
         ft = fm.beginTransaction()
         searchItems.clear()
-        for (playable in resultsPlaylist) {
+        for (playable in PlaylistIterator(resultsPlaylist)) {
             val fragment = FragmentItemPlayable.newInstance(playable, resultsPlaylist)
             searchItems.add(fragment)
             ft.add(R.id.foundContent, fragment, "argumentPlayable-" + fragmentCounter++)
