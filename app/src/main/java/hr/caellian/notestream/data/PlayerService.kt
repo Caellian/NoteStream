@@ -30,7 +30,7 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playlist.Playlist
 import hr.caellian.notestream.data.playlist.PlaylistIterator
-import hr.caellian.notestream.gui.NoteStreamNotification
+import hr.caellian.notestream.gui.Notification
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 import java.util.*
@@ -42,7 +42,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
     internal var playing: Boolean = false
 
-    internal var notification: NoteStreamNotification? = null
+    internal var notification: Notification? = null
 
     internal var progressHandler: Handler? = null
 
@@ -119,7 +119,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                         }
                     }, 1000, 1000)
 
-                    notification = NoteStreamNotification(this, this)
+                    notification = Notification(this, this)
                 }
                 else -> {
                     mp.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
@@ -137,7 +137,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                             }
                         }
                     }, 1000, 1000)
-                    notification = NoteStreamNotification(this, this)
+                    notification = Notification(this, this)
                 }
             }
         }
@@ -196,9 +196,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         var repeatState: RepeatState = RepeatState.NONE
 
         val currentPlayable: Playable?
-            get() = if (!pl.isEmpty) {
-                iterator.current()
-            } else null
+            get() = iterator.current()
 
         var progress: Int
             get() = mp.currentPosition
@@ -345,7 +343,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                 iterator.switchPrevious().prepare(mp)
                 if (isPlaying) play()
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
-                    controlListener.onPlayableChanged(currentPlayable!!)
+                    controlListener.onPlayableChanged(currentPlayable)
                 }
                 return true
             }
@@ -357,7 +355,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
             iterator.switchNext().prepare(mp)
             if (isPlaying) play()
             for (controlListener in NoteStream.CONTROL_LISTENERS) {
-                controlListener.onPlayableChanged(currentPlayable!!)
+                controlListener.onPlayableChanged(currentPlayable)
             }
             return true
         }

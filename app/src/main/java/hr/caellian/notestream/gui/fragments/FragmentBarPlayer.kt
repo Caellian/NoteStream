@@ -50,14 +50,14 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
         val buttonPrevious = view.findViewById<Button>(R.id.buttonPrevious)
         val buttonNext = view.findViewById<Button>(R.id.buttonNext)
 
-        buttonPrevious.setOnClickListener { psb!!.switchPrevious() }
+        buttonPrevious.setOnClickListener { psb?.switchPrevious() }
 
         buttonPrevious.setOnLongClickListener {
             val holdTimer = Timer()
             holdTimer.scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     if (buttonPrevious.isPressed) {
-                        psb!!.progress = Math.max(psb!!.progress - 5000, 0)
+                        psb?.progress = Math.max(psb!!.progress - 5000, 0)
                     } else {
                         holdTimer.cancel()
                     }
@@ -66,7 +66,7 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
             true
         }
 
-        buttonNext.setOnClickListener { psb!!.switchNext() }
+        buttonNext.setOnClickListener { psb?.switchNext() }
 
         buttonNext.setOnLongClickListener {
             val holdTimer = Timer()
@@ -83,9 +83,9 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
             true
         }
 
-        view.findViewById<Button>(R.id.buttonTogglePlay).setOnClickListener { psb!!.togglePlay() }
+        view.findViewById<Button>(R.id.buttonTogglePlay).setOnClickListener { psb?.togglePlay() }
 
-        if (psb == null || psb!!.isEmpty) {
+        if (psb?.isEmpty != true || psb?.isPlaying != true) {
             view.visibility = View.GONE
         }
 
@@ -94,9 +94,9 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
         NoteStream.registerPlayerServiceListener(object : NoteStream.PlayerServiceListener() {
             override fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder) {
                 this@FragmentBarPlayer.psb = psb
-                if (!psb.isEmpty && psb.currentPlayable != null) {
+                if (!psb.isEmpty && psb.isPlaying) {
                     this@FragmentBarPlayer.onProgressChanged(psb.progress)
-                    this@FragmentBarPlayer.onPlayableChanged(psb.currentPlayable!!)
+                    this@FragmentBarPlayer.onPlayableChanged(psb.currentPlayable)
                     this@FragmentBarPlayer.onPlayStatusChanged(psb.isPlaying)
                     view.visibility = View.VISIBLE
                 }
@@ -127,8 +127,8 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
 
     override fun onPlayableChanged(current: Playable?) {
         view?.findViewById<TextView>(R.id.labelSongTitle)?.text = current?.title
-        view?.findViewById<TextView>(R.id.labelTileDescription)?.text = current?.author
-        view?.findViewById<ProgressBar>(R.id.songProgressBar)?.max = current?.info?.length!!
+        view?.findViewById<TextView>(R.id.labelSongAuthor)?.text = current?.author
+        view?.findViewById<ProgressBar>(R.id.songProgressBar)?.max = current?.info?.length ?: 0
         onProgressChanged(0)
         view?.visibility = View.VISIBLE
     }

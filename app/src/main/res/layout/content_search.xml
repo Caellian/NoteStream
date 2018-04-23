@@ -29,7 +29,7 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/exitTextSearch"
+            android:id="@+id/textEditSearch"
             style="@style/Widget.AppCompat.AutoCompleteTextView"
             android:layout_width="0dp"
             android:layout_height="50dp"

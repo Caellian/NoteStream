@@ -133,16 +133,16 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
     }
 
     private fun showRequiredPermissionsDialogue() {
-        val dialog = DialogCancelOk(this@ActivityLibrary,
+        val dialog = DialogCancelOk(this,
                 getString(R.string.title_permissions_mandatory),
                 getString(R.string.mandatory_permissions_explanation),
-                View.OnClickListener { this@ActivityLibrary.finish() },
+                View.OnClickListener { this.finish() },
                 View.OnClickListener {
-                    val myAppSettings = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName))
+                    val myAppSettings = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
                     myAppSettings.addCategory(Intent.CATEGORY_DEFAULT)
                     myAppSettings.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     startActivityForResult(myAppSettings, Constants.APP_REQUEST_CODE)
-                    this@ActivityLibrary.finish()
+                    this.finish()
                 })
 
         dialog.setCancelable(false)

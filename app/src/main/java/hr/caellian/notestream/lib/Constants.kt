@@ -28,7 +28,6 @@ object Constants {
     // Playlist
     const val PLAYLIST_EMPTY_ID = "empty"
     const val PLAYLIST_TEMPORARY_PREFIX = "temporary_"
-    const val PLAYLIST_FILTERED_PREFIX = "filtered_"
     const val PLAYLIST_GENRE_PREFIX = "genre_"
     const val PLAYLIST_ARTIST_PREFIX = "author_"
     const val PLAYLIST_ALBUM_PREFIX = "album_"

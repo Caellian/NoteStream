@@ -98,7 +98,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
     override fun onCreate(db: SQLiteDatabase) {
         createPlayablesTable(db)
         createPlaylistInfoTable(db)
-        db.close()
+//        db.close()
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -129,17 +129,19 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
         }
 
         val columns = arrayOf(TRACK_ID, TRACK_TIMESTAMP)
-        writableDatabase.query("$DB_PLAYLIST_PREFIX${pl.id}", columns, null, null, null, null, null)?.let { c ->
-            if (c.count > 0) {
-                val itId = c.getString(0)
-                if (!list.map { it.id }.contains(itId)) {
-                    getPlayable(itId)?.apply {
-                        pl.add(this)
+        (writableDatabase.query("$DB_PLAYLIST_PREFIX${pl.id}", columns, null, null, null, null, null))
+                ?.also { c ->
+                    c.moveToFirst()
+                    if (c.count > 0) {
+                        val itId = c.getString(0)
+                        if (!list.map { it.id }.contains(itId)) {
+                            getPlayable(itId)?.apply {
+                                pl.add(this)
+                            }
+                        }
                     }
+                    c.close()
                 }
-            }
-            c.close()
-        }
 
         writableDatabase.execSQL(statement)
 
@@ -148,7 +150,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                 "(\"$id\", \"$author\", \"$label\", $capacity);"
 
         writableDatabase.execSQL(statement)
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 
     fun updatePlaylist(pl: Playlist, close: Boolean = true) {
@@ -157,7 +159,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                 "(\"${pl.id}\", \"${pl.author}\", \"${pl.label}\", ${pl.capacity});"
 
         writableDatabase.execSQL(statement)
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 
     fun getPlayable(id: String, close: Boolean = true): Playable? {
@@ -190,28 +192,28 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
 
         try {
             readableDatabase.query(Constants.DB_PLAYABLES_ID, columns, "$TRACK_ID=?", arrayOf(id), null, null, null)
-                    ?.also {
-                        it.moveToFirst()
-                        result[TRACK_ID] = it.getString(0)
-                        result[TRACK_SOURCE] = it.getString(1)
-                        result[TRACK_PATH] = it.getString(2)
+                    ?.also {c ->
+                        c.moveToFirst()
+                        result[TRACK_ID] = c.getString(0)
+                        result[TRACK_SOURCE] = c.getString(1)
+                        result[TRACK_PATH] = c.getString(2)
 
-                        result[TRACK_TITLE] = it.getString(3)
-                        result[TRACK_AUTHOR] = it.getString(4)
-                        result[TRACK_ALBUM] = it.getString(5)
-                        result[TRACK_YEAR] = it.getInt(6)
-                        result[TRACK_TRACK] = it.getInt(7)
-                        result[TRACK_GENRE] = it.getString(8)
-                        result[TRACK_RATING] = it.getInt(9)
-                        result[TRACK_LYRICS] = it.getString(10)
+                        result[TRACK_TITLE] = c.getString(3)
+                        result[TRACK_AUTHOR] = c.getString(4)
+                        result[TRACK_ALBUM] = c.getString(5)
+                        result[TRACK_YEAR] = c.getInt(6)
+                        result[TRACK_TRACK] = c.getInt(7)
+                        result[TRACK_GENRE] = c.getString(8)
+                        result[TRACK_RATING] = c.getInt(9)
+                        result[TRACK_LYRICS] = c.getString(10)
 
-                        result[TRACK_START] = it.getInt(11)
-                        result[TRACK_END] = it.getInt(12)
-                        result[TRACK_LENGTH] = it.getInt(13)
-                        result[TRACK_COVER_PATH] = it.getString(14)
-                        it.close()
+                        result[TRACK_START] = c.getInt(11)
+                        result[TRACK_END] = c.getInt(12)
+                        result[TRACK_LENGTH] = c.getInt(13)
+                        result[TRACK_COVER_PATH] = c.getString(14)
+                        c.close()
                     }
-            if (close) writableDatabase.close()
+//            if (close) writableDatabase.close()
         } catch (e: CursorIndexOutOfBoundsException) {
             Log.e("Database", "CursorIndexOutOfBoundsException for '$id'.")
         }
@@ -234,7 +236,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
 
         try {
             writableDatabase.execSQL(statement)
-            if (close) writableDatabase.close()
+//            if (close) writableDatabase.close()
         } catch (e: SQLiteException) {
             Log.w("Database", "Unable execute SQL statement: $statement")
         }
@@ -248,21 +250,21 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
             removeFromPlaylist(p, it, false)
         }
 
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 
     fun removeFromPlaylist(p: Playable, playlist: String, close: Boolean = true) {
         val statement = "DELETE FROM $DB_PLAYLIST_PREFIX$playlist WHERE $TRACK_ID = \"${p.id}\";"
 
         writableDatabase.execSQL(statement)
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 
     fun removeFromPlaylist(p: Playable, from: Playlist, close: Boolean = true) {
         val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${from.id} WHERE $TRACK_ID = \"${p.id}\";"
 
         writableDatabase.execSQL(statement)
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 
     fun removePlaylist(pl: Playlist, close: Boolean = true) {
@@ -272,7 +274,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
         statement = "DELETE FROM $DB_PLAYLIST_INFO_ID WHERE $PLAYLIST_ID = \"${pl.id}\";"
         writableDatabase.execSQL(statement)
 
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 
     fun addToPlaylist(p: Playable, to: Playlist, close: Boolean = true) {
@@ -283,13 +285,13 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                 "(\"${p.id}\", ${System.currentTimeMillis()});"
 
         writableDatabase.execSQL(statement)
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 
     fun clearPlaylist(pl: Playlist, close: Boolean = true) {
         val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${PlayerService.pl.id};"
 
         writableDatabase.execSQL(statement)
-        if (close) writableDatabase.close()
+//        if (close) writableDatabase.close()
     }
 }

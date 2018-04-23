@@ -51,7 +51,7 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
         val playable = argumentPlayable ?: return
 
         rootView.findViewById<TextView>(R.id.labelSongTitle)?.text = playable.title
-        rootView.findViewById<TextView>(R.id.labelTileDescription)?.text = playable.author
+        rootView.findViewById<TextView>(R.id.labelSongAuthor)?.text = playable.author
 
         rootView.setOnClickListener(View.OnClickListener {
             if (playable is PlayableRemote && !playable.available) {

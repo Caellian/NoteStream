@@ -17,13 +17,14 @@
 
 package hr.caellian.notestream.gui
 
+import android.app.*
 import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.os.Build
+import android.support.annotation.RequiresApi
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
@@ -32,11 +33,7 @@ import hr.caellian.notestream.gui.views.StatusBarLarge
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 
-/**
- * Created by caellyan on 24/06/17.
- */
-
-class NoteStreamNotification(internal var context: Context, internal var parentService: Service) : Playable.ControlListener {
+class Notification(internal var context: Context, internal var parentService: Service) : Playable.ControlListener {
 
     var notification: Notification? = null
         private set
@@ -51,6 +48,12 @@ class NoteStreamNotification(internal var context: Context, internal var parentS
     internal var builder: Notification.Builder
 
     init {
+        val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel()
+        } else {
+            "notestream_service"
+        }
+
         val packageName = context.packageName
         this.nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -60,7 +63,12 @@ class NoteStreamNotification(internal var context: Context, internal var parentS
         val nsIntent = Intent(context, ActivityLibrary::class.java)
         pendingIntent = PendingIntent.getActivity(context, Constants.APP_NOTIFICATION_ID, nsIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        builder = Notification.Builder(context)
+        builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(context, channelId)
+        } else {
+            Notification.Builder(context)
+        }
+
         builder.setContentTitle(context.getString(R.string.app_name))
 
         builder.setCustomContentView(statusBar)
@@ -73,7 +81,19 @@ class NoteStreamNotification(internal var context: Context, internal var parentS
         NoteStream.registerControlListener(this)
     }
 
-    fun rebuild(): NoteStreamNotification {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel(): String {
+        val channelId = "notestream_service"
+        val channelName = "NoteStream Service"
+        val channel = NotificationChannel (channelId, channelName, NotificationManager.IMPORTANCE_NONE)
+        channel.lightColor = Color.BLUE
+        channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        val service = NoteStream.instance?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        service.createNotificationChannel(channel)
+        return channelId
+    }
+
+    fun rebuild(): hr.caellian.notestream.gui.Notification {
         notification = builder.build()
         parentService.startForeground(Constants.APP_NOTIFICATION_ID, notification)
         return this

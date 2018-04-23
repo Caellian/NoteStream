@@ -123,7 +123,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/labelTileDescription"
+            android:id="@+id/labelSongAuthor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.15"

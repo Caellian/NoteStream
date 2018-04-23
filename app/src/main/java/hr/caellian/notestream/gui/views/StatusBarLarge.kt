@@ -70,7 +70,7 @@ class StatusBarLarge(context: Context, packageName: String) : RemoteViews(packag
     override fun onPlayableChanged(current: Playable?) {
         setImageViewBitmap(R.id.albumImage, current?.info?.cover)
         setTextViewText(R.id.labelSongTitle, current?.info?.title)
-        setTextViewText(R.id.labelTileDescription, current?.info?.author)
+        setTextViewText(R.id.labelSongAuthor, current?.info?.author)
     }
 
     override fun onPlayStatusChanged(playing: Boolean) {

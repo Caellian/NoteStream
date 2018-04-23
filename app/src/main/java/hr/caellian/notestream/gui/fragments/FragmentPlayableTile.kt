@@ -54,7 +54,7 @@ class FragmentPlayableTile : FragmentPlayableMediator(LinearLayout.VERTICAL) {
 
         rootView.findViewById<ImageView>(R.id.imageTileBackground)?.setImageBitmap(playable.info.cover)
         rootView.findViewById<TextView>(R.id.labelTileTitle)?.text = playable.title
-        rootView.findViewById<TextView>(R.id.labelTileDescription)?.text = playable.author
+        rootView.findViewById<TextView>(R.id.labelSongAuthor)?.text = playable.author
 
         rootView.setOnClickListener(View.OnClickListener {
             if (playable is PlayableRemote && !playable.available) {

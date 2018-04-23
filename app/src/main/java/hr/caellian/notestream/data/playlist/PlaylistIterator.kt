@@ -94,7 +94,7 @@ open class PlaylistIterator(protected var source: Playlist, var ascending: Boole
     }
 
     fun switchPrevious(): Playable {
-        return if (ascending) source.playlist[ordered[--current]] else source.playlist[ordered[++current]]
+        return if (ascending) source.playlist[ordered[(--current).takeUnless{it < 0}?:ordered.lastIndex]] else source.playlist[ordered[(++current).rem(ordered.size)]]
     }
 
     fun hasPrevious(): Boolean {
@@ -102,11 +102,15 @@ open class PlaylistIterator(protected var source: Playlist, var ascending: Boole
     }
 
     fun current(): Playable? {
-        return source.playlist[ordered[current]]
+        return try {
+            source.playlist[ordered[current]]
+        } catch (e: IndexOutOfBoundsException) {
+            null
+        }
     }
 
     fun switchNext(): Playable {
-        return if (ascending) source.playlist[ordered[++current]] else source.playlist[ordered[--current]]
+        return if (ascending) source.playlist[ordered[(++current).rem(ordered.size)]] else source.playlist[ordered[(--current).takeUnless{it < 0}?:ordered.lastIndex]]
     }
 
     override fun hasNext(): Boolean {

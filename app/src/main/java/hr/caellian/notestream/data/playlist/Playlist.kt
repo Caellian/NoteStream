@@ -75,7 +75,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
             NoteStreamDB.addToPlaylist(playable, this, false)
             NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
         }
-        NoteStreamDB.writableDatabase.close()
+//        NoteStreamDB.writableDatabase.close()
 
         trimToCapacity()
         return this
@@ -108,7 +108,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
             NoteStreamDB.removeFromPlaylist(playable, this, false)
             NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playable, this)
         }
-        NoteStreamDB.writableDatabase.close()
+//        NoteStreamDB.writableDatabase.close()
 
         playlist.clear()
         timestamps.clear()
@@ -135,15 +135,12 @@ class Playlist private constructor(val id: String, author: String = "", label: S
         }
     }
 
-    fun filtered(filter: String): Playlist {
-        val result = Playlist(Constants.PLAYLIST_TEMPORARY_PREFIX + Constants.PLAYLIST_FILTERED_PREFIX + id)
-        result.clear()
-
+    fun filtered(filter: String): MutableList<Playable> {
+        val result = mutableListOf<Playable>()
         for (playable in playlist) {
             if (playable.info.title?.toLowerCase()?.contains(filter.toLowerCase()) == true) result.add(playable)
             if (playable.info.author?.toLowerCase()?.contains(filter.toLowerCase()) == true) result.add(playable)
         }
-
         return result
     }
 
@@ -161,9 +158,9 @@ class Playlist private constructor(val id: String, author: String = "", label: S
     companion object {
         private val Initialized = HashMap<String, Playlist>()
 
-        val Empty = get(Constants.PLAYLIST_EMPTY_ID, capacity = 0)
+        val Empty = Playlist(Constants.PLAYLIST_EMPTY_ID, capacity = 0)
 
-        fun get(id: String, author: String = "", label: String = "", capacity: Int = 512, data: List<Playable> = emptyList()): Playlist {
+        fun get(id: String, author: String = "", label: String = "", capacity: Int = 512, data: List<Playable> = mutableListOf()): Playlist {
             return when {
                 id == Constants.PLAYLIST_EMPTY_ID -> Empty
                 Initialized.containsKey(id) -> Initialized[id]!!

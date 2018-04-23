@@ -66,7 +66,7 @@ abstract class FragmentTile : Fragment() {
         }
 
         view.findViewById<TextView>(R.id.labelTileTitle)?.text = label
-        view.findViewById<TextView>(R.id.labelTileDescription)?.text = labelDescription
+        view.findViewById<TextView>(R.id.labelSongAuthor)?.text = labelDescription
 
         view.setOnClickListener {
             onClickListener(data)
