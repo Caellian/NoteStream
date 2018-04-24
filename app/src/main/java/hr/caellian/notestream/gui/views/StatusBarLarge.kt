@@ -54,7 +54,7 @@ class StatusBarLarge(context: Context, packageName: String) : RemoteViews(packag
         serviceIntent = Intent(context, PlayerService::class.java)
         serviceIntent.action = Constants.ACTION_TOGGLE_SHUFFLE
         servicePending = PendingIntent.getService(context, Constants.APP_REQUEST_CODE, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        setOnClickPendingIntent(R.id.buttonShuffle, servicePending)
+        setOnClickPendingIntent(R.id.buttonShuffleStatusBar, servicePending)
 
         serviceIntent = Intent(context, PlayerService::class.java)
         serviceIntent.action = Constants.ACTION_TOGGLE_REPEAT
@@ -83,9 +83,9 @@ class StatusBarLarge(context: Context, packageName: String) : RemoteViews(packag
 
     override fun onShuffleStateChanged(currentState: Boolean) {
         if (currentState) {
-            setInt(R.id.buttonShuffle, "setBackgroundResource", R.drawable.ic_shuffle_on)
+            setInt(R.id.buttonShuffleStatusBar, "setBackgroundResource", R.drawable.ic_shuffle_on)
         } else {
-            setInt(R.id.buttonShuffle, "setBackgroundResource", R.drawable.ic_shuffle)
+            setInt(R.id.buttonShuffleStatusBar, "setBackgroundResource", R.drawable.ic_shuffle)
         }
     }
 

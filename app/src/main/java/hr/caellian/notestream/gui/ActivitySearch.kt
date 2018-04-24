@@ -55,7 +55,7 @@ class ActivitySearch : NavigationActivity() {
             refreshSearchResults()
         }
 
-        (findViewById<View>(R.id.textEditSearch) as? EditText)?.addTextChangedListener(object : TextWatcher {
+        findViewById<EditText>(R.id.textEditSearch)?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
@@ -72,13 +72,13 @@ class ActivitySearch : NavigationActivity() {
     }
 
     fun refreshSearchResults() {
-        (findViewById<View>(R.id.foundContent) as? LinearLayout)?.removeAllViewsInLayout()
+        findViewById<LinearLayout>(R.id.foundContent)?.removeAllViewsInLayout()
+        searchItems.clear()
 
         val fm = fragmentManager
         val ft = fm.beginTransaction()
-        searchItems.clear()
         for (playable in resultList) {
-            val fragment = FragmentItemPlayable.newInstance(playable, Playlist.Empty)
+            val fragment = FragmentItemPlayable.newInstance(playable, PlaylistIterator(resultList))
             searchItems.add(fragment)
             ft.add(R.id.foundContent, fragment, "resultFragment-" + fragmentCounter++)
         }

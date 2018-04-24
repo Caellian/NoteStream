@@ -72,7 +72,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
             playlist.add(playable)
 
             timestamps[playable] = System.currentTimeMillis()
-            NoteStreamDB.addToPlaylist(playable, this, false)
+            NoteStreamDB.addToPlaylist(playable, this)
             NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
         }
 //        NoteStreamDB.writableDatabase.close()
@@ -105,7 +105,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
 
     fun clear(): Playlist {
         for (playable in playlist) {
-            NoteStreamDB.removeFromPlaylist(playable, this, false)
+            NoteStreamDB.removeFromPlaylist(playable, this)
             NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playable, this)
         }
 //        NoteStreamDB.writableDatabase.close()

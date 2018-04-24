@@ -86,7 +86,7 @@
                 android:layout_weight="1">
 
                 <Button
-                    android:id="@+id/buttonShuffle"
+                    android:id="@+id/buttonShuffleStatusBar"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:background="@drawable/ic_shuffle"

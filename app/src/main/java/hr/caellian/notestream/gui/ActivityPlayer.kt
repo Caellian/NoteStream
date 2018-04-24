@@ -22,7 +22,6 @@ import android.support.design.widget.NavigationView
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
-import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -33,7 +32,6 @@ import hr.caellian.notestream.R
 import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableDownloadable
-import hr.caellian.notestream.data.playable.PlayableYouTube
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 import hr.caellian.notestream.util.Util.timeToString
@@ -42,7 +40,6 @@ import java.util.*
 class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSelectedListener, Playable.ControlListener, Playable.ProgressListener {
 
     internal var psb: PlayerService.PlayerServiceBinder? = null
-    internal var suggestionsView: NavigationView? = null
 
     override val drawerLayout: DrawerLayout?
         get() = findViewById(R.id.player_layout)
@@ -64,8 +61,6 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
 
         navigationView = findViewById(R.id.nav_view)
         navigationView?.setNavigationItemSelectedListener(this)
-        suggestionsView = findViewById(R.id.suggestions_view)
-        suggestionsView?.setNavigationItemSelectedListener(this)
 
         findViewById<Button>(R.id.buttonDownload).setOnClickListener {
             if (psb?.currentPlayable is PlayableDownloadable?) {
@@ -99,7 +94,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
 
 
         findViewById<Button>(R.id.buttonShuffle)?.setOnClickListener {
-            psb?.setShuffle(psb!!.doShuffle())
+            psb?.setShuffle(!psb!!.doShuffle())
         }
 
         val buttonPrevious = findViewById<Button>(R.id.buttonPrevious)
@@ -165,7 +160,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
                 this@ActivityPlayer.onShuffleStateChanged(psb.doShuffle())
                 this@ActivityPlayer.onPlayStatusChanged(psb.isPlaying)
                 this@ActivityPlayer.onRepeatStateChanged(psb.repeatState)
-                this@ActivityPlayer.onPlayableChanged(psb.currentPlayable!!)
+                this@ActivityPlayer.onPlayableChanged(psb.currentPlayable)
             }
         })
     }
@@ -204,12 +199,6 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             findViewById<Button>(R.id.buttonDownload).visibility = View.VISIBLE
         } else {
             findViewById<Button>(R.id.buttonDownload).visibility = View.INVISIBLE
-        }
-
-        if (current is PlayableYouTube) {
-            suggestionsView?.visibility = View.VISIBLE
-        } else {
-            suggestionsView?.visibility = View.GONE
         }
 
         val saveButton = findViewById<Button>(R.id.buttonLibraryAdd)
@@ -251,22 +240,22 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
 
     override fun onPlayStatusChanged(playing: Boolean) {
         if (!playing) {
-            (findViewById<Button>(R.id.buttonTogglePlay)).background = ContextCompat.getDrawable(this, R.drawable.ic_play_circle)
+            findViewById<Button>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this, R.drawable.ic_play_circle)
         } else {
-            (findViewById<Button>(R.id.buttonTogglePlay)).background = ContextCompat.getDrawable(this, R.drawable.ic_pause_circle)
+            findViewById<Button>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this, R.drawable.ic_pause_circle)
         }
     }
 
     override fun onShuffleStateChanged(currentState: Boolean) {
         if (currentState) {
-            (findViewById<Button>(R.id.buttonShuffle)).background = ContextCompat.getDrawable(this, R.drawable.ic_shuffle_on)
+            findViewById<Button>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this, R.drawable.ic_shuffle_on)
         } else {
-            (findViewById<Button>(R.id.buttonShuffle)).background = ContextCompat.getDrawable(this, R.drawable.ic_shuffle)
+            findViewById<Button>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this, R.drawable.ic_shuffle)
         }
     }
 
     override fun onRepeatStateChanged(currentState: RepeatState) {
-        (findViewById<Button>(R.id.buttonRepeat)).background = currentState.getDrawable(this)
+        findViewById<Button>(R.id.buttonRepeat)?.background = currentState.getDrawable(this)
     }
 
     override fun onBackPressed() {
@@ -276,13 +265,5 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         } else {
             super.onBackPressed()
         }
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        super.onNavigationItemSelected(item)
-        // TODO: Suggestions for online content.
-
-        drawerLayout!!.closeDrawer(GravityCompat.END)
-        return false
     }
 }

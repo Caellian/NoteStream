@@ -97,7 +97,16 @@ object Constants {
 
     const val EXTRA_DATA = "hr.caellian.notestream.EXTRA_DATA" // Represents all NoteStream data
     const val EXTRA_PLAYLIST = "hr.caellian.notestream.EXTRA_PLAYLIST"
+    const val EXTRA_ITERATOR = "hr.caellian.notestream.EXTRA_ITERATOR"
+    const val EXTRA_ITERATOR_ASCENDING = "hr.caellian.notestream.EXTRA_ITERATOR_ASCENDING"
     const val EXTRA_PLAYABLE = "hr.caellian.notestream.EXTRA_PLAYABLE"
+
+    // Iterators
+    const val ITERATOR_DEFAULT_ID = "hr.caellian.notestream.ITERATOR_DEFAULT"
+    const val ITERATOR_RANDOM_ID = "hr.caellian.notestream.ITERATOR_RANDOM"
+    const val ITERATOR_TITLE_ID = "hr.caellian.notestream.ITERATOR_TITLE"
+    const val ITERATOR_AUTHOR_ID = "hr.caellian.notestream.ITERATOR_AUTHOR"
+    const val ITERATOR_TIME_ID = "hr.caellian.notestream.ITERATOR_TIME"
 
     // Bundle data
     const val BUNDLE_LYRICS_VISIBLE = "hr.caellian.notestream.BUNDLE_LYRICS_VISIBLE"

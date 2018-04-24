@@ -57,7 +57,7 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
             holdTimer.scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     if (buttonPrevious.isPressed) {
-                        psb?.progress = Math.max(psb!!.progress - 5000, 0)
+                        psb?.progress = Math.max(psb!!.progress - PlayerService.DEFAULT_PROGRESS_CHANGE, 0)
                     } else {
                         holdTimer.cancel()
                     }
@@ -73,7 +73,7 @@ class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.Progres
             holdTimer.scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     if (buttonNext.isPressed) {
-                        psb!!.progress = Math.min(psb!!.progress + 5000,
+                        psb!!.progress = Math.min(psb!!.progress + PlayerService.DEFAULT_PROGRESS_CHANGE,
                                 psb!!.currentPlayable!!.info.length)
                     } else {
                         holdTimer.cancel()

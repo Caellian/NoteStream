@@ -31,6 +31,7 @@ import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableRemote
 import hr.caellian.notestream.data.playlist.Playlist
+import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.gui.ActivityPlayer
 import hr.caellian.notestream.gui.PlayablePopupMenu
 import hr.caellian.notestream.lib.Constants
@@ -48,6 +49,7 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
 
     override fun updateView(rootView: View) {
         val playlist = argumentPlaylist ?: return
+        val iterator = argumentIterator ?: return
         val playable = argumentPlayable ?: return
 
         rootView.findViewById<TextView>(R.id.labelSongTitle)?.text = playable.title
@@ -60,15 +62,17 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
 
             val psb = NoteStream.instance?.psb
             if (psb?.currentPlayable != playable) {
-                psb?.playAt(playlist, playable)
+                psb?.playAt(iterator, playable)
             } else {
-                psb.setPlaylist(playlist)
+                psb.setIterator(iterator)
             }
 
             val intent = Intent(rootView.context, ActivityPlayer::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             intent.putExtra(Constants.EXTRA_PLAYLIST, playlist.id)
             intent.putExtra(Constants.EXTRA_PLAYABLE, playable.id)
+            intent.putExtra(Constants.EXTRA_ITERATOR, iterator.id)
+            intent.putExtra(Constants.EXTRA_ITERATOR_ASCENDING, iterator.ascending)
             startActivity(intent)
         })
 
@@ -90,46 +94,42 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
     }
 
     fun filter(filter: String) {
-        Filter(filter).execute(this)
-    }
-
-    class Filter(private val filter: String) : AsyncTask<FragmentItemPlayable, Unit, Unit>() {
-        override fun doInBackground(vararg params: FragmentItemPlayable?) {
-            if (params[0] == null || params[0]?.argumentPlayable == null) {
-                params[0]?.view?.visibility = View.GONE
-                return
-            }
-
-            if (params[0]!!.argumentPlayable is PlayableRemote) {
-                if ((params[0]!!.argumentPlayable as PlayableRemote?)?.available == true) {
-                    params[0]?.loadingView?.visibility = View.GONE
-                    params[0]?.contentViewFrame?.visibility = View.VISIBLE
-                } else {
-                    params[0]?.contentViewFrame?.visibility = View.GONE
-                    params[0]?.loadingView?.visibility = View.VISIBLE
-                }
-                return
-            }
-
-            if (params[0]?.argumentPlayable?.info?.title?.toLowerCase()?.contains(filter.toLowerCase()) == false
-                    && params[0]?.argumentPlayable?.info?.author?.toLowerCase()?.contains(filter.toLowerCase()) == false) {
-                params[0]?.view?.visibility = View.GONE
-                return
-            }
-
-            params[0]?.loadingView?.visibility = View.GONE
-            params[0]?.contentViewFrame?.visibility = View.VISIBLE
-            params[0]?.view?.visibility = View.VISIBLE
+        if (argumentPlayable == null) {
+            view?.visibility = View.GONE
             return
         }
+
+        if (argumentPlayable is PlayableRemote) {
+            if ((argumentPlayable as PlayableRemote?)?.available == true) {
+                loadingView.visibility = View.GONE
+                contentViewFrame.visibility = View.VISIBLE
+            } else {
+                contentViewFrame.visibility = View.GONE
+                loadingView.visibility = View.VISIBLE
+            }
+            return
+        }
+
+        if (argumentPlayable?.title?.toLowerCase()?.contains(filter.toLowerCase()) == false
+                && argumentPlayable?.author?.toLowerCase()?.contains(filter.toLowerCase()) == false) {
+            view?.visibility = View.GONE
+            return
+        }
+
+        loadingView.visibility = View.GONE
+        contentViewFrame.visibility = View.VISIBLE
+        view?.visibility = View.VISIBLE
+        return
     }
 
     companion object {
-        fun newInstance(playable: Playable, playlist: Playlist): FragmentItemPlayable {
+        fun newInstance(playable: Playable, playlistIterator: PlaylistIterator): FragmentItemPlayable {
             val fragment = FragmentItemPlayable()
 
             val args = Bundle()
-            args.putString(Constants.EXTRA_PLAYLIST, playlist.id)
+            args.putString(Constants.EXTRA_PLAYLIST, playlistIterator.playlist?.id ?: Constants.PLAYLIST_EMPTY_ID)
+            args.putString(Constants.EXTRA_ITERATOR, playlistIterator.id)
+            args.putBoolean(Constants.EXTRA_ITERATOR_ASCENDING, playlistIterator.ascending)
             args.putString(Constants.EXTRA_PLAYABLE, playable.id)
             fragment.arguments = args
             return fragment

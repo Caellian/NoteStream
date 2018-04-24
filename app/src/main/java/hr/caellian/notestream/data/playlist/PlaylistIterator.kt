@@ -18,30 +18,47 @@
 package hr.caellian.notestream.data.playlist
 
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.lib.Constants
 
-open class PlaylistIterator(protected var source: Playlist, var ascending: Boolean = true) : Iterator<Playable>, Iterable<Playable> {
-    override fun iterator(): Iterator<Playable> = this
+open class PlaylistIterator(protected var source: List<Playable>, var ascending: Boolean = true, val parent: Playlist? = null) : MutableListIterator<Playable>, Iterable<Playable>  {
 
-    protected var ordered = mutableListOf<Int>().also {
-        it.addAll(0 until source.size())
-    }
+    constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+
+    val size: Int
+        get() = ordered.size
+
+    val isEmpty: Boolean
+        get() = ordered.isEmpty()
+
+    open val id: String = Constants.ITERATOR_DEFAULT_ID
+
+    var ordered: MutableList<Playable> = ArrayList(source)
+        protected set
 
     init {
-        @Suppress("LeakingThis")
+        @Suppress("LeakingThis") // This is intentional.
         reorder()
     }
 
-    var current = if (ascending) 0 else ordered.lastIndex
+    var current = if (ascending) -1 else ordered.size
 
-    open fun reassign(source: Playlist, ascending: Boolean = this.ascending): PlaylistIterator {
+    val playlist: Playlist?
+        get() = parent
+
+    override fun iterator(): MutableIterator<Playable> = this
+
+    open fun reassign(pl: Playlist, ascending: Boolean = this.ascending): PlaylistIterator {
         val prev = current()
-        ordered = mutableListOf<Int>().also {
-            it.addAll(0 until source.size())
-        }
+        ordered = ArrayList(pl.playlist)
         reorder()
         switchTo(prev)
-        this.source = source
+        this.source = pl.playlist
         this.ascending = ascending
+        return this
+    }
+
+    fun reset(): PlaylistIterator {
+        current = if (ascending) -1 else ordered.size
         return this
     }
 
@@ -49,122 +66,215 @@ open class PlaylistIterator(protected var source: Playlist, var ascending: Boole
         return this
     }
 
-    open fun defaultAddIndex(): Int {
+    private fun defaultAddIndex(): Int {
         return if (ascending) ordered.size else 0
     }
 
-    fun add(sourcePlayable: Playable, index: Int = defaultAddIndex()): PlaylistIterator {
-        source.add(sourcePlayable)
-        add(index, source.playlist.indexOf(sourcePlayable))
+    override fun add(element: Playable) = add(element, defaultAddIndex()).let{Unit}
+
+    fun add(playable: Playable, index: Int = defaultAddIndex()): PlaylistIterator {
+        ordered.add(index, playable)
         return this
     }
 
-    open fun add(sourceIndex: Int, index: Int = defaultAddIndex()): PlaylistIterator {
-        ordered.add(index, sourceIndex)
-        return this
+    fun addAll(elements: Collection<Playable>, index: Int = defaultAddIndex()): Boolean {
+        var counter = 0
+        elements.forEach {
+            add(it, index + counter++)
+        }
+        return true
     }
 
-    fun move(origin: Int, index: Int): PlaylistIterator {
-        ordered.add(index, ordered[origin])
-        return this
+    override fun set(element: Playable) = set(current, element).let{Unit}
+
+    fun set(index: Int, element: Playable): Playable? {
+        val old = ordered.getOrNull(index)
+        ordered[index] = element
+        return old
     }
 
-    fun remove(sourcePlayable: Playable): PlaylistIterator {
-        remove(source.playlist.indexOf(sourcePlayable))
-        return this
-    }
-
-    open fun remove(sourceIndex: Int): PlaylistIterator {
-        ordered = ordered.map {
-            if (it > sourceIndex) it - 1 else it
-        }.toMutableList()
-        return this
-    }
-
-    fun switchTo(sourcePlayable: Playable?): PlaylistIterator {
-        if (sourcePlayable != null) switchTo(source.playlist.indexOf(sourcePlayable))
-        return this
-    }
-
-    fun switchTo(sourceIndex: Int): PlaylistIterator {
-        if (sourceIndex >= 0 && sourceIndex < source.size()) {
-            current = ordered.indexOf(sourceIndex)
+    fun move(origin: Int, end: Int): PlaylistIterator {
+        val moved = ordered[origin]
+        if (origin > end) {
+            ordered.removeAt(origin)
+            ordered.add(end, moved)
+        } else if (origin < end) {
+            ordered.add(end, moved)
+            ordered.removeAt(origin)
         }
         return this
     }
 
-    fun switchPrevious(): Playable {
-        return if (ascending) source.playlist[ordered[(--current).takeUnless{it < 0}?:ordered.lastIndex]] else source.playlist[ordered[(++current).rem(ordered.size)]]
+    override fun remove() {
+        ordered.removeAt(current)
     }
 
-    fun hasPrevious(): Boolean {
-        return current > 0
+    fun remove(sourcePlayable: Playable): PlaylistIterator {
+        ordered.removeAll {it == sourcePlayable}
+        return this
     }
+
+    fun removeAt(index: Int): Playable {
+        return ordered.removeAt(index)
+    }
+
+    fun removeAll(elements: Collection<Playable>): Boolean {
+        elements.forEach { element ->
+            ordered.removeIf { it == element }
+        }
+        return true
+    }
+
+    fun retainAll(elements: Collection<Playable>): Boolean {
+        elements.forEach { element ->
+            ordered.removeIf { it != element }
+        }
+        return true
+    }
+
+    fun clear() {
+        ordered.clear()
+    }
+
+    fun switchTo(playable: Playable?): PlaylistIterator {
+        if (playable != null) current = ordered.indexOf(playable).takeIf { it > -1 } ?: current
+        return this
+    }
+
+    fun switchNext(): Playable {
+        return if (ascending) {
+            ordered[nextIndex()].also {
+                current = nextIndex()
+            }
+        } else {
+            ordered[previousIndex()].also {
+                current = previousIndex()
+            }
+        }
+    }
+
+    override fun hasNext(): Boolean {
+        return current < ordered.lastIndex
+    }
+
+    override fun next(): Playable = switchNext()
+
+    override fun nextIndex(): Int = if (hasNext()) current + 1 else 0
 
     fun current(): Playable? {
-        return try {
-            source.playlist[ordered[current]]
-        } catch (e: IndexOutOfBoundsException) {
+        return if (0 <= current && current <= ordered.lastIndex) {
+            ordered[current]
+        } else {
             null
         }
     }
 
-    fun switchNext(): Playable {
-        return if (ascending) source.playlist[ordered[(++current).rem(ordered.size)]] else source.playlist[ordered[(--current).takeUnless{it < 0}?:ordered.lastIndex]]
+    override fun previous(): Playable = switchPrevious()
+
+    fun switchPrevious(): Playable {
+        return if (ascending) {
+            ordered[previousIndex()].also {
+                current = previousIndex()
+            }
+        } else {
+            ordered[nextIndex()].also {
+                current = nextIndex()
+            }
+        }
+
     }
 
-    override fun hasNext(): Boolean {
-        return current < ordered.size
-    }
+    override fun hasPrevious(): Boolean = current > 0
 
-    override fun next(): Playable {
-        return if (ascending) source.playlist[ordered[current++]] else source.playlist[ordered[current--]]
+    override fun previousIndex(): Int = if (hasPrevious()) current - 1 else ordered.lastIndex
+
+    fun contains(element: Playable): Boolean = ordered.contains(element)
+
+    fun containsAll(elements: Collection<Playable>): Boolean = ordered.containsAll(elements)
+
+    fun indexOf(element: Playable): Int = ordered.indexOf(element)
+
+    fun lastIndexOf(element: Playable): Int = ordered.lastIndexOf(element)
+
+    fun get(index: Int): Playable = ordered[index]
+
+    fun subList(fromIndex: Int, toIndex: Int): MutableList<Playable> {
+        return ordered.subList(fromIndex, toIndex).toMutableList()
     }
 
     open fun setRandom(shuffle: Boolean): PlaylistIterator {
         return if (shuffle) Random(source, ascending, this) else this
     }
 
-    class Random(source: Playlist, ascending: Boolean = true, val previous: PlaylistIterator? = null) : PlaylistIterator(source, ascending) {
+    override fun toString(): String {
+        return "[${ordered.joinToString(", ") { "${it.title} - ${it.author}" }}]"
+    }
+
+    class Random(source: List<Playable>, ascending: Boolean = true, val previous: PlaylistIterator? = null, parent: Playlist? = null) : PlaylistIterator(source, ascending, parent) {
         private val random = java.util.Random()
+
+        override val id: String = Constants.ITERATOR_RANDOM_ID
+
+        constructor(pl: Playlist, ascending: Boolean = true, previous: PlaylistIterator? = null): this(pl.playlist, ascending, previous, pl)
 
         init {
             ordered.shuffle(random)
         }
 
-        override fun defaultAddIndex(): Int {
-            return random.nextInt(ordered.size)
-        }
-
         override fun setRandom(shuffle: Boolean): PlaylistIterator {
-            return if (shuffle) this else previous!!
+            return if (shuffle) this else previous ?: this
         }
     }
 
-    class Title(source: Playlist, ascending: Boolean = true) : PlaylistIterator(source, ascending) {
+    class Title(source: List<Playable>, ascending: Boolean = true, parent: Playlist? = null) : PlaylistIterator(source, ascending, parent) {
+        override val id: String = Constants.ITERATOR_TITLE_ID
+
+        constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+
         override fun reorder(): Title {
-            ordered.sortBy { index ->
-                source.playlist[index].title
+            ordered.sortBy { it ->
+                it.title
             }
             return this
         }
     }
 
-    class Author(source: Playlist, ascending: Boolean = true) : PlaylistIterator(source, ascending) {
+    class Author(source: List<Playable>, ascending: Boolean = true, parent: Playlist? = null) : PlaylistIterator(source, ascending, parent) {
+        override val id: String = Constants.ITERATOR_AUTHOR_ID
+
+        constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+
         override fun reorder(): Author {
-            ordered.sortBy { index ->
-                source.playlist[index].author
+            ordered.sortBy { it ->
+                it.author
             }
             return this
         }
     }
 
-    class Time(source: Playlist, ascending: Boolean = true) : PlaylistIterator(source, ascending) {
+    class Time(source: List<Playable>, ascending: Boolean = true, parent: Playlist? = null) : PlaylistIterator(source, ascending, parent) {
+        override val id: String = Constants.ITERATOR_TIME_ID
+
+        constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+
         override fun reorder(): Time {
-            ordered.sortBy { index ->
-                source.timestamps[source.playlist[index]]
+            val time = System.currentTimeMillis()
+            ordered.sortBy { it ->
+                parent?.timestamps?.getOrDefault(it, time) ?: 0
             }
             return this
+        }
+    }
+
+    companion object {
+        fun get(id: String, playlist: Playlist, ascending: Boolean): PlaylistIterator {
+            return when (id) {
+                Constants.ITERATOR_RANDOM_ID -> PlaylistIterator.Random(playlist, ascending)
+                Constants.ITERATOR_TITLE_ID -> PlaylistIterator.Title(playlist, ascending)
+                Constants.ITERATOR_AUTHOR_ID -> PlaylistIterator.Author(playlist, ascending)
+                Constants.ITERATOR_TIME_ID -> PlaylistIterator.Time(playlist, ascending)
+                else -> PlaylistIterator(playlist, ascending)
+            }
         }
     }
 }

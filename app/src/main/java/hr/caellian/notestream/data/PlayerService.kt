@@ -59,7 +59,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
     override fun onCompletion(mediaPlayer: MediaPlayer) {
         if (repeatState != RepeatState.ONE) {
-            if (!iterator.hasNext() && repeatState != RepeatState.ALL) {
+            if (iterator?.hasNext() == false && repeatState != RepeatState.ALL) {
                 psb!!.pause()
             } else {
                 psb!!.switchNext()
@@ -70,7 +70,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
     private class ProgressHandler(internal var mp: MediaPlayer) : Handler() {
 
         override fun handleMessage(msg: Message) {
-            if (mp.currentPosition > iterator.current()?.info?.end ?: iterator.current()!!.info.length && mp.currentPosition < iterator.current()!!.info.end + 1000) {
+            if (mp.currentPosition > iterator?.current()?.info?.end ?: iterator?.current()?.info?.length ?: 0 && mp.currentPosition < iterator?.current()?.info?.end ?: 0 + 1000) {
                 psb!!.switchNext()
             } else {
                 for (progressListener in NoteStream.PROGRESS_LISTENERS) {
@@ -196,88 +196,94 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         var repeatState: RepeatState = RepeatState.NONE
 
         val currentPlayable: Playable?
-            get() = iterator.current()
+            get() = iterator?.current()
 
         var progress: Int
             get() = mp.currentPosition
             set(progress) {
-                currentPlayable!!.skipTo(mp, progress)
+                currentPlayable?.skipTo(mp, progress)
             }
 
         val isEmpty: Boolean
-            get() = pl.isEmpty
+            get() = iterator?.isEmpty ?: true
 
         val isPlaying: Boolean
             get() = playing
 
-        fun shufflePlay(playlist: Playlist?): Playlist {
-            val old = pl
+        fun shufflePlay(playlist: Playlist?): Playlist? {
+            val old = iterator?.playlist
             if (playlist != null && !playlist.isEmpty) {
                 mp.stop()
-                pl = playlist
-                iterator = PlaylistIterator.Random(pl)
-                iterator.current()!!.prepare(mp)
+                iterator = PlaylistIterator.Random(playlist)
+                iterator?.current()?.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
-                    controlListener.onPlayableChanged(currentPlayable!!)
+                    controlListener.onPlayableChanged(currentPlayable)
                 }
                 play()
             }
             return old
         }
 
-        fun playPlaylist(playlist: Playlist?): Playlist {
-            val old = pl
+        fun playPlaylist(playlist: Playlist?): Playlist? {
+            val old = iterator?.playlist
             if (playlist != null && !playlist.isEmpty) {
-                pl = playlist
-                iterator.current()?.prepare(mp)
+                iterator?.reassign(playlist)
+                iterator?.current()?.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
-                    controlListener.onPlayableChanged(currentPlayable!!)
+                    controlListener.onPlayableChanged(currentPlayable)
                 }
                 play()
             }
             return old
         }
 
-        fun playAt(playlist: Playlist?, playable: Playable): Playlist {
-            val old = pl
+        fun playAt(plIterator: PlaylistIterator, playable: Playable): Playlist? {
+            val old = iterator?.playlist
+            iterator = plIterator
+            iterator?.switchTo(playable)?.current()?.prepare(mp)
+
+            for (controlListener in NoteStream.CONTROL_LISTENERS) {
+                controlListener.onPlayableChanged(currentPlayable)
+            }
+            play()
+            return old
+        }
+
+        fun playAt(playlist: Playlist?, playable: Playable?): Playlist? {
+            val old = iterator?.playlist
             if (playlist != null) {
-                pl = playlist
-                iterator.switchTo(playable).current()!!.prepare(mp)
+                iterator?.reassign(playlist)
+                iterator?.switchTo(playable)?.current()?.prepare(mp)
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
-                    controlListener.onPlayableChanged(currentPlayable!!)
+                    controlListener.onPlayableChanged(currentPlayable)
                 }
                 play()
             }
             return old
         }
 
-        fun play(playable: Playable): Playlist {
+        fun play(playable: Playable): Playlist? {
             return playPlaylist(Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + playable.id, data = listOf(playable)))
         }
 
         fun playNext(playable: Playable) {
-            iterator.add(playable, iterator.current + 1)
+            iterator?.add(playable, iterator!!.current + 1)
         }
 
         fun playNext(playlist: Playlist) {
-            val current = iterator.current()
-            pl.clear()
-            current?.let {
-                pl.add(it)
-            }
-            pl.add(playlist)
+            iterator?.addAll(playlist.playlist, iterator!!.current + 1)
         }
 
         fun addToQueue(playable: Playable) {
-            iterator.add(playable, iterator.current + ++queueSize)
+//            iterator?.queue(playable, iterator.current + ++queueSize)
         }
 
         fun play(): Boolean {
             val old = playing
-            if (!pl.isEmpty) {
+            if (iterator?.isEmpty == false) {
                 playing = true
                 mp.start()
 
@@ -322,14 +328,17 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
             mp.stop()
         }
 
-        fun setPlaylist(playlist: Playlist?): Playlist {
-            val old = pl
+        fun setPlaylist(playlist: Playlist?): Playlist? {
+            val old = iterator?.playlist
             if (playlist != null && !playlist.isEmpty) {
-                val currentPlayable: Playable? = iterator.current()
-
-                pl = playlist
-                iterator.switchTo(currentPlayable)
+                iterator?.reassign(playlist)
             }
+            return old
+        }
+
+        fun setIterator(playlistIterator: PlaylistIterator): PlaylistIterator? {
+            val old = iterator
+            iterator = playlistIterator
             return old
         }
 
@@ -339,8 +348,8 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                 return false
             } else {
                 if (queueSize > 0) queueSize++
-                if (pl.isEmpty) return false
-                iterator.switchPrevious().prepare(mp)
+                if (iterator == null || iterator?.isEmpty == true) return false
+                iterator?.switchPrevious()?.prepare(mp)
                 if (isPlaying) play()
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onPlayableChanged(currentPlayable)
@@ -351,8 +360,8 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
 
         fun switchNext(): Boolean {
             if (queueSize > 0) queueSize--
-            if (pl.isEmpty) return false
-            iterator.switchNext().prepare(mp)
+            if (iterator == null || iterator?.isEmpty == true) return false
+            iterator?.switchNext()?.prepare(mp)
             if (isPlaying) play()
             for (controlListener in NoteStream.CONTROL_LISTENERS) {
                 controlListener.onPlayableChanged(currentPlayable)
@@ -373,10 +382,10 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         }
 
         fun setShuffle(shuffle: Boolean): Boolean {
-            if (!pl.isEmpty) {
+            if (iterator?.isEmpty == false) {
                 val old = iterator is PlaylistIterator.Random
                 if (old != shuffle) queueSize = 0
-                iterator.setRandom(shuffle)
+                iterator = iterator?.setRandom(shuffle)
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
                     controlListener.onShuffleStateChanged(shuffle)
                 }
@@ -386,23 +395,17 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         }
 
         fun doShuffle(): Boolean {
-            return iterator is PlaylistIterator.Random
+            return iterator?.id == Constants.ITERATOR_RANDOM_ID
         }
     }
 
     companion object {
         // http://www.tutorialsface.com/2015/08/android-custom-notification-tutorial/
-        const val DEFAULT_PROGRESS_CHANGE = 5000
+        const val DEFAULT_PROGRESS_CHANGE = 10000
 
         private val progressTimer = Timer()
 
-        internal var pl = Playlist.get(Constants.PLAYLIST_TEMPORARY_PREFIX + "currentPlaylist")
-            set(value) {
-                val index = value.playlist.indexOf(iterator.current())
-                field.clear().add(value)
-                iterator.reassign(value).switchTo(index)
-            }
-        var iterator: PlaylistIterator = PlaylistIterator.Title(pl)
+        var iterator: PlaylistIterator? = null
 
         internal var mp = MediaPlayer()
         internal var repeatState = RepeatState.NONE

@@ -23,9 +23,11 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.PopupMenu
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
@@ -42,6 +44,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
     internal var active = true
     internal var playlist: Playlist? = null
+    internal lateinit var iterator: PlaylistIterator
     internal var previousOrder = -1
     internal var psb: PlayerService.PlayerServiceBinder? = null
 
@@ -80,18 +83,17 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
                 } else {
                     Toast.makeText(this, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
                 }
-                it.setOnLongClickListener {
-                    if (psb == null) {
-                        Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
-                    } else if (!playlist.isEmpty) {
-                        psb!!.playNext(playlist)
-                    } else {
-                        Toast.makeText(this@ActivityPlaylist, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
-                    }
-                    true
-                }
             }
-
+            it.setOnLongClickListener {
+                if (psb == null) {
+                    Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
+                } else if (!playlist.isEmpty) {
+                    psb!!.playNext(playlist)
+                } else {
+                    Toast.makeText(this, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
         }
 
         findViewById<EditText>(R.id.textFilter).addTextChangedListener(object : TextWatcher {
@@ -112,7 +114,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
         val orderButton = findViewById<Button>(R.id.buttonOrder)
         orderButton.setOnClickListener {
-            val popup = PopupMenu(this@ActivityPlaylist, orderButton)
+            val popup = PopupMenu(this, orderButton)
             popup.menuInflater.inflate(R.menu.menu_order, popup.menu)
 
             popup.setOnMenuItemClickListener { item ->
@@ -122,7 +124,6 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
             popup.show()
         }
 
-        this.playlist = playlist
         setIterator(PlaylistIterator.Title(playlist))
 
         NoteStream.registerPlayerServiceListener(object : NoteStream.PlayerServiceListener() {
@@ -156,17 +157,16 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
     }
 
     fun setIterator(iterator: PlaylistIterator) {
-        val fm = fragmentManager
-        var ft = fm.beginTransaction()
-        for (playlistItem in playlistItems) {
-            ft.remove(fm.findFragmentById(playlistItem.id))
-        }
-        ft.commit()
+        this.iterator = iterator
 
-        ft = fm.beginTransaction()
+        findViewById<LinearLayout>(R.id.playlistContent)?.removeAllViewsInLayout()
         playlistItems.clear()
+
+        val fm = fragmentManager
+        val ft = fm.beginTransaction()
+        Log.d("HMH", iterator.toString())
         for (playable in iterator) {
-            val fragment = FragmentItemPlayable.newInstance(playable, playlist ?: Playlist.Empty)
+            val fragment = FragmentItemPlayable.newInstance(playable, iterator)
             playlistItems.add(fragment)
             ft.add(R.id.playlistContent, fragment, "plFragment-" + fragmentCounter++)
         }
@@ -181,7 +181,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
             val ft = fm.beginTransaction()
             for (fragmentItemPlayable in playlistAdded) {
                 playlistItems.add(fragmentItemPlayable)
-                ft.add(R.id.playlistContent, fragmentItemPlayable, "argumentPlayable-" + fragmentCounter++)
+                ft.add(R.id.playlistContent, fragmentItemPlayable, "plFragment-" + fragmentCounter++)
             }
             playlistAdded.clear()
             ft.commit()
@@ -205,12 +205,12 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
                 if (fragmentPlayable != null && fragmentPlayable == playable) return
             }
 
-            val fragment = FragmentItemPlayable.newInstance(playable, playlist)
+            val fragment = FragmentItemPlayable.newInstance(playable, iterator)
             if (active) {
                 val fm = fragmentManager
                 val ft = fm.beginTransaction()
                 playlistItems.add(fragment)
-                ft.add(R.id.playlistContent, fragment, "argumentPlayable-" + fragmentCounter++)
+                ft.add(R.id.playlistContent, fragment, "plFragment-" + fragmentCounter++)
                 ft.commit()
             } else {
                 playlistAdded.add(fragment)

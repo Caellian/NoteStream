@@ -34,6 +34,7 @@ import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.PlayableRemote
 import hr.caellian.notestream.lib.Constants
 import java.util.*
+import kotlin.system.exitProcess
 
 class NoteStream : Application() {
     var psb: PlayerService.PlayerServiceBinder? = null
@@ -58,7 +59,12 @@ class NoteStream : Application() {
                 psb = null
             }
         }, Context.BIND_ABOVE_CLIENT)
-        startService(psi)
+        try {
+            startService(psi)
+        } catch (e: IllegalStateException) {
+            // This exception is only ever raised when the app crashes and is restarted.
+            exitProcess(0)
+        }
 
         super.onCreate()
     }
@@ -127,6 +133,7 @@ class NoteStream : Application() {
                         if (!playable.info.setFromDatabase()) {
                             playable.info.setFromSource(path)
                         }
+
                         library.localMusic.add(playable)
                         library.savedMusic.add(playable)
                     }

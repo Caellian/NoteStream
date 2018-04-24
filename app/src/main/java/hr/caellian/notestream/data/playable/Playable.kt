@@ -22,7 +22,7 @@ import hr.caellian.notestream.data.PlayableInfo
 import hr.caellian.notestream.util.RepeatState
 import java.io.Serializable
 
-interface Playable : Serializable {
+interface Playable {
     val info: PlayableInfo
 
     val id: String

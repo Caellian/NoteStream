@@ -98,38 +98,35 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
     override fun onCreate(db: SQLiteDatabase) {
         createPlayablesTable(db)
         createPlaylistInfoTable(db)
-//        db.close()
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion != newVersion) {
-            var statement = "DROP TABLE IF EXISTS $DB_PLAYABLES_ID;"
-            writableDatabase.execSQL(statement)
-            statement = "DROP TABLE IF EXISTS $DB_PLAYLIST_INFO_ID;"
+            var statement = "DROP TABLE IF EXISTS $DB_PLAYABLES_ID; DROP TABLE IF EXISTS $DB_PLAYLIST_INFO_ID; VACUUM;"
             writableDatabase.execSQL(statement)
 
             onCreate(db)
         }
     }
 
-    fun syncPlaylist(pl: Playlist, id: String = "", author: String = "", label: String = "", capacity: Int = 512, close: Boolean = true) {
-        var statement = "CREATE TABLE IF NOT EXISTS $DB_PLAYLIST_PREFIX${pl.id} (" +
+    fun syncPlaylist(pl: Playlist, id: String = "", author: String = "", label: String = "", capacity: Int = 512) {
+        val dbid = makeDBSafeString(pl.id)
+        var statement = "CREATE TABLE IF NOT EXISTS $DB_PLAYLIST_PREFIX$dbid (" +
                 "$TRACK_ID $SQL_TYPE_TEXT $SQL_PRIMARY_KEY, " +
-                "$TRACK_TIMESTAMP $SQL_TYPE_INTEGER $SQL_NOT_NULL" +
-                ");"
+                "$TRACK_TIMESTAMP $SQL_TYPE_INTEGER $SQL_NOT_NULL);"
         writableDatabase.execSQL(statement)
 
         val list = pl.playlist
 
         list.forEach {
-            statement = "INSERT OR IGNORE INTO $DB_PLAYLIST_PREFIX${pl.id}" +
+            statement = "INSERT OR IGNORE INTO $DB_PLAYLIST_PREFIX$dbid " +
                     "($TRACK_ID, $TRACK_TIMESTAMP) VALUES " +
                     "(\"${it.id}\", ${pl.timestamps[it]});"
             writableDatabase.execSQL(statement)
         }
 
         val columns = arrayOf(TRACK_ID, TRACK_TIMESTAMP)
-        (writableDatabase.query("$DB_PLAYLIST_PREFIX${pl.id}", columns, null, null, null, null, null))
+        (writableDatabase.query("$DB_PLAYLIST_PREFIX$dbid", columns, null, null, null, null, null))
                 ?.also { c ->
                     c.moveToFirst()
                     if (c.count > 0) {
@@ -150,20 +147,18 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                 "(\"$id\", \"$author\", \"$label\", $capacity);"
 
         writableDatabase.execSQL(statement)
-//        if (close) writableDatabase.close()
     }
 
-    fun updatePlaylist(pl: Playlist, close: Boolean = true) {
+    fun updatePlaylist(pl: Playlist) {
         val statement = "INSERT OR REPLACE INTO $DB_PLAYLIST_INFO_ID " +
                 "($PLAYLIST_ID, $PLAYLIST_AUTHOR, $PLAYLIST_LABEL, $PLAYLIST_CAPACITY) VALUES " +
                 "(\"${pl.id}\", \"${pl.author}\", \"${pl.label}\", ${pl.capacity});"
 
         writableDatabase.execSQL(statement)
-//        if (close) writableDatabase.close()
     }
 
-    fun getPlayable(id: String, close: Boolean = true): Playable? {
-        val data = getPlayableData(id, close)
+    fun getPlayable(id: String): Playable? {
+        val data = getPlayableData(id)
 
         return when (data[TRACK_SOURCE]) {
             PlayableSource.LOCAL.id -> {
@@ -179,11 +174,11 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
         }
     }
 
-    fun getPlayableData(p: Playable, close: Boolean = true): Map<String, Any> {
-        return getPlayableData(p.id, close)
+    fun getPlayableData(p: Playable): Map<String, Any> {
+        return getPlayableData(p.id)
     }
 
-    fun getPlayableData(id: String, close: Boolean = true): Map<String, Any> {
+    fun getPlayableData(id: String): Map<String, Any> {
         val result = mutableMapOf<String, Any>()
 
         val columns = arrayOf(TRACK_ID, TRACK_SOURCE, TRACK_PATH, TRACK_TITLE, TRACK_AUTHOR,
@@ -213,7 +208,6 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                         result[TRACK_COVER_PATH] = c.getString(14)
                         c.close()
                     }
-//            if (close) writableDatabase.close()
         } catch (e: CursorIndexOutOfBoundsException) {
             Log.e("Database", "CursorIndexOutOfBoundsException for '$id'.")
         }
@@ -221,13 +215,13 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
         return result
     }
 
-    fun addPlayable(p: Playable, close: Boolean = true) {
+    fun addPlayable(p: Playable) {
         val pInfo = p.info
         val statement = "INSERT OR REPLACE INTO $DB_PLAYABLES_ID " +
                 "($TRACK_ID, $TRACK_SOURCE, $TRACK_PATH, $TRACK_TITLE, $TRACK_AUTHOR, " +
                 "$TRACK_ALBUM, $TRACK_YEAR, $TRACK_TRACK, $TRACK_GENRE, $TRACK_RATING, " +
                 "$TRACK_LYRICS, $TRACK_START, $TRACK_END, $TRACK_LENGTH, $TRACK_COVER_PATH) VALUES " +
-                "(\"${p.id}\", \"${p.playableSource}\", \"${p.path}\", \"${pInfo.title ?: ""}\", " +
+                "(\"${p.id}\", \"${p.playableSource.id}\", \"${p.path}\", \"${pInfo.title ?: ""}\", " +
                 "\"${pInfo.author ?: ""}\", \"${pInfo.album ?: ""}\", ${pInfo.year
                         ?: 0}, ${pInfo.track ?: 0}, " +
                 "\"${pInfo.genre ?: ""}\", ${pInfo.rating}, \"${pInfo.lyrics
@@ -236,62 +230,55 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
 
         try {
             writableDatabase.execSQL(statement)
-//            if (close) writableDatabase.close()
         } catch (e: SQLiteException) {
             Log.w("Database", "Unable execute SQL statement: $statement")
         }
     }
 
-    fun removePlayable(p: Playable, close: Boolean = true) {
-        val statement = "DELETE FROM $DB_PLAYABLES_ID WHERE $TRACK_ID = \"${p.id}\";"
-        writableDatabase.execSQL(statement)
-
-        NoteStream.instance?.library?.playlists?.forEach {
-            removeFromPlaylist(p, it, false)
-        }
-
-//        if (close) writableDatabase.close()
-    }
-
-    fun removeFromPlaylist(p: Playable, playlist: String, close: Boolean = true) {
-        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX$playlist WHERE $TRACK_ID = \"${p.id}\";"
-
-        writableDatabase.execSQL(statement)
-//        if (close) writableDatabase.close()
-    }
-
-    fun removeFromPlaylist(p: Playable, from: Playlist, close: Boolean = true) {
-        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${from.id} WHERE $TRACK_ID = \"${p.id}\";"
-
-        writableDatabase.execSQL(statement)
-//        if (close) writableDatabase.close()
-    }
-
-    fun removePlaylist(pl: Playlist, close: Boolean = true) {
-        var statement = "DROP TABLE IF EXISTS $DB_PLAYLIST_PREFIX${pl.id};"
-        writableDatabase.execSQL(statement)
-
-        statement = "DELETE FROM $DB_PLAYLIST_INFO_ID WHERE $PLAYLIST_ID = \"${pl.id}\";"
-        writableDatabase.execSQL(statement)
-
-//        if (close) writableDatabase.close()
-    }
-
-    fun addToPlaylist(p: Playable, to: Playlist, close: Boolean = true) {
+    fun addToPlaylist(p: Playable, to: Playlist) {
         addPlayable(p)
 
-        val statement = "INSERT OR REPLACE INTO $DB_PLAYLIST_PREFIX${to.id} " +
+        val statement = "INSERT OR REPLACE INTO $DB_PLAYLIST_PREFIX${makeDBSafeString(to.id)} " +
                 "($TRACK_ID, $TRACK_TIMESTAMP) VALUES " +
                 "(\"${p.id}\", ${System.currentTimeMillis()});"
 
         writableDatabase.execSQL(statement)
-//        if (close) writableDatabase.close()
     }
 
-    fun clearPlaylist(pl: Playlist, close: Boolean = true) {
-        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${PlayerService.pl.id};"
+    fun removePlayable(p: Playable) {
+        val statement = "DELETE FROM $DB_PLAYABLES_ID WHERE $TRACK_ID = \"${p.id}\"; VACUUM;"
+        writableDatabase.execSQL(statement)
+
+        NoteStream.instance?.library?.playlists?.forEach {
+            removeFromPlaylist(p, it)
+        }
+    }
+
+    fun removeFromPlaylist(p: Playable, playlist: String) {
+        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(playlist)} WHERE $TRACK_ID = \"${p.id}\"; VACUUM;"
 
         writableDatabase.execSQL(statement)
-//        if (close) writableDatabase.close()
     }
+
+    fun removeFromPlaylist(p: Playable, from: Playlist) {
+        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(from.id)} WHERE $TRACK_ID = \"${p.id}\"; VACUUM;"
+
+        writableDatabase.execSQL(statement)
+    }
+
+    fun removePlaylist(pl: Playlist) {
+        var statement = "DROP TABLE IF EXISTS $DB_PLAYLIST_PREFIX${makeDBSafeString(pl.id)}; VACUUM;"
+        writableDatabase.execSQL(statement)
+
+        statement = "DELETE FROM $DB_PLAYLIST_INFO_ID WHERE $PLAYLIST_ID = \"${pl.id}\";"
+        writableDatabase.execSQL(statement)
+    }
+
+    fun clearPlaylist(pl: Playlist) {
+        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(pl.id)}; VACUUM;"
+
+        writableDatabase.execSQL(statement)
+    }
+
+    fun makeDBSafeString(s: String): String = s.replace(Regex("[^\\w\\d]"), "")
 }

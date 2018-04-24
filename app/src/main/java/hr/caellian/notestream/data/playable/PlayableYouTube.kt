@@ -158,7 +158,7 @@ class PlayableYouTube(val youtubeID: String,
     }
 
     companion object {
-        private const val ID_PREFIX = "argumentPlayable-youtube-"
+        private const val ID_PREFIX = "ns-playable-youtube-"
 
         fun getId(youtubeID: String): String {
             return ID_PREFIX + youtubeID

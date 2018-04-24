@@ -30,6 +30,7 @@ import hr.caellian.notestream.data.Library
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableRemote
 import hr.caellian.notestream.data.playlist.Playlist
+import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 
@@ -43,10 +44,20 @@ abstract class FragmentPlayableMediator(val orientation: Int = LinearLayout.HORI
             return field
         }
 
+    var argumentIterator: PlaylistIterator? = null
+        get() {
+            if (field == null) {
+                val ascending = arguments.getBoolean(Constants.EXTRA_ITERATOR_ASCENDING)
+                field = PlaylistIterator.get(arguments.getString(Constants.EXTRA_ITERATOR), argumentPlaylist!!, ascending)
+            }
+            return field
+        }
+
     var argumentPlayable: Playable? = null
         get() {
             if (field == null) {
-                field = argumentPlaylist?.getPlayable(arguments.getString(Constants.EXTRA_PLAYABLE))
+                field = argumentPlaylist?.getPlayable(arguments.getString(Constants.EXTRA_PLAYABLE)) ?:
+                        argumentIterator?.reset()?.firstOrNull{it.id == arguments.getString(Constants.EXTRA_PLAYABLE)}
             }
             return field
         }
