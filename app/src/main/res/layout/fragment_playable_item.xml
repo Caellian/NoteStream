@@ -48,7 +48,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/song_author_default"
-            android:textColor="@color/guiGrey"
+            android:textColor="@color/colorGuiAccent"
             android:textSize="14sp" />
 
     </LinearLayout>

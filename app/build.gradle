@@ -58,6 +58,8 @@ dependencies {
     implementation "com.android.support:percent:$supportVersion"
     implementation "com.daimajia.swipelayout:library:1.2.0@aar"
 
+    compile 'com.google.apis:google-api-services-youtube:v3-rev195-1.23.0'
+
     implementation 'com.github.evgenyneu:js-evaluator-for-android:v2.0.0'
     implementation 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
 

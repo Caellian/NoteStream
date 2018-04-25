@@ -39,6 +39,7 @@ import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
 import hr.caellian.notestream.lib.Constants
 import java.util.*
+import kotlin.concurrent.thread
 
 class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
@@ -164,6 +165,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
 
         val fm = fragmentManager
         val ft = fm.beginTransaction()
+        ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out)
         Log.d("HMH", iterator.toString())
         for (playable in iterator) {
             val fragment = FragmentItemPlayable.newInstance(playable, iterator)
@@ -179,12 +181,13 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
         if (!playlistAdded.isEmpty()) {
             val fm = fragmentManager
             val ft = fm.beginTransaction()
+            ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out)
             for (fragmentItemPlayable in playlistAdded) {
                 playlistItems.add(fragmentItemPlayable)
                 ft.add(R.id.playlistContent, fragmentItemPlayable, "plFragment-" + fragmentCounter++)
             }
-            playlistAdded.clear()
             ft.commit()
+            playlistAdded.clear()
         }
     }
 

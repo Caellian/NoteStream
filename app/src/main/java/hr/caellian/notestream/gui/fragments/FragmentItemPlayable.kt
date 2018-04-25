@@ -17,13 +17,18 @@
 
 package hr.caellian.notestream.gui.fragments
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.Interpolator
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.BounceInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.TextView
 import hr.caellian.notestream.NoteStream
@@ -95,7 +100,22 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
 
     fun filter(filter: String) {
         if (argumentPlayable == null) {
-            view?.visibility = View.GONE
+            val anim = ObjectAnimator.ofInt(view, "layout_height", view.height, 0)
+            anim.setDuration(1000).addListener(object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(animation: Animator?) {}
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    view?.visibility = View.GONE
+                }
+
+                override fun onAnimationCancel(animation: Animator?) {
+                    view?.isEnabled = true
+                }
+
+                override fun onAnimationStart(animation: Animator?) {
+                    view?.isEnabled = false
+                }
+            })
             return
         }
 
