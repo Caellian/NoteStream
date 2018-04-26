@@ -17,14 +17,9 @@
 
 package hr.caellian.notestream.gui
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.support.v4.widget.DrawerLayout
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import hr.caellian.notestream.NoteStream
@@ -33,7 +28,6 @@ import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playlist.Playlist
 import hr.caellian.notestream.data.playlist.PlaylistIterator
-import hr.caellian.notestream.gui.dialog.DialogCancelOk
 import hr.caellian.notestream.gui.fragments.FragmentPlayableTile
 import hr.caellian.notestream.lib.Constants
 import java.util.*
