@@ -27,7 +27,6 @@ import android.widget.LinearLayout
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
-import hr.caellian.notestream.data.playlist.Playlist
 import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
 import java.util.*
@@ -62,7 +61,8 @@ class ActivitySearch : NavigationActivity() {
                 val searched = charSequence.toString()
 
                 resultList.clear()
-                resultList.addAll(NoteStream.instance?.library?.localMusic?.filtered(searched) ?: emptyList())
+                resultList.addAll(NoteStream.instance.data.localMusic?.filtered(searched)
+                        ?: emptyList())
             }
 
             override fun afterTextChanged(editable: Editable) {

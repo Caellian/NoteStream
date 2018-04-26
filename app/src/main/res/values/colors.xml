@@ -17,11 +17,11 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#d0fcb3</color>
-    <color name="colorPrimaryDark">#c8ad55</color>
-    <color name="colorAccent">#dc9135</color>
-    <color name="colorGuiAccent">#6c5a49</color>
-    <color name="bgColor">#271f23</color>
+    <color name="colorPrimary">#de9151</color>
+    <color name="colorPrimaryDark">#ff7733</color>
+    <color name="colorAccent">#f42c04</color>
+    <color name="colorGraphicsAccent">#ee8434</color>
+    <color name="colorBackground">#2e2e3a</color>
 
     <color name="black_overlay">#66000000</color>
     <color name="black_dark_overlay">#b4000000</color>

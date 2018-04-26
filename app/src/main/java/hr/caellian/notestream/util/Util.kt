@@ -44,7 +44,7 @@ object Util {
     fun drawableToBitmap(drawableID: Int, width: Int = -1, height: Int = -1): Bitmap {
         var width = width
         var height = height
-        val drawable = NoteStream.instance?.resources?.getDrawable(drawableID, null)
+        val drawable = NoteStream.instance.resources?.getDrawable(drawableID, null)
         val bitmap: Bitmap
         width = Math.max(width, drawable?.intrinsicWidth ?: 0)
         height = Math.max(height, drawable?.intrinsicWidth ?: 0)

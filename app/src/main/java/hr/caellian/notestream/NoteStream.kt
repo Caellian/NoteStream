@@ -20,14 +20,15 @@ package hr.caellian.notestream
 import android.Manifest
 import android.app.Activity
 import android.app.Application
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.IBinder
+import android.preference.PreferenceManager
 import android.provider.MediaStore
-import hr.caellian.notestream.data.Library
+import android.widget.Toast
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableLocal
@@ -38,13 +39,20 @@ import kotlin.system.exitProcess
 
 class NoteStream : Application() {
     var psb: PlayerService.PlayerServiceBinder? = null
-    var library: Library? = null
+    lateinit var data: NoteStreamData
+    lateinit var preferences: SharedPreferences
+        private set
+
+    var googleAccount: GoogleSignInAccount? = null
+    var googleAccountCredential: GoogleAccountCredential? = null
+
 
     override fun onCreate() {
         instance = this
+        preferences = PreferenceManager.getDefaultSharedPreferences(instance)
 
         //Initialise player service for later use.
-        val psi = Intent(this, PlayerService::class.java)
+        val psi = Intent(instance, PlayerService::class.java)
         psi.action = Constants.ACTION_INIT
 
         bindService(psi, object : ServiceConnection {
@@ -69,33 +77,25 @@ class NoteStream : Application() {
         super.onCreate()
     }
 
-    fun populateLibrary(activity: Activity) {
-        val storageCheck = activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (storageCheck == PackageManager.PERMISSION_GRANTED) {
-            library = Library()
-            addLocalContentToLibrary(activity, library!!)
-        }
-    }
-
     abstract class PlayerServiceListener {
         abstract fun onPlayerServiceConnected(psb: PlayerService.PlayerServiceBinder)
         open fun onPlayerServiceDisconnected() {}
     }
 
     companion object {
-        var instance: NoteStream? = null
+        lateinit var instance: NoteStream
 
         val PSB_LISTENERS = ArrayList<PlayerServiceListener>()
         val PROGRESS_LISTENERS = ArrayList<Playable.ProgressListener>()
         val CONTROL_LISTENERS = ArrayList<Playable.ControlListener>()
-        val LIBRARY_LISTENERS = ArrayList<Library.LibraryListener>()
+        val LIBRARY_LISTENERS = ArrayList<NoteStreamData.LibraryListener>()
         val AVAILABILITY_LISTENERS = ArrayList<PlayableRemote.AvailabilityListener>()
 
         fun registerPlayerServiceListener(listener: PlayerServiceListener) {
-            if (instance?.psb == null) {
+            if (instance.psb == null) {
                 PSB_LISTENERS.add(listener)
             } else {
-                listener.onPlayerServiceConnected(instance?.psb!!)
+                listener.onPlayerServiceConnected(instance.psb!!)
             }
         }
 
@@ -107,39 +107,12 @@ class NoteStream : Application() {
             CONTROL_LISTENERS.add(listener)
         }
 
-        fun registerLibraryListener(listener: Library.LibraryListener) {
+        fun registerLibraryListener(listener: NoteStreamData.LibraryListener) {
             LIBRARY_LISTENERS.add(listener)
         }
 
         fun registerAvailabilityListener(listener: PlayableRemote.AvailabilityListener) {
             AVAILABILITY_LISTENERS.add(listener)
-        }
-
-        private fun addLocalContentToLibrary(context: Context, library: Library) {
-            val extUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-            val selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0"
-            val sortOrder = MediaStore.Audio.Media.TITLE + " ASC"
-
-            val cur = context.contentResolver.query(extUri, null, selection, null, sortOrder)
-
-            if (cur != null) {
-                if (cur.count > 0) {
-                    OuterLoop@ while (cur.moveToNext()) {
-                        val path = cur.getString(cur.getColumnIndex(MediaStore.Audio.Media.DATA))
-
-                        if (library.localMusic.playlist.any { it.id == PlayableLocal.getId(path) }) continue@OuterLoop
-
-                        val playable = PlayableLocal(path)
-                        if (!playable.info.setFromDatabase()) {
-                            playable.info.setFromSource(path)
-                        }
-
-                        library.localMusic.add(playable)
-                        library.savedMusic.add(playable)
-                    }
-                }
-                cur.close()
-            }
         }
     }
 }

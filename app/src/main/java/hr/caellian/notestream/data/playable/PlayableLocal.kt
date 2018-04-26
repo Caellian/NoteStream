@@ -26,8 +26,8 @@ import hr.caellian.notestream.lib.Constants
 import java.io.IOException
 
 class PlayableLocal(override val path: String,
-                    override var title: String = NoteStream.instance!!.getString(R.string.unknown_title),
-                    override var author: String = NoteStream.instance!!.getString(R.string.unknown_artist),
+                    override var title: String = NoteStream.instance.getString(R.string.unknown_title),
+                    override var author: String = NoteStream.instance.getString(R.string.unknown_artist),
                     data: Map<String, Any>? = null) : Playable {
 
     override var id: String = data?.get(Constants.TRACK_ID)?.toString() ?: getId(path)

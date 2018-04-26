@@ -17,13 +17,34 @@
 
 package hr.caellian.notestream.lib
 
+import android.util.Base64
+import java.util.*
+
 object Constants {
+    // Application
+    const val ApplicationName = "NoteStream"
+    const val ApplicationVersion = "0.0.1"
+
+    // Codes
+    const val SIGN_IN_CODE = 9001
     const val APP_REQUEST_CODE = 6678
     const val APP_PSBR_CODE = 7727
-
     const val APP_NOTIFICATION_ID = 66786
 
+    // Tags
     const val MEDIA_SESSION_TAG = "NSMediaSession"
+
+    const val KA = "AIzaSyDgWMXnS"
+    const val KB = "G45sdfFAr334g"
+    const val KC = "imp52Pt1MM0Uw"
+    const val KD = "34d2lrrt6423e"
+    const val KE = "xWopVeTLSTn48"
+
+    // Google API Scopes
+
+    val Scopes = listOf(
+            "https://www.googleapis.com/auth/youtube.readonly",
+            "https://www.googleapis.com/auth/drive.file")
 
     // Playlist
     const val PLAYLIST_EMPTY_ID = "empty"
@@ -101,13 +122,24 @@ object Constants {
     const val EXTRA_ITERATOR_ASCENDING = "hr.caellian.notestream.EXTRA_ITERATOR_ASCENDING"
     const val EXTRA_PLAYABLE = "hr.caellian.notestream.EXTRA_PLAYABLE"
 
+    // Arguments
+    const val ARGUMENT_ICON = "hr.caellian.notestream.ARGUMENT_ICON"
+    const val ARGUMENT_TITLE = "hr.caellian.notestream.ARGUMENT_TITLE"
+    const val ARGUMENT_DESCRIPTION = "hr.caellian.notestream.ARGUMENT_DESCRIPTION"
+    const val ARGUMENT_PERMISSION = "hr.caellian.notestream.ARGUMENT_PERMISSION"
+
+    // Bundle data
+    const val BUNDLE_LYRICS_VISIBLE = "hr.caellian.notestream.BUNDLE_LYRICS_VISIBLE"
+
+    // Preferences
+    const val CHECK_GOOGLE_SIGN_IN = "hr.caellian.notestream.SHOULD_SIGN_IN"
+    const val CHECK_PERMISSION = "hr.caellian.notestream.SHOULD_"
+    const val PERMISSION_PREFIX = "android.permission."
+
     // Iterators
     const val ITERATOR_DEFAULT_ID = "hr.caellian.notestream.ITERATOR_DEFAULT"
     const val ITERATOR_RANDOM_ID = "hr.caellian.notestream.ITERATOR_RANDOM"
     const val ITERATOR_TITLE_ID = "hr.caellian.notestream.ITERATOR_TITLE"
     const val ITERATOR_AUTHOR_ID = "hr.caellian.notestream.ITERATOR_AUTHOR"
     const val ITERATOR_TIME_ID = "hr.caellian.notestream.ITERATOR_TIME"
-
-    // Bundle data
-    const val BUNDLE_LYRICS_VISIBLE = "hr.caellian.notestream.BUNDLE_LYRICS_VISIBLE"
 }

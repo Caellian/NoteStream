@@ -51,7 +51,7 @@
                 android:layout_height="match_parent"
                 android:textAlignment="textStart"
                 android:textAllCaps="false"
-                android:textColor="@color/colorGuiAccent" />
+                android:textColor="@color/colorGraphicsAccent" />
         </LinearLayout>
     </ScrollView>
 

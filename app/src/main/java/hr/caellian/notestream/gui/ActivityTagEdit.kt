@@ -33,9 +33,9 @@ class ActivityTagEdit : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tag_edit)
 
-        edited = NoteStream.instance?.library?.savedMusic?.getPlayable(intent.getStringExtra(Constants.EXTRA_PLAYABLE))
+        edited = NoteStream.instance.data.savedMusic?.getPlayable(intent.getStringExtra(Constants.EXTRA_PLAYABLE))
         if (edited == null) {
-            edited = NoteStream.instance?.library?.localMusic?.getPlayable(intent.getStringExtra(Constants.EXTRA_PLAYABLE))
+            edited = NoteStream.instance.data.localMusic?.getPlayable(intent.getStringExtra(Constants.EXTRA_PLAYABLE))
         }
 
         if (edited == null) {

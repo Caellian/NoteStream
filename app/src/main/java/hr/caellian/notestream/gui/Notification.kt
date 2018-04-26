@@ -85,10 +85,10 @@ class Notification(internal var context: Context, internal var parentService: Se
     private fun createNotificationChannel(): String {
         val channelId = "notestream_service"
         val channelName = "NoteStream Service"
-        val channel = NotificationChannel (channelId, channelName, NotificationManager.IMPORTANCE_NONE)
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE)
         channel.lightColor = Color.BLUE
         channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        val service = NoteStream.instance?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val service = NoteStream.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         service.createNotificationChannel(channel)
         return channelId
     }

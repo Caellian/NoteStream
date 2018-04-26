@@ -29,7 +29,7 @@ import android.widget.Button
 import android.widget.TextView
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.Library
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playlist.Playlist
 import hr.caellian.notestream.data.playlist.PlaylistIterator
@@ -38,7 +38,7 @@ import hr.caellian.notestream.gui.fragments.FragmentPlayableTile
 import hr.caellian.notestream.lib.Constants
 import java.util.*
 
-class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
+class ActivityLibrary : NavigationActivity(), NoteStreamData.LibraryListener {
 
     internal var active = true
 
@@ -63,9 +63,15 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
             startActivity(intent)
         }
 
+        findViewById<Button>(R.id.buttonSettings).setOnClickListener {
+            val intent = Intent(this, ActivitySettings::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            startActivity(intent)
+        }
+
         findViewById<TextView>(R.id.labelFavorites).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityPlaylist::class.java)
-            intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance?.library?.favoriteMusic?.id)
+            intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance.data.favoriteMusic.id)
             startActivity(intent)
         }
 
@@ -81,7 +87,7 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
 
         findViewById<TextView>(R.id.labelSongs).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityPlaylist::class.java)
-            intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance?.library?.savedMusic?.id)
+            intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance.data.savedMusic.id)
             startActivity(intent)
         }
 
@@ -99,62 +105,20 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
 
         findViewById<TextView>(R.id.labelHidden).setOnClickListener {
             val intent = Intent(this@ActivityLibrary, ActivityPlaylist::class.java)
-            intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance?.library?.hiddenMusic?.id)
+            intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance.data.hiddenMusic.id)
             startActivity(intent)
         }
 
-        findViewById<TextView>(R.id.labelClear).setOnClickListener { NoteStream.instance?.library?.lastListened?.clear() }
+        findViewById<TextView>(R.id.labelClear).setOnClickListener { NoteStream.instance.data.lastListened.clear() }
 
         NoteStream.registerLibraryListener(this)
-
-
-        val storageCheck = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-        val phoneStateCheck = checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
-        if (storageCheck != PackageManager.PERMISSION_GRANTED || phoneStateCheck != PackageManager.PERMISSION_GRANTED) {
-
-            if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) || shouldShowRequestPermissionRationale(Manifest.permission.READ_PHONE_STATE)) {
-
-                showRequiredPermissionsDialogue()
-            } else {
-                val permissionsLeft = ArrayList<String>(2)
-                if (storageCheck != PackageManager.PERMISSION_GRANTED) {
-                    permissionsLeft.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-                }
-
-                if (phoneStateCheck != PackageManager.PERMISSION_GRANTED) {
-                    permissionsLeft.add(Manifest.permission.READ_PHONE_STATE)
-                }
-
-                requestPermissions(permissionsLeft.toTypedArray(), Constants.APP_REQUEST_CODE)
-            }
-        } else {
-            populateLibrary()
-        }
-    }
-
-    private fun showRequiredPermissionsDialogue() {
-        val dialog = DialogCancelOk(this,
-                getString(R.string.title_permissions_mandatory),
-                getString(R.string.mandatory_permissions_explanation),
-                View.OnClickListener { this.finish() },
-                View.OnClickListener {
-                    val myAppSettings = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
-                    myAppSettings.addCategory(Intent.CATEGORY_DEFAULT)
-                    myAppSettings.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    startActivityForResult(myAppSettings, Constants.APP_REQUEST_CODE)
-                    this.finish()
-                })
-
-        dialog.setCancelable(false)
-        dialog.show()
+        populateLibrary()
     }
 
     private fun populateLibrary() {
-        NoteStream.instance?.populateLibrary(this)
-
         val fm = fragmentManager
         val ft = fm.beginTransaction()
-        val lastListened = NoteStream.instance?.library?.lastListened ?: Playlist.Empty
+        val lastListened = NoteStream.instance.data.lastListened
         for (playable in PlaylistIterator.Time(lastListened)) {
             val fragment = FragmentPlayableTile.create(lastListened, playable)
             playlistItems.add(fragment)
@@ -190,14 +154,13 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
     }
 
     override fun onPlayableAddedToPlaylist(playable: Playable, playlist: Playlist) {
-        if (playlist == NoteStream.instance?.library?.lastListened) {
+        if (playlist == NoteStream.instance.data.lastListened) {
             playlistItems
                     .map { it.argumentPlayable }
                     .filter { it != null && it == playable }
                     .forEach { return }
 
-            val fragment = FragmentPlayableTile.create(NoteStream.instance?.library?.lastListened!!,
-                    playable)
+            val fragment = FragmentPlayableTile.create(NoteStream.instance.data.lastListened, playable)
 
             if (active) {
                 val fm = fragmentManager
@@ -212,16 +175,4 @@ class ActivityLibrary : NavigationActivity(), Library.LibraryListener {
     }
 
     override fun onPlayableRemovedFromPlaylist(playable: Playable, playlist: Playlist) {}
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        val finished = permissions.indices.none { grantResults[it] != PackageManager.PERMISSION_GRANTED }
-
-        if (finished) {
-            populateLibrary()
-        } else {
-            showRequiredPermissionsDialogue()
-        }
-    }
 }

@@ -67,8 +67,7 @@
     <!-- Playlist -->
     <string name="label_filter">Filter</string>
     <string name="label_shuffle_play">Shuffle Play</string>
-    <string name="invalid_playlist">Invalid or empty playlist.</string>
-    <string name="shuffle_empty_playlist">Can\'t shuffle play empty playlist!</string>
+    <string name="empty_playlist">Empty playlist!</string>
     <string name="null_player_service">Player service is null.</string>
 
     <!-- Player -->
@@ -111,15 +110,35 @@
     <string name="title_permissions_denied">Permissions denied</string>
     <string name="mandatory_permissions_explanation">NoteStream requires access to external storage in order to populate library with local music and access to call state so it can temporarily pause music playback when you\'re receiving a phone call. It will not function properly without these permissions. Please change your permission settings.</string>
 
+    <string name="notestream_data_description">NoteStream needs to load your data, scan for new music and prepare everything to run smoothly.\n\nLoading time varies depending on your library.</string>
+
+    <string name="google_sign_in_title">Google Sign In</string>
+    <string name="google_sign_in_explanation">By signing in you\'re allowing NoteStream to store your playlists and data on your Google Drive.\n\nThis optional feature makes sure all your music and preferences are always in sync.</string>
+    <string name="google_sign_in_fail">Unable to sign in.</string>
+
     <string name="permission_access_external">Access External Storage</string>
     <string name="permission_access_external_explanation">NoteStream needs to access external storage in order to populate library with local music.</string>
+    <string name="permission_access_external_fail">Access to external storage not granted.</string>
+
     <string name="permission_access_phone_state">Access Phone State</string>
     <string name="permission_access_phone_state_explanation">NoteStream needs to access phone state so it can temporarily pause music playback when you\'re receiving a phone call.</string>
+
+    <string name="welcome_loading_not_ready">Please select your preferences on previous screens.</string>
+    <string name="loading_pointer">Loading: %1$s</string>
+    <string name="checking_pointer">Checking: %1$s</string>
+
     <string name="permission_internet">Use Internet</string>
 
     <!-- Navigation -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+    <string name="deny">Deny</string>
+    <string name="allow">Allow</string>
+    <string name="never">Don\'t ask again</string>
 
     <!-- Unsorted -->
     <string name="dummy">DUMMY</string>

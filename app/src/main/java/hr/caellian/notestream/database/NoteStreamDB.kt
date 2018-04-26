@@ -23,7 +23,6 @@ import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import hr.caellian.notestream.NoteStream
-import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableLocal
 import hr.caellian.notestream.data.playable.PlayableSource
@@ -187,7 +186,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
 
         try {
             readableDatabase.query(Constants.DB_PLAYABLES_ID, columns, "$TRACK_ID=?", arrayOf(id), null, null, null)
-                    ?.also {c ->
+                    ?.also { c ->
                         c.moveToFirst()
                         result[TRACK_ID] = c.getString(0)
                         result[TRACK_SOURCE] = c.getString(1)
@@ -221,7 +220,8 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                 "($TRACK_ID, $TRACK_SOURCE, $TRACK_PATH, $TRACK_TITLE, $TRACK_AUTHOR, " +
                 "$TRACK_ALBUM, $TRACK_YEAR, $TRACK_TRACK, $TRACK_GENRE, $TRACK_RATING, " +
                 "$TRACK_LYRICS, $TRACK_START, $TRACK_END, $TRACK_LENGTH, $TRACK_COVER_PATH) VALUES " +
-                "(\"${p.id}\", \"${p.playableSource.id}\", \"${p.path}\", \"${pInfo.title ?: ""}\", " +
+                "(\"${p.id}\", \"${p.playableSource.id}\", \"${p.path}\", \"${pInfo.title
+                        ?: ""}\", " +
                 "\"${pInfo.author ?: ""}\", \"${pInfo.album ?: ""}\", ${pInfo.year
                         ?: 0}, ${pInfo.track ?: 0}, " +
                 "\"${pInfo.genre ?: ""}\", ${pInfo.rating}, \"${pInfo.lyrics
@@ -249,7 +249,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
         val statement = "DELETE FROM $DB_PLAYABLES_ID WHERE $TRACK_ID = \"${p.id}\"; VACUUM;"
         writableDatabase.execSQL(statement)
 
-        NoteStream.instance?.library?.playlists?.forEach {
+        NoteStream.instance.data.playlists.forEach {
             removeFromPlaylist(p, it)
         }
     }

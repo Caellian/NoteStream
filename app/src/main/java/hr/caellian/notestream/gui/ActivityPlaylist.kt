@@ -31,7 +31,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.Library
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.PlayerService
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playlist.Playlist
@@ -39,9 +39,8 @@ import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
 import hr.caellian.notestream.lib.Constants
 import java.util.*
-import kotlin.concurrent.thread
 
-class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
+class ActivityPlaylist : NavigationActivity(), NoteStreamData.LibraryListener {
 
     internal var active = true
     internal var playlist: Playlist? = null
@@ -67,7 +66,7 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
         this.playlist = playlist
 
         if (playlist.size() == 0) {
-            Toast.makeText(this, getString(R.string.invalid_playlist), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.empty_playlist), Toast.LENGTH_SHORT).show()
             finish()
         }
 
@@ -75,23 +74,19 @@ class ActivityPlaylist : NavigationActivity(), Library.LibraryListener {
             it.setOnClickListener {
                 if (psb == null) {
                     Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
-                } else if (!playlist.isEmpty) {
+                } else {
                     psb!!.shufflePlay(playlist)
 
                     val intent = Intent(this, ActivityPlayer::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     startActivity(intent)
-                } else {
-                    Toast.makeText(this, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
                 }
             }
             it.setOnLongClickListener {
                 if (psb == null) {
                     Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
-                } else if (!playlist.isEmpty) {
-                    psb!!.playNext(playlist)
                 } else {
-                    Toast.makeText(this, getString(R.string.shuffle_empty_playlist), Toast.LENGTH_SHORT).show()
+                    psb!!.playNext(playlist)
                 }
                 true
             }

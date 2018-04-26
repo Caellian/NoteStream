@@ -132,7 +132,7 @@
             android:maxLines="1"
             android:text="@string/song_author_default"
             android:textAlignment="center"
-            android:textColor="@color/colorGuiAccent"
+            android:textColor="@color/colorGraphicsAccent"
             android:textSize="12sp"
             android:textStyle="bold" />
 

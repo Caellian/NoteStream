@@ -38,7 +38,6 @@ import hr.caellian.notestream.gui.PlayablePopupMenu
 import hr.caellian.notestream.lib.Constants
 
 class FragmentPlayableTile : FragmentPlayableMediator(LinearLayout.VERTICAL) {
-
     private var defaultTextColor: Int = 0
 
     override fun inflateContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

@@ -20,7 +20,6 @@ package hr.caellian.notestream.data.playable
 import android.media.MediaPlayer
 import hr.caellian.notestream.data.PlayableInfo
 import hr.caellian.notestream.util.RepeatState
-import java.io.Serializable
 
 interface Playable {
     val info: PlayableInfo

@@ -36,7 +36,7 @@ import hr.caellian.notestream.util.RepeatState
 import java.util.*
 
 class FragmentBarPlayer : Fragment(), Playable.ControlListener, Playable.ProgressListener {
-    internal var psb = NoteStream.instance?.psb
+    internal var psb = NoteStream.instance.psb
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_bar_player, container, false)

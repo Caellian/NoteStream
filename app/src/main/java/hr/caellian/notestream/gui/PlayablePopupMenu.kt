@@ -54,26 +54,26 @@ class PlayablePopupMenu(internal var parentContext: Context, anchor: View, inter
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        val psb = NoteStream.instance?.psb
+        val psb = NoteStream.instance.psb
 
         when (item.itemId) {
-            R.id.add_library -> NoteStream.instance?.library?.savePlayable(playable)
+            R.id.add_library -> NoteStream.instance.data.savePlayable(playable)
             R.id.add_playlist -> {
                 // TODO: Open argumentPlaylist list
             }
-            R.id.add_favorites -> NoteStream.instance?.library?.favoriteMusic?.add(playable)
+            R.id.add_favorites -> NoteStream.instance.data.favoriteMusic?.add(playable)
             R.id.download -> (playable as PlayableDownloadable).download()
             R.id.play_next -> psb?.playNext(playable)
             R.id.add_queue -> psb?.addToQueue(playable)
             R.id.show_album -> {
                 val albumIntent = Intent(parentContext, ActivityPlaylist::class.java)
-                val albumID = NoteStream.instance?.library?.albums?.get(playable.info.album)?.id
+                val albumID = NoteStream.instance.data.albums?.get(playable.info.album)?.id
                 albumIntent.putExtra(Constants.EXTRA_PLAYLIST, albumID)
                 parentContext.startActivity(albumIntent)
             }
             R.id.show_artist -> {
                 val artistIntent = Intent(parentContext, ActivityPlaylist::class.java)
-                val artistID = NoteStream.instance?.library?.artists?.get(playable.info.author)?.id
+                val artistID = NoteStream.instance.data.artists?.get(playable.info.author)?.id
                 artistIntent.putExtra(Constants.EXTRA_PLAYLIST, artistID)
                 parentContext.startActivity(artistIntent)
             }

@@ -20,9 +20,9 @@ package hr.caellian.notestream.data.playlist
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.lib.Constants
 
-open class PlaylistIterator(protected var source: List<Playable>, var ascending: Boolean = true, val parent: Playlist? = null) : MutableListIterator<Playable>, Iterable<Playable>  {
+open class PlaylistIterator(protected var source: List<Playable>, var ascending: Boolean = true, val parent: Playlist? = null) : MutableListIterator<Playable>, Iterable<Playable> {
 
-    constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+    constructor(pl: Playlist, ascending: Boolean = true) : this(pl.playlist, ascending, pl)
 
     val size: Int
         get() = ordered.size
@@ -70,7 +70,7 @@ open class PlaylistIterator(protected var source: List<Playable>, var ascending:
         return if (ascending) ordered.size else 0
     }
 
-    override fun add(element: Playable) = add(element, defaultAddIndex()).let{Unit}
+    override fun add(element: Playable) = add(element, defaultAddIndex()).let { Unit }
 
     fun add(playable: Playable, index: Int = defaultAddIndex()): PlaylistIterator {
         ordered.add(index, playable)
@@ -85,7 +85,7 @@ open class PlaylistIterator(protected var source: List<Playable>, var ascending:
         return true
     }
 
-    override fun set(element: Playable) = set(current, element).let{Unit}
+    override fun set(element: Playable) = set(current, element).let { Unit }
 
     fun set(index: Int, element: Playable): Playable? {
         val old = ordered.getOrNull(index)
@@ -110,7 +110,7 @@ open class PlaylistIterator(protected var source: List<Playable>, var ascending:
     }
 
     fun remove(sourcePlayable: Playable): PlaylistIterator {
-        ordered.removeAll {it == sourcePlayable}
+        ordered.removeAll { it == sourcePlayable }
         return this
     }
 
@@ -215,7 +215,7 @@ open class PlaylistIterator(protected var source: List<Playable>, var ascending:
 
         override val id: String = Constants.ITERATOR_RANDOM_ID
 
-        constructor(pl: Playlist, ascending: Boolean = true, previous: PlaylistIterator? = null): this(pl.playlist, ascending, previous, pl)
+        constructor(pl: Playlist, ascending: Boolean = true, previous: PlaylistIterator? = null) : this(pl.playlist, ascending, previous, pl)
 
         init {
             ordered.shuffle(random)
@@ -229,7 +229,7 @@ open class PlaylistIterator(protected var source: List<Playable>, var ascending:
     class Title(source: List<Playable>, ascending: Boolean = true, parent: Playlist? = null) : PlaylistIterator(source, ascending, parent) {
         override val id: String = Constants.ITERATOR_TITLE_ID
 
-        constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+        constructor(pl: Playlist, ascending: Boolean = true) : this(pl.playlist, ascending, pl)
 
         override fun reorder(): Title {
             ordered.sortBy { it ->
@@ -242,7 +242,7 @@ open class PlaylistIterator(protected var source: List<Playable>, var ascending:
     class Author(source: List<Playable>, ascending: Boolean = true, parent: Playlist? = null) : PlaylistIterator(source, ascending, parent) {
         override val id: String = Constants.ITERATOR_AUTHOR_ID
 
-        constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+        constructor(pl: Playlist, ascending: Boolean = true) : this(pl.playlist, ascending, pl)
 
         override fun reorder(): Author {
             ordered.sortBy { it ->
@@ -255,7 +255,7 @@ open class PlaylistIterator(protected var source: List<Playable>, var ascending:
     class Time(source: List<Playable>, ascending: Boolean = true, parent: Playlist? = null) : PlaylistIterator(source, ascending, parent) {
         override val id: String = Constants.ITERATOR_TIME_ID
 
-        constructor(pl: Playlist, ascending: Boolean = true): this(pl.playlist, ascending, pl)
+        constructor(pl: Playlist, ascending: Boolean = true) : this(pl.playlist, ascending, pl)
 
         override fun reorder(): Time {
             val time = System.currentTimeMillis()

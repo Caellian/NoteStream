@@ -23,7 +23,7 @@
     android:viewportHeight="32">
 
     <path
-        android:strokeColor="@color/colorGuiAccent"
+        android:strokeColor="@color/colorGraphicsAccent"
         android:strokeWidth="1"
         android:strokeMiterLimit="10"
         android:pathData="M8.052,26.094l-0.998,0.998c0,0-1.073,1.074-2.146,0.001

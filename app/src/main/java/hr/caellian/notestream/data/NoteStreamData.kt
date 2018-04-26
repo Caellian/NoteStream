@@ -30,8 +30,8 @@ import hr.caellian.notestream.lib.Constants
 import java.io.IOException
 import java.util.*
 
-class Library {
-    private val pref: SharedPreferences? = NoteStream.instance?.getSharedPreferences("library", Context.MODE_PRIVATE)
+class NoteStreamData {
+    private val pref: SharedPreferences? = NoteStream.instance.getSharedPreferences("data", Context.MODE_PRIVATE)
 
     var playlists = HashSet<String>()
 
@@ -43,7 +43,7 @@ class Library {
     var savedMusic = Playlist.get("savedMusic")
     var hiddenMusic = Playlist.get("hiddenMusic")
     var favoriteMusic = Playlist.get("favoriteMusic")
-            .also { it.label = NoteStream.instance?.getString(R.string.label_favorites) ?: "Favorites" }
+            .also { it.label = NoteStream.instance.getString(R.string.label_favorites) ?: "Favorites" }
 
     var lastListened = Playlist.get("lastListened", capacity = 20)
 
@@ -179,6 +179,6 @@ class Library {
     }
 
     companion object {
-        private val TAG = Library::class.java.simpleName
+        private val TAG = NoteStreamData::class.java.simpleName
     }
 }

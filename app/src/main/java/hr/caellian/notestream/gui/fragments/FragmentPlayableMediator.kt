@@ -26,7 +26,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
-import hr.caellian.notestream.data.Library
+import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableRemote
 import hr.caellian.notestream.data.playlist.Playlist
@@ -34,8 +34,7 @@ import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 
-abstract class FragmentPlayableMediator(val orientation: Int = LinearLayout.HORIZONTAL) : Fragment(), Playable.ControlListener, Library.LibraryListener, PlayableRemote.AvailabilityListener {
-
+abstract class FragmentPlayableMediator(val orientation: Int = LinearLayout.HORIZONTAL) : Fragment(), Playable.ControlListener, NoteStreamData.LibraryListener, PlayableRemote.AvailabilityListener {
     var argumentPlaylist: Playlist? = null
         get() {
             if (field == null) {
@@ -56,8 +55,7 @@ abstract class FragmentPlayableMediator(val orientation: Int = LinearLayout.HORI
     var argumentPlayable: Playable? = null
         get() {
             if (field == null) {
-                field = argumentPlaylist?.getPlayable(arguments.getString(Constants.EXTRA_PLAYABLE)) ?:
-                        argumentIterator?.reset()?.firstOrNull{it.id == arguments.getString(Constants.EXTRA_PLAYABLE)}
+                field = argumentPlaylist?.getPlayable(arguments.getString(Constants.EXTRA_PLAYABLE)) ?: argumentIterator?.reset()?.firstOrNull { it.id == arguments.getString(Constants.EXTRA_PLAYABLE) }
             }
             return field
         }

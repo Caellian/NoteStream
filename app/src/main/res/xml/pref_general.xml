@@ -17,20 +17,21 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--SwitchPreference
-        android:defaultValue="true"
-        android:key="crossfade_switch"
-        android:summary="Allows you to crossfade between songs."
-        android:title="Crossfade" /-->
+    <!--<SwitchPreference-->
+        <!--android:defaultValue="true"-->
+        <!--android:key="crossfade_switch"-->
+        <!--android:summary="Allows you to crossfade between songs."-->
+        <!--android:title="Crossfade" />-->
 
-    <!--SwitchPreference
-        android:defaultValue="true"
-        android:key="normalize_switch"
-        android:summary="Set the same volume level for all tracks."
-        android:title="Normalize volume" /-->
+    <!--<SwitchPreference-->
+        <!--android:defaultValue="true"-->
+        <!--android:key="normalize_switch"-->
+        <!--android:summary="Set the same volume level for all tracks."-->
+        <!--android:title="Normalize volume" />-->
 
     <!--&lt;!&ndash; NOTE: EditTextPreference accepts EditText attributes. &ndash;&gt;-->
     <!--&lt;!&ndash; NOTE: EditTextPreference's summary should be set to its value by the activity code. &ndash;&gt;-->
+
     <!--<EditTextPreference-->
         <!--android:capitalize="words"-->
         <!--android:defaultValue="@string/pref_default_display_name"-->

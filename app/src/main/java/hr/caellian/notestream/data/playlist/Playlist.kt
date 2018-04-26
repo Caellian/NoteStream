@@ -73,7 +73,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
 
             timestamps[playable] = System.currentTimeMillis()
             NoteStreamDB.addToPlaylist(playable, this)
-            NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
+            NoteStream.instance.data.onPlayableAddedToPlaylist(playable, this)
         }
 //        NoteStreamDB.writableDatabase.close()
 
@@ -87,7 +87,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
         playlist.add(playable)
         timestamps[playable] = System.currentTimeMillis()
         NoteStreamDB.addToPlaylist(playable, this)
-        NoteStream.instance?.library?.onPlayableAddedToPlaylist(playable, this)
+        NoteStream.instance.data.onPlayableAddedToPlaylist(playable, this)
 
         trimToCapacity()
         return this
@@ -98,7 +98,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
             playlist.remove(playable)
             timestamps.remove(playable)
             NoteStreamDB.removeFromPlaylist(playable, this)
-            NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playable, this)
+            NoteStream.instance.data.onPlayableRemovedFromPlaylist(playable, this)
         }
         return this
     }
@@ -106,7 +106,7 @@ class Playlist private constructor(val id: String, author: String = "", label: S
     fun clear(): Playlist {
         for (playable in playlist) {
             NoteStreamDB.removeFromPlaylist(playable, this)
-            NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playable, this)
+            NoteStream.instance.data.onPlayableRemovedFromPlaylist(playable, this)
         }
 //        NoteStreamDB.writableDatabase.close()
 
@@ -126,11 +126,11 @@ class Playlist private constructor(val id: String, author: String = "", label: S
     private fun trimToCapacity(fromEnd: Boolean = false) {
         if (fromEnd) {
             while (playlist.size >= capacity) {
-                NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playlist.removeAt(playlist.size - 1), this)
+                NoteStream.instance.data.onPlayableRemovedFromPlaylist(playlist.removeAt(playlist.size - 1), this)
             }
         } else {
             while (playlist.size >= capacity) {
-                NoteStream.instance?.library?.onPlayableRemovedFromPlaylist(playlist.removeAt(0), this)
+                NoteStream.instance.data.onPlayableRemovedFromPlaylist(playlist.removeAt(0), this)
             }
         }
     }

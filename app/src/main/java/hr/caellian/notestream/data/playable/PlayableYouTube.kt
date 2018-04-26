@@ -38,8 +38,8 @@ import hr.caellian.notestream.lib.Constants
 import java.io.IOException
 
 class PlayableYouTube(val youtubeID: String,
-                      override var title: String = NoteStream.instance!!.getString(R.string.unknown_title),
-                      override var author: String = NoteStream.instance!!.getString(R.string.unknown_artist),
+                      override var title: String = NoteStream.instance.getString(R.string.unknown_title),
+                      override var author: String = NoteStream.instance.getString(R.string.unknown_artist),
                       data: Map<String, Any>? = null) : PlayableDownloadable() {
 
     override val id: String = data?.get(Constants.TRACK_ID)?.toString() ?: getId(youtubeID)
@@ -123,26 +123,23 @@ class PlayableYouTube(val youtubeID: String,
     }
 
     override fun download(): PlayableLocal? {
-        val writeExternal = NoteStream.instance?.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        val writeExternal = NoteStream.instance.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
         if (writeExternal != PackageManager.PERMISSION_GRANTED) {
-            //TODO: Localize
-            Toast.makeText(NoteStream.instance, "Write External Storage permission not granted!", Toast.LENGTH_LONG).show()
+            Toast.makeText(NoteStream.instance, R.string.permission_access_external_fail, Toast.LENGTH_LONG).show()
             return null
         }
 
         val uri = Uri.parse(downloadURL)
         val request = DownloadManager.Request(uri)
-        //TODO: Localize
-        request.setTitle("${NoteStream.instance?.getString(R.string.app_name)
-                ?: "NoteStream"} ${NoteStream.instance?.getString(R.string.label_download)
+        request.setTitle("${NoteStream.instance.getString(R.string.app_name) ?: "NoteStream"} ${NoteStream.instance.getString(R.string.label_download)
                 ?: "Download"}: $title")
 
         request.allowScanningByMediaScanner()
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, "$title.$extension")
 
-        val manager = NoteStream.instance?.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
+        val manager = NoteStream.instance.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
         manager?.enqueue(request)
 
         // TODO: Return PlayableLocal
@@ -162,6 +159,10 @@ class PlayableYouTube(val youtubeID: String,
 
         fun getId(youtubeID: String): String {
             return ID_PREFIX + youtubeID
+        }
+
+        fun getSearch(data: String): PlayableYouTube? {
+            return null
         }
     }
 }

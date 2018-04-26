@@ -24,6 +24,4 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# TODO: Set up proguard!
-# http://responsiveandroid.com/2014/12/10/android-proguard-tutorial.html
-# https://developer.android.com/studio/build/shrink-code.html
+-keep class com.akexorcist.roundcornerprogressbar.** { *; }

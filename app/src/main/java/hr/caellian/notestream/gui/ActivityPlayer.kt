@@ -50,7 +50,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(null)
         setContentView(R.layout.activity_player)
-        psb = NoteStream.instance?.psb
+        psb = NoteStream.instance.psb
 
         if (savedInstanceState?.getBoolean(Constants.BUNDLE_LYRICS_VISIBLE) == true) {
             findViewById<View>(R.id.lyricsDisplay).visibility = View.VISIBLE
@@ -70,12 +70,12 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
 
         val saveButton = findViewById<Button>(R.id.buttonLibraryAdd)
         saveButton.setOnClickListener {
-            if (NoteStream.instance?.library?.isSaved(psb?.currentPlayable) == true) {
-                NoteStream.instance?.library?.removePlayable(psb?.currentPlayable)
+            if (NoteStream.instance.data.isSaved(psb?.currentPlayable) == true) {
+                NoteStream.instance.data.removePlayable(psb?.currentPlayable)
                 saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_add)
                 psb!!.switchNext()
             } else {
-                NoteStream.instance?.library?.savePlayable(psb?.currentPlayable)
+                NoteStream.instance.data.savePlayable(psb?.currentPlayable)
                 saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_check)
             }
         }
@@ -202,7 +202,7 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         }
 
         val saveButton = findViewById<Button>(R.id.buttonLibraryAdd)
-        if (NoteStream.instance?.library?.isSaved(psb?.currentPlayable) == true) {
+        if (NoteStream.instance.data.isSaved(psb?.currentPlayable) == true) {
             saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_check)
         } else {
             saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_add)

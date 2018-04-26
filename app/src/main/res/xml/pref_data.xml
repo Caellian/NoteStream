@@ -34,15 +34,4 @@
         android:summary="Download music using cellular internet connection. (Recommended: Off)"
         android:title="Download Using Cellular" />
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="fast_download_switch"
-        android:summary="Download music using multiple connections. Actual download speed will vary depending on network conditions."
-        android:title="Fast Download Mode" />
-
-    <Preference
-        android:key="fast_download_options"
-        android:summary="More fast download options."
-        android:title="Fast Download Options" />
-
 </PreferenceScreen>

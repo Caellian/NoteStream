@@ -20,22 +20,17 @@ package hr.caellian.notestream.gui.fragments
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Intent
-import android.graphics.Interpolator
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.BounceInterpolator
-import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.TextView
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
 import hr.caellian.notestream.data.playable.PlayableRemote
-import hr.caellian.notestream.data.playlist.Playlist
 import hr.caellian.notestream.data.playlist.PlaylistIterator
 import hr.caellian.notestream.gui.ActivityPlayer
 import hr.caellian.notestream.gui.PlayablePopupMenu
@@ -65,7 +60,7 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
                 return@OnClickListener
             }
 
-            val psb = NoteStream.instance?.psb
+            val psb = NoteStream.instance.psb
             if (psb?.currentPlayable != playable) {
                 psb?.playAt(iterator, playable)
             } else {
@@ -147,7 +142,8 @@ class FragmentItemPlayable : FragmentPlayableMediator() {
             val fragment = FragmentItemPlayable()
 
             val args = Bundle()
-            args.putString(Constants.EXTRA_PLAYLIST, playlistIterator.playlist?.id ?: Constants.PLAYLIST_EMPTY_ID)
+            args.putString(Constants.EXTRA_PLAYLIST, playlistIterator.playlist?.id
+                    ?: Constants.PLAYLIST_EMPTY_ID)
             args.putString(Constants.EXTRA_ITERATOR, playlistIterator.id)
             args.putBoolean(Constants.EXTRA_ITERATOR_ASCENDING, playlistIterator.ascending)
             args.putString(Constants.EXTRA_PLAYABLE, playable.id)

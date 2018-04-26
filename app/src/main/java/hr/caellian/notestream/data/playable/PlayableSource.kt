@@ -27,7 +27,7 @@ enum class PlayableSource(val id: String, private val displayName: Int) {
     OTHER("unknown", R.string.location_unknown);
 
     fun localizedDisplayName(): String {
-        return NoteStream.instance?.getString(this.displayName) ?: ""
+        return NoteStream.instance.getString(this.displayName) ?: ""
     }
 
     companion object {

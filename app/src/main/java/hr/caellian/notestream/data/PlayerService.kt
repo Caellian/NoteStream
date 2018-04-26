@@ -288,7 +288,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                 mp.start()
 
                 currentPlayable?.let {
-                    NoteStream.instance?.library?.lastListened?.add(it)
+                    NoteStream.instance.data.lastListened.add(it)
                 }
 
                 for (controlListener in NoteStream.CONTROL_LISTENERS) {
