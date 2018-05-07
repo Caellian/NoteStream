@@ -61,8 +61,7 @@ class ActivitySearch : NavigationActivity() {
                 val searched = charSequence.toString()
 
                 resultList.clear()
-                resultList.addAll(NoteStream.instance.data.localMusic?.filtered(searched)
-                        ?: emptyList())
+                resultList.addAll(NoteStream.instance.data.localMusic.filtered(searched))
             }
 
             override fun afterTextChanged(editable: Editable) {

@@ -41,6 +41,7 @@ object Util {
         }
     }
 
+    @Suppress("NAME_SHADOWING")
     fun drawableToBitmap(drawableID: Int, width: Int = -1, height: Int = -1): Bitmap {
         var width = width
         var height = height

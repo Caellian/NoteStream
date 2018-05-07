@@ -102,11 +102,6 @@ class NoteStreamData {
             if (!result) return false
 
             savedMusic.add(playable)
-            try {
-                pref?.edit()?.putString("addedTimestamps", "" /* ObjectSerializer.serialize(addedTimestamps)*/)?.apply()
-            } catch (e: IOException) {
-                Log.e(TAG, "savePlayable: unable to update 'addedTimestamps' preference!", e)
-            }
 
             if (playable is PlayableLocal) {
                 hiddenMusic.remove(playable)
@@ -122,11 +117,6 @@ class NoteStreamData {
             if (!result) return false
 
             savedMusic.remove(playable)
-            try {
-                pref?.edit()?.putString("addedTimestamps", "" /* ObjectSerializer.serialize(addedTimestamps)*/)?.apply()
-            } catch (e: IOException) {
-                Log.e(TAG, "removePlayable: unable to update 'addedTimestamps' preference!", e)
-            }
 
             if (playable is PlayableLocal) {
                 hiddenMusic.add(playable)

@@ -120,9 +120,10 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
         list.forEach {
             statement = "INSERT OR IGNORE INTO $DB_PLAYLIST_PREFIX$dbid " +
                     "($TRACK_ID, $TRACK_TIMESTAMP) VALUES " +
-                    "(\"${it.id}\", ${pl.timestamps[it]});"
+                    "(\"${it.id}\", ${pl.timestamps[it]}); "
             writableDatabase.execSQL(statement)
         }
+
 
         val columns = arrayOf(TRACK_ID, TRACK_TIMESTAMP)
         (writableDatabase.query("$DB_PLAYLIST_PREFIX$dbid", columns, null, null, null, null, null))
@@ -220,18 +221,15 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
                 "($TRACK_ID, $TRACK_SOURCE, $TRACK_PATH, $TRACK_TITLE, $TRACK_AUTHOR, " +
                 "$TRACK_ALBUM, $TRACK_YEAR, $TRACK_TRACK, $TRACK_GENRE, $TRACK_RATING, " +
                 "$TRACK_LYRICS, $TRACK_START, $TRACK_END, $TRACK_LENGTH, $TRACK_COVER_PATH) VALUES " +
-                "(\"${p.id}\", \"${p.playableSource.id}\", \"${p.path}\", \"${pInfo.title
-                        ?: ""}\", " +
-                "\"${pInfo.author ?: ""}\", \"${pInfo.album ?: ""}\", ${pInfo.year
-                        ?: 0}, ${pInfo.track ?: 0}, " +
-                "\"${pInfo.genre ?: ""}\", ${pInfo.rating}, \"${pInfo.lyrics
-                        ?: ""}\", ${pInfo.start}, " +
+                "(\"${p.id}\", \"${p.playableSource.id}\", \"${p.path}\", \"${makeDBSafeString(pInfo.title ?: "")}\", " +
+                "\"${makeDBSafeString(pInfo.author ?: "")}\", \"${makeDBSafeString(pInfo.album ?: "")}\", ${pInfo.year ?: 0}, ${pInfo.track ?: 0}, " +
+                "\"${pInfo.genre ?: ""}\", ${pInfo.rating}, \"${pInfo.lyrics ?: ""}\", ${pInfo.start}, " +
                 "${pInfo.end}, ${pInfo.length}, \"${pInfo.coverPath}\");"
 
         try {
             writableDatabase.execSQL(statement)
         } catch (e: SQLiteException) {
-            Log.w("Database", "Unable execute SQL statement: $statement")
+            Log.w("Database", "Unable to execute SQL statement: $statement")
         }
     }
 
@@ -246,7 +244,7 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
     }
 
     fun removePlayable(p: Playable) {
-        val statement = "DELETE FROM $DB_PLAYABLES_ID WHERE $TRACK_ID = \"${p.id}\"; VACUUM;"
+        val statement = "DELETE FROM $DB_PLAYABLES_ID WHERE $TRACK_ID = \"${p.id}\";"
         writableDatabase.execSQL(statement)
 
         NoteStream.instance.data.playlists.forEach {
@@ -255,19 +253,19 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
     }
 
     fun removeFromPlaylist(p: Playable, playlist: String) {
-        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(playlist)} WHERE $TRACK_ID = \"${p.id}\"; VACUUM;"
+        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(playlist)} WHERE $TRACK_ID = \"${p.id}\";"
 
         writableDatabase.execSQL(statement)
     }
 
     fun removeFromPlaylist(p: Playable, from: Playlist) {
-        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(from.id)} WHERE $TRACK_ID = \"${p.id}\"; VACUUM;"
+        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(from.id)} WHERE $TRACK_ID = \"${p.id}\";"
 
         writableDatabase.execSQL(statement)
     }
 
     fun removePlaylist(pl: Playlist) {
-        var statement = "DROP TABLE IF EXISTS $DB_PLAYLIST_PREFIX${makeDBSafeString(pl.id)}; VACUUM;"
+        var statement = "DROP TABLE IF EXISTS $DB_PLAYLIST_PREFIX${makeDBSafeString(pl.id)};"
         writableDatabase.execSQL(statement)
 
         statement = "DELETE FROM $DB_PLAYLIST_INFO_ID WHERE $PLAYLIST_ID = \"${pl.id}\";"
@@ -275,9 +273,13 @@ object NoteStreamDB : SQLiteOpenHelper(NoteStream.instance, Constants.DB_NAME, n
     }
 
     fun clearPlaylist(pl: Playlist) {
-        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(pl.id)}; VACUUM;"
+        val statement = "DELETE FROM $DB_PLAYLIST_PREFIX${makeDBSafeString(pl.id)};"
 
         writableDatabase.execSQL(statement)
+    }
+
+    fun vacuum() {
+        writableDatabase.execSQL("VACUUM;")
     }
 
     fun makeDBSafeString(s: String): String = s.replace(Regex("[^\\w\\d]"), "")

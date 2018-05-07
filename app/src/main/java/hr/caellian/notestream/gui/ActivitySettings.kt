@@ -128,8 +128,9 @@ class ActivitySettings : AppCompatPreferenceActivity() {
             addPreferencesFromResource(R.xml.pref_data)
             setHasOptionsMenu(true)
 
+            bindPreferenceSummaryToValue(findPreference("offline_switch"))
             bindPreferenceSummaryToValue(findPreference("buffered_playlist"))
-            bindPreferenceSummaryToValue(findPreference("fast_download_options"))
+            bindPreferenceSummaryToValue(findPreference("cellular_switch"))
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {

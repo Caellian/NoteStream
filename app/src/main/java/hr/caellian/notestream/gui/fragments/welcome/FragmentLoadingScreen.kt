@@ -36,12 +36,14 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.NoteStreamData
 import hr.caellian.notestream.data.playable.PlayableLocal
+import hr.caellian.notestream.database.NoteStreamDB
 import hr.caellian.notestream.gui.ActivityLibrary
 
-class FragmentLoadingScreen : Fragment() {
-    lateinit var rootView: View
+import kotlinx.android.synthetic.main.content_loading.*
 
+class FragmentLoadingScreen : Fragment() {
     var ready = false
+    var loaded = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.content_loading, container, false)!!
@@ -52,6 +54,13 @@ class FragmentLoadingScreen : Fragment() {
 
         if (ready) {
             load()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (loaded) {
+            activity?.finish()
         }
     }
 
@@ -68,6 +77,8 @@ class FragmentLoadingScreen : Fragment() {
     private fun load() {
         val data = NoteStreamData()
 
+        NoteStreamDB.vacuum()
+
         if (NoteStream.instance.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             val extUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
             val selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0"
@@ -76,17 +87,17 @@ class FragmentLoadingScreen : Fragment() {
             val cur = NoteStream.instance.contentResolver.query(extUri, null, selection, null, sortOrder)
             if (cur != null) {
                 if (cur.count > 0) {
-                    rootView.findViewById<RoundCornerProgressBar>(R.id.progressBarLoading).max = cur.count.toFloat()
+                    progressBarLoading.max = cur.count.toFloat()
                     var counter = 1
                     OuterLoop@ while (cur.moveToNext()) {
-                        rootView.findViewById<RoundCornerProgressBar>(R.id.progressBarLoading).progress = counter++.toFloat()
+                        progressBarLoading.progress = counter++.toFloat()
                         val path = cur.getString(cur.getColumnIndex(MediaStore.Audio.Media.DATA))
 
-                        rootView.findViewById<TextView>(R.id.textViewLoading).text = NoteStream.instance.getString(R.string.checking_pointer, path)
+                        textViewLoading.text = NoteStream.instance.getString(R.string.checking_pointer, path)
 
                         if (data.localMusic.playlist.any { it.id == PlayableLocal.getId(path) }) continue@OuterLoop
 
-                        rootView.findViewById<TextView>(R.id.textViewLoading).text = NoteStream.instance.getString(R.string.loading_pointer, path)
+                        textViewLoading.text = NoteStream.instance.getString(R.string.loading_pointer, path)
 
                         val playable = PlayableLocal(path)
                         if (!playable.info.setFromDatabase()) {
@@ -105,6 +116,7 @@ class FragmentLoadingScreen : Fragment() {
 
         val intent = Intent(NoteStream.instance, ActivityLibrary::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        loaded = true
         startActivity(intent)
     }
 }

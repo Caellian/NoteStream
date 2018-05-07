@@ -54,8 +54,7 @@ abstract class NavigationActivity : AppCompatActivity(), NavigationView.OnNaviga
             }
             R.id.nav_songs -> {
                 intent = Intent(this, ActivityPlaylist::class.java)
-                intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance.data.savedMusic?.id
-                        ?: Constants.PLAYLIST_EMPTY_ID)
+                intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance.data.savedMusic.id)
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)
             }
@@ -78,8 +77,7 @@ abstract class NavigationActivity : AppCompatActivity(), NavigationView.OnNaviga
             }
             R.id.nav_local -> {
                 intent = Intent(this, ActivityPlaylist::class.java)
-                intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance.data.localMusic?.id
-                        ?: Constants.PLAYLIST_EMPTY_ID)
+                intent.putExtra(Constants.EXTRA_PLAYLIST, NoteStream.instance.data.localMusic.id)
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)
             }

@@ -40,6 +40,8 @@ import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
 import hr.caellian.notestream.lib.Constants
 import java.util.*
 
+import kotlinx.android.synthetic.main.content_playlist.*
+
 class ActivityPlaylist : NavigationActivity(), NoteStreamData.LibraryListener {
 
     internal var active = true
@@ -70,7 +72,7 @@ class ActivityPlaylist : NavigationActivity(), NoteStreamData.LibraryListener {
             finish()
         }
 
-        findViewById<View>(R.id.buttonShufflePlay)?.also {
+        buttonShufflePlay.also {
             it.setOnClickListener {
                 if (psb == null) {
                     Toast.makeText(this, getString(R.string.null_player_service), Toast.LENGTH_SHORT).show()
@@ -92,7 +94,9 @@ class ActivityPlaylist : NavigationActivity(), NoteStreamData.LibraryListener {
             }
         }
 
-        findViewById<EditText>(R.id.textFilter).addTextChangedListener(object : TextWatcher {
+        buttonShufflePlay.text = "${playlist.size()}"
+
+        textFilter.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
 
             }
@@ -108,9 +112,8 @@ class ActivityPlaylist : NavigationActivity(), NoteStreamData.LibraryListener {
             }
         })
 
-        val orderButton = findViewById<Button>(R.id.buttonOrder)
-        orderButton.setOnClickListener {
-            val popup = PopupMenu(this, orderButton)
+        buttonOrder.setOnClickListener {
+            val popup = PopupMenu(this, buttonOrder)
             popup.menuInflater.inflate(R.menu.menu_order, popup.menu)
 
             popup.setOnMenuItemClickListener { item ->

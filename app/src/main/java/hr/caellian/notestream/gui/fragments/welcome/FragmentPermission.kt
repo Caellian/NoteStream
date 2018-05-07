@@ -39,6 +39,8 @@ import hr.caellian.notestream.gui.ActivityWelcome
 open class FragmentPermission : Fragment() {
     lateinit var rootView: View
 
+    var waiting = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootView = inflater.inflate(R.layout.content_permission, container, false)!!
 
@@ -67,7 +69,7 @@ open class FragmentPermission : Fragment() {
             }
 
             rootView.findViewById<Button>(R.id.buttonAllow).setOnClickListener {
-                (activity as ActivityWelcome).onFragmentUpdate(this@FragmentPermission)
+                waiting = true
                 requestPermissions(arrayOf(permission), Constants.APP_REQUEST_CODE)
 
                 NoteStream.instance.preferences.edit()
@@ -94,8 +96,9 @@ open class FragmentPermission : Fragment() {
                 rootView.findViewById<Button>(R.id.buttonDeny)?.visibility = View.GONE
                 rootView.findViewById<Button>(R.id.buttonAllow)?.visibility = View.VISIBLE
             }
-
         }
+
+        if (waiting) (activity as ActivityWelcome).onFragmentUpdate(this@FragmentPermission)
     }
 
     companion object {

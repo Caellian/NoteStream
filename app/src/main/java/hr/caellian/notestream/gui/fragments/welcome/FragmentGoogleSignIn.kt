@@ -36,23 +36,22 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.gui.ActivityWelcome
 import hr.caellian.notestream.lib.Constants
+import kotlinx.android.synthetic.main.content_google_sign_in.*
 
 class FragmentGoogleSignIn : Fragment() {
-    lateinit var rootView: View
-
     private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        rootView = inflater.inflate(R.layout.content_google_sign_in, container, false)!!
+        val rootView = inflater.inflate(R.layout.content_google_sign_in, container, false)!!
 
         val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).also {
             it.requestScopes(Scope(Constants.Scopes[0]),Scope(Constants.Scopes[1]))
             it.requestIdToken("945221734020-ftqp0ip2bmjb793o0juodfrsuap2qqdb.apps.googleusercontent.com")
             it.requestEmail()
         }.build()
-        googleSignInClient = GoogleSignIn.getClient(rootView.context, options)
+        googleSignInClient = GoogleSignIn.getClient(container!!.context, options)
 
-        rootView.findViewById<SignInButton>(R.id.sign_in_button).apply {
+        sign_in_button.apply {
             setSize(SignInButton.SIZE_STANDARD)
             setOnClickListener {
                 when (it.id) {
@@ -61,7 +60,7 @@ class FragmentGoogleSignIn : Fragment() {
             }
         }
 
-        rootView.findViewById<Button>(R.id.buttonSkip).setOnClickListener {
+        buttonSkip.setOnClickListener {
             NoteStream.instance.preferences.edit()
                     .putBoolean(Constants.CHECK_GOOGLE_SIGN_IN, false)
                     .apply()
@@ -86,10 +85,10 @@ class FragmentGoogleSignIn : Fragment() {
                 NoteStream.instance.googleAccountCredential = GoogleAccountCredential.usingOAuth2(NoteStream.instance, Constants.Scopes).also {
                     it.selectedAccount = NoteStream.instance.googleAccount!!.account
                 }
-                rootView.findViewById<SignInButton>(R.id.sign_in_button)?.visibility = View.GONE
+                sign_in_button.visibility = View.GONE
             } catch (e: ApiException) {
 //                Toast.makeText(rootView.context, R.string.google_sign_in_fail, Toast.LENGTH_LONG).show()
-                Toast.makeText(rootView.context, "signInResult:failed code=${e.statusCode}", Toast.LENGTH_LONG).show()
+                Toast.makeText(view?.context, "signInResult:failed code=${e.statusCode}", Toast.LENGTH_LONG).show()
             }
         }
     }

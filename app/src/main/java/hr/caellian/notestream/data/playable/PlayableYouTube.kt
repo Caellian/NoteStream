@@ -34,6 +34,7 @@ import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.PlayableInfo
 import hr.caellian.notestream.data.youtube.ThumbnailDecoder
+import hr.caellian.notestream.data.youtube.YouTubeFetcher
 import hr.caellian.notestream.lib.Constants
 import java.io.IOException
 
@@ -162,7 +163,7 @@ class PlayableYouTube(val youtubeID: String,
         }
 
         fun getSearch(data: String): PlayableYouTube? {
-            return null
+            return YouTubeFetcher.searchVideos(data).firstOrNull()
         }
     }
 }

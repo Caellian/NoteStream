@@ -35,6 +35,8 @@ import hr.caellian.notestream.data.playable.PlayableDownloadable
 import hr.caellian.notestream.lib.Constants
 import hr.caellian.notestream.util.RepeatState
 import hr.caellian.notestream.util.Util.timeToString
+import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.android.synthetic.main.content_player.*
 import java.util.*
 
 class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSelectedListener, Playable.ControlListener, Playable.ProgressListener {
@@ -56,10 +58,10 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             findViewById<View>(R.id.lyricsDisplay).visibility = View.VISIBLE
         }
 
-        findViewById<TextView>(R.id.labelSongTitle).isSelected = true
-        findViewById<TextView>(R.id.labelSongAuthor).isSelected = true
+        labelSongTitle.isSelected = true
+        labelSongAuthor.isSelected = true
 
-        navigationView = findViewById(R.id.nav_view)
+        navigationView = nav_view
         navigationView?.setNavigationItemSelectedListener(this)
 
         findViewById<Button>(R.id.buttonDownload).setOnClickListener {
@@ -68,19 +70,18 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             }
         }
 
-        val saveButton = findViewById<Button>(R.id.buttonLibraryAdd)
-        saveButton.setOnClickListener {
-            if (NoteStream.instance.data.isSaved(psb?.currentPlayable) == true) {
+        buttonLibraryAdd.setOnClickListener {
+            if (NoteStream.instance.data.isSaved(psb?.currentPlayable)) {
                 NoteStream.instance.data.removePlayable(psb?.currentPlayable)
-                saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_add)
-                psb!!.switchNext()
+                buttonLibraryAdd.background = ContextCompat.getDrawable(this, R.drawable.ic_add)
+                psb?.switchNext()
             } else {
                 NoteStream.instance.data.savePlayable(psb?.currentPlayable)
-                saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_check)
+                buttonLibraryAdd.background = ContextCompat.getDrawable(this, R.drawable.ic_check)
             }
         }
 
-        findViewById<SeekBar>(R.id.songProgressBar).setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        songProgressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     psb?.progress = progress
@@ -93,12 +94,9 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         })
 
 
-        findViewById<Button>(R.id.buttonShuffle)?.setOnClickListener {
+        buttonShuffle.setOnClickListener {
             psb?.setShuffle(!psb!!.doShuffle())
         }
-
-        val buttonPrevious = findViewById<Button>(R.id.buttonPrevious)
-        val buttonNext = findViewById<Button>(R.id.buttonNext)
 
         buttonPrevious.setOnClickListener { psb!!.switchPrevious() }
 
@@ -134,21 +132,19 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
             true
         }
 
-        findViewById<Button>(R.id.buttonTogglePlay).setOnClickListener { psb!!.togglePlay() }
+        buttonTogglePlay.setOnClickListener { psb!!.togglePlay() }
 
-        findViewById<Button>(R.id.buttonRepeat).setOnClickListener { psb!!.toggleRepeat() }
+        buttonRepeat.setOnClickListener { psb!!.toggleRepeat() }
 
-        findViewById<ImageView>(R.id.albumImage).setOnLongClickListener {
-            findViewById<View>(R.id.lyricsDisplay).visibility = View.VISIBLE
+        albumImage.setOnLongClickListener {
+            lyricsDisplay.visibility = View.VISIBLE
             true
         }
 
 
-        setOf(findViewById<View>(R.id.lyricsDisplay),
-                findViewById(R.id.lyricsContainer),
-                findViewById(R.id.textViewLyrics)).forEach {
+        setOf(lyricsDisplay, lyricsContainer, textViewLyrics).forEach {
             it.setOnLongClickListener {
-                findViewById<View>(R.id.lyricsDisplay).visibility = View.GONE
+                lyricsDisplay.visibility = View.GONE
                 true
             }
         }
@@ -187,81 +183,78 @@ class ActivityPlayer : NavigationActivity(), NavigationView.OnNavigationItemSele
         if (current == null) return
 
         val metadata = current.info
-        findViewById<ImageView>(R.id.albumImage).setImageBitmap(metadata.cover)
+        albumImage.setImageBitmap(metadata.cover)
 
         val lyrics = metadata.lyrics
-        (findViewById<TextView>(R.id.textViewLyrics)).text = lyrics
+        textViewLyrics.text = lyrics
 
         findViewById<View>(R.id.lyricsDisplay).visibility = View.GONE
-        (findViewById<TextView>(R.id.labelSource)).text = current.playableSource.localizedDisplayName()
+        labelSource.text = current.playableSource.localizedDisplayName()
 
-        if (current is PlayableDownloadable) {
-            findViewById<Button>(R.id.buttonDownload).visibility = View.VISIBLE
+        buttonDownload.visibility = if (current is PlayableDownloadable) {
+            View.VISIBLE
         } else {
-            findViewById<Button>(R.id.buttonDownload).visibility = View.INVISIBLE
+            View.INVISIBLE
         }
 
-        val saveButton = findViewById<Button>(R.id.buttonLibraryAdd)
-        if (NoteStream.instance.data.isSaved(psb?.currentPlayable) == true) {
-            saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_check)
+        buttonLibraryAdd.background = if (NoteStream.instance.data.isSaved(psb?.currentPlayable)) {
+            ContextCompat.getDrawable(this, R.drawable.ic_check)
         } else {
-            saveButton.background = ContextCompat.getDrawable(this, R.drawable.ic_add)
+            ContextCompat.getDrawable(this, R.drawable.ic_add)
         }
 
-        (findViewById<TextView>(R.id.labelSongTitle)).text = metadata.title
-        (findViewById<TextView>(R.id.labelSongAuthor)).text = metadata.author
+        labelSongTitle.text = metadata.title
+        labelSongAuthor.text = metadata.author
 
-        findViewById<Button>(R.id.buttonMenu).setOnClickListener(object : View.OnClickListener {
+        buttonMenu.setOnClickListener(object : View.OnClickListener {
             internal var playablePopupMenu: PlayablePopupMenu? = null
 
             override fun onClick(v: View) {
                 if (playablePopupMenu == null) {
                     psb?.currentPlayable?.also {
-                        playablePopupMenu = PlayablePopupMenu(this@ActivityPlayer, findViewById(R.id.buttonMenu), it)
+                        playablePopupMenu = PlayablePopupMenu(this@ActivityPlayer, buttonMenu, it)
                     }
                 }
                 playablePopupMenu?.show()
             }
         })
 
-        findViewById<SeekBar>(R.id.songProgressBar).max = metadata.length
+        songProgressBar.max = metadata.length
 
-        val length = findViewById<TextView>(R.id.labelLength)
-        length.text = timeToString(metadata.length)
+        labelLength.text = timeToString(metadata.length)
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         outState?.run {
-            putBoolean(Constants.BUNDLE_LYRICS_VISIBLE, findViewById<View>(R.id.lyricsDisplay).visibility == View.VISIBLE)
+            putBoolean(Constants.BUNDLE_LYRICS_VISIBLE, lyricsDisplay.visibility == View.VISIBLE)
         }
 
         super.onSaveInstanceState(outState)
     }
 
     override fun onPlayStatusChanged(playing: Boolean) {
-        if (!playing) {
-            findViewById<Button>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this, R.drawable.ic_play_circle)
+        buttonTogglePlay.background = if (!playing) {
+            ContextCompat.getDrawable(this, R.drawable.ic_play_circle)
         } else {
-            findViewById<Button>(R.id.buttonTogglePlay)?.background = ContextCompat.getDrawable(this, R.drawable.ic_pause_circle)
+            ContextCompat.getDrawable(this, R.drawable.ic_pause_circle)
         }
     }
 
     override fun onShuffleStateChanged(currentState: Boolean) {
-        if (currentState) {
-            findViewById<Button>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this, R.drawable.ic_shuffle_on)
+        buttonShuffle.background = if (currentState) {
+            ContextCompat.getDrawable(this, R.drawable.ic_shuffle_on)
         } else {
-            findViewById<Button>(R.id.buttonShuffle)?.background = ContextCompat.getDrawable(this, R.drawable.ic_shuffle)
+            ContextCompat.getDrawable(this, R.drawable.ic_shuffle)
         }
     }
 
     override fun onRepeatStateChanged(currentState: RepeatState) {
-        findViewById<Button>(R.id.buttonRepeat)?.background = currentState.getDrawable(this)
+        buttonRepeat.background = currentState.getDrawable(this)
     }
 
     override fun onBackPressed() {
-        val drawer = findViewById<DrawerLayout>(R.id.player_layout)
-        if (drawer.isDrawerOpen(GravityCompat.END)) {
-            drawer.closeDrawer(GravityCompat.END)
+        if (player_layout.isDrawerOpen(GravityCompat.END)) {
+            player_layout.closeDrawer(GravityCompat.END)
         } else {
             super.onBackPressed()
         }

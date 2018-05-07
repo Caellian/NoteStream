@@ -21,6 +21,7 @@ import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.extensions.android.json.AndroidJsonFactory
 import com.google.api.services.youtube.YouTube
 import hr.caellian.notestream.NoteStream
+import hr.caellian.notestream.data.playable.PlayableYouTube
 import hr.caellian.notestream.lib.Constants
 
 import hr.caellian.notestream.lib.Constants.KA as a
@@ -38,11 +39,14 @@ object YouTubeFetcher {
             YouTube.Builder(httpTransport, jsonFactory, NoteStream.instance.googleAccountCredential)
             .setApplicationName(Constants.ApplicationName).build()
 
-    fun searchVideos() {
+    fun searchVideos(query: String): List<PlayableYouTube> {
+        val result = mutableListOf<PlayableYouTube>()
         val search = youTube.search().list("id,snippet")
+
+        return result
     }
 
-    fun searchPlaylists() {
+    fun searchPlaylists(query: String) {
         val search = youTube.search().list("id,snippet")
 
     }

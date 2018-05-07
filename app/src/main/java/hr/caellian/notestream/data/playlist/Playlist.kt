@@ -59,7 +59,6 @@ class Playlist private constructor(val id: String, author: String = "", label: S
     val coverBitmaps: List<Bitmap>
         get() = playlist.filter { it.info.cover !== PlayableInfo.DEFAULT_COVER }
                 .map { it.info.cover }
-                .subList(0, 4)
 
     fun add(other: Playlist): Playlist {
         return add(other.playlist)
@@ -75,7 +74,6 @@ class Playlist private constructor(val id: String, author: String = "", label: S
             NoteStreamDB.addToPlaylist(playable, this)
             NoteStream.instance.data.onPlayableAddedToPlaylist(playable, this)
         }
-//        NoteStreamDB.writableDatabase.close()
 
         trimToCapacity()
         return this
@@ -87,7 +85,12 @@ class Playlist private constructor(val id: String, author: String = "", label: S
         playlist.add(playable)
         timestamps[playable] = System.currentTimeMillis()
         NoteStreamDB.addToPlaylist(playable, this)
-        NoteStream.instance.data.onPlayableAddedToPlaylist(playable, this)
+        try {
+            NoteStream.instance.data.onPlayableAddedToPlaylist(playable, this)
+        } catch (e: UninitializedPropertyAccessException) {
+            // Perfectly normal for library init.
+        }
+
 
         trimToCapacity()
         return this

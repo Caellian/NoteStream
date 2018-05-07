@@ -122,7 +122,7 @@ abstract class FragmentPlayableMediator(val orientation: Int = LinearLayout.HORI
 
     override fun onPlayableRemovedFromPlaylist(playable: Playable, playlist: Playlist) {
         if (playable == argumentPlayable && playlist == argumentPlaylist) {
-            view.visibility = View.GONE
+            view?.visibility = View.GONE
         }
     }
 
