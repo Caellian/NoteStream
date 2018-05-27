@@ -30,12 +30,11 @@ import java.net.URL
 /**
  * Created by caellian on 02/01/18.
  */
-class ThumbnailDecoder(private var resultConsumer: (Bitmap) -> Unit) : AsyncTask<VideoMeta, Void, Bitmap?>() {
-    override fun doInBackground(vararg videoMeta: VideoMeta): Bitmap? {
-        val meta = videoMeta[0]
+class ThumbnailDecoder(private var resultConsumer: (Bitmap) -> Unit) : AsyncTask<String, Void, Bitmap?>() {
+    override fun doInBackground(vararg imageURL: String): Bitmap? {
         val url: URL
         try {
-            url = URL(meta.maxResImageUrl)
+            url = URL(imageURL[0])
         } catch (e: MalformedURLException) {
             return null
         }

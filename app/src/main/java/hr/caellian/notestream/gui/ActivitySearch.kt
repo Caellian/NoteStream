@@ -18,6 +18,7 @@
 package hr.caellian.notestream.gui
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.widget.DrawerLayout
 import android.text.Editable
 import android.text.TextWatcher
@@ -27,19 +28,41 @@ import android.widget.LinearLayout
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.R
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.data.playable.PlayableYouTube
 import hr.caellian.notestream.data.playlist.PlaylistIterator
+import hr.caellian.notestream.data.playlist.PlaylistYouTube
+import hr.caellian.notestream.data.youtube.YouTubeFetcher
 import hr.caellian.notestream.gui.fragments.FragmentItemPlayable
+import hr.caellian.notestream.gui.fragments.FragmentPlaylistTile
+import hr.caellian.notestream.gui.fragments.FragmentTileYouTube
 import java.util.*
 
 class ActivitySearch : NavigationActivity() {
     internal var showingResults = false
-    val resultList = mutableListOf<Playable>()
+    val youtubePlaylists = mutableListOf<PlaylistYouTube>()
+    val youtubeResults = mutableListOf<PlayableYouTube>()
+    val localResults = mutableListOf<Playable>()
 
     private var fragmentCounter = 0
-    private val searchItems = ArrayList<FragmentItemPlayable>()
+
+    private val searchHandler = Handler()
 
     override val drawerLayout: DrawerLayout?
         get() = findViewById<View>(R.id.search_layout) as DrawerLayout
+
+
+    private val youtubeSearch = Runnable {
+        val query = findViewById<EditText>(R.id.textEditSearch)?.text?.toString()!!
+        youtubePlaylists.clear()
+        youtubeResults.clear()
+
+        youtubePlaylists += YouTubeFetcher.searchPlaylists(query)
+        youtubeResults += YouTubeFetcher.searchVideos(query)
+
+        refreshSearchResults()
+        findViewById<EditText>(R.id.youtubePlaylistArea)?.visibility = View.VISIBLE
+        findViewById<EditText>(R.id.youtubePlayableArea)?.visibility = View.VISIBLE
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(null)
@@ -50,7 +73,9 @@ class ActivitySearch : NavigationActivity() {
 
         findViewById<View>(R.id.buttonClearSearch)?.setOnClickListener {
             (findViewById<View>(R.id.textEditSearch) as? EditText)?.setText("")
-            resultList.clear()
+            localResults.clear()
+            findViewById<EditText>(R.id.youtubePlaylistArea)?.visibility = View.GONE
+            findViewById<EditText>(R.id.youtubePlayableArea)?.visibility = View.GONE
             refreshSearchResults()
         }
 
@@ -59,9 +84,13 @@ class ActivitySearch : NavigationActivity() {
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 val searched = charSequence.toString()
+                findViewById<EditText>(R.id.youtubePlaylistArea)?.visibility = View.GONE
+                findViewById<EditText>(R.id.youtubePlayableArea)?.visibility = View.GONE
 
-                resultList.clear()
-                resultList.addAll(NoteStream.instance.data.localMusic.filtered(searched))
+                localResults.clear()
+                localResults += NoteStream.instance.data.localMusic.filtered(searched)
+                searchHandler.removeCallbacks(youtubeSearch)
+                searchHandler.postDelayed(youtubeSearch,2000)
             }
 
             override fun afterTextChanged(editable: Editable) {
@@ -71,15 +100,26 @@ class ActivitySearch : NavigationActivity() {
     }
 
     fun refreshSearchResults() {
-        findViewById<LinearLayout>(R.id.foundContent)?.removeAllViewsInLayout()
-        searchItems.clear()
+        findViewById<LinearLayout>(R.id.localPlayable)?.removeAllViewsInLayout()
+        findViewById<LinearLayout>(R.id.youtubePlayable)?.removeAllViewsInLayout()
+        findViewById<LinearLayout>(R.id.localPlayable)?.removeAllViewsInLayout()
 
         val fm = fragmentManager
         val ft = fm.beginTransaction()
-        for (playable in resultList) {
-            val fragment = FragmentItemPlayable.newInstance(playable, PlaylistIterator(resultList))
-            searchItems.add(fragment)
-            ft.add(R.id.foundContent, fragment, "resultFragment-" + fragmentCounter++)
+
+        for (playable in localResults) {
+            val fragment = FragmentItemPlayable.newInstance(playable, PlaylistIterator(localResults))
+            ft.add(R.id.localPlayable, fragment, "resultFragment-" + fragmentCounter++)
+        }
+
+        for (playable in youtubeResults) {
+            val fragment = FragmentItemPlayable.newInstance(playable, PlaylistIterator(youtubeResults))
+            ft.add(R.id.youtubePlayable, fragment, "resultFragment-" + fragmentCounter++)
+        }
+
+        for (playlist in youtubePlaylists) {
+            val fragment = FragmentTileYouTube.create(playlist)
+            ft.add(R.id.localPlayable, fragment, "resultFragment-" + fragmentCounter++)
         }
         ft.commit()
     }
@@ -87,7 +127,7 @@ class ActivitySearch : NavigationActivity() {
     override fun onBackPressed() {
         if ((findViewById<View>(R.id.textEditSearch) as EditText?)?.text.toString() != "") {
             (findViewById<View>(R.id.textEditSearch) as EditText?)?.setText("")
-            resultList.clear()
+            localResults.clear()
             refreshSearchResults()
         } else {
             super.onBackPressed()

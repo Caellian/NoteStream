@@ -21,22 +21,29 @@ import android.graphics.Bitmap
 import hr.caellian.notestream.NoteStream
 import hr.caellian.notestream.data.PlayableInfo
 import hr.caellian.notestream.data.playable.Playable
+import hr.caellian.notestream.data.playable.PlayableSource
 import hr.caellian.notestream.database.NoteStreamDB
 import hr.caellian.notestream.lib.Constants
 import java.util.*
 import kotlin.concurrent.thread
 
-class Playlist private constructor(val id: String, author: String = "", label: String = "", capacity: Int = 512, data: List<Playable> = mutableListOf()) {
+class Playlist private constructor(val id: String, author: String = "", label: String = "", capacity: Int = 512, data: List<Playable> = mutableListOf()): PlaylistCore {
+
+    override val source = PlayableSource.LOCAL
+    override val path: String = id
+
+    override fun get(): Playlist = this
+
     val playlist = data as MutableList
 
-    var label: String = label
+    override var label: String = label
         set(value) {
             field = value
             thread {
                 NoteStreamDB.updatePlaylist(this)
             }
         }
-    var author: String = author
+    override var author: String = author
         set(value) {
             field = value
             thread {
@@ -56,9 +63,12 @@ class Playlist private constructor(val id: String, author: String = "", label: S
 
     val timestamps = mutableMapOf<Playable, Long>()
 
-    val coverBitmaps: List<Bitmap>
-        get() = playlist.filter { it.info.cover !== PlayableInfo.DEFAULT_COVER }
+    override var coverBitmaps: MutableList<Bitmap>
+        set(value) {}
+        get() = playlist
+                .filter { it.info.cover !== PlayableInfo.DEFAULT_COVER }
                 .map { it.info.cover }
+                .toMutableList()
 
     fun add(other: Playlist): Playlist {
         return add(other.playlist)

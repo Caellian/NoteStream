@@ -21,10 +21,11 @@ import android.content.Intent
 import android.os.Bundle
 
 import hr.caellian.notestream.data.playlist.Playlist
+import hr.caellian.notestream.data.playlist.PlaylistYouTube
 import hr.caellian.notestream.gui.ActivityPlaylist
 import hr.caellian.notestream.lib.Constants
 
-class FragmentPlaylistTile : FragmentTile() {
+open class FragmentPlaylistTile : FragmentTile() {
     override fun onClickListener(data: String) {
         val intent = Intent(view.context, ActivityPlaylist::class.java)
         intent.putExtra(Constants.EXTRA_PLAYLIST, data)

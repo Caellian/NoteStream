@@ -88,7 +88,7 @@ class PlayableYouTube(val youtubeID: String,
                     val decoder = ThumbnailDecoder({ result ->
                         info.cover = result
                     })
-                    decoder.execute(videoMeta)
+                    decoder.execute(videoMeta.hqImageUrl)
                 }
 
                 working = false
@@ -157,6 +157,12 @@ class PlayableYouTube(val youtubeID: String,
 
     companion object {
         private const val ID_PREFIX = "ns-playable-youtube-"
+
+        fun get(youtubeID: String): PlayableYouTube {
+            val result = PlayableYouTube(youtubeID)
+            result.makeAvailable()
+            return result
+        }
 
         fun getId(youtubeID: String): String {
             return ID_PREFIX + youtubeID

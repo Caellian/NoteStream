@@ -51,7 +51,7 @@ class FragmentGoogleSignIn : Fragment() {
         }.build()
         googleSignInClient = GoogleSignIn.getClient(container!!.context, options)
 
-        sign_in_button.apply {
+        rootView.findViewById<SignInButton>(R.id.sign_in_button)?.apply {
             setSize(SignInButton.SIZE_STANDARD)
             setOnClickListener {
                 when (it.id) {
@@ -60,7 +60,7 @@ class FragmentGoogleSignIn : Fragment() {
             }
         }
 
-        buttonSkip.setOnClickListener {
+        rootView.findViewById<Button>(R.id.buttonSkip)?.setOnClickListener {
             NoteStream.instance.preferences.edit()
                     .putBoolean(Constants.CHECK_GOOGLE_SIGN_IN, false)
                     .apply()
