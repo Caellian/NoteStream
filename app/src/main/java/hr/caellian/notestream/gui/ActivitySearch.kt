@@ -1,18 +1,25 @@
 /*
- * Copyright (C) 2018 Tin Svagelj
+ * The MIT License (MIT)
+ * NoteStream, android music player and streamer
+ * Copyright (c) 2018 Tin Švagelj <tin.svagelj.email@gmail.com> a.k.a. Caellian
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
- * persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
 
 package hr.caellian.notestream.gui
@@ -51,7 +58,7 @@ class ActivitySearch : NavigationActivity() {
         get() = findViewById<View>(R.id.search_layout) as DrawerLayout
 
 
-    private val youtubeSearch = Runnable {
+    private val searchThread = Thread {
         val query = findViewById<EditText>(R.id.textEditSearch)?.text?.toString()!!
         youtubePlaylists.clear()
         youtubeResults.clear()
@@ -60,13 +67,24 @@ class ActivitySearch : NavigationActivity() {
         youtubeResults += YouTubeFetcher.searchVideos(query)
 
         refreshSearchResults()
-        findViewById<EditText>(R.id.youtubePlaylistArea)?.visibility = View.VISIBLE
-        findViewById<EditText>(R.id.youtubePlayableArea)?.visibility = View.VISIBLE
+
+        searchHandler.post {
+            findViewById<LinearLayout>(R.id.youtubePlaylistArea)?.visibility = View.VISIBLE
+            findViewById<LinearLayout>(R.id.youtubePlayableArea)?.visibility = View.VISIBLE
+        }
+    }
+
+    private val youtubeSearch = Runnable {
+        searchThread.start()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(null)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+
+        findViewById<LinearLayout>(R.id.localPlayable)?.removeAllViewsInLayout()
+        findViewById<LinearLayout>(R.id.youtubePlayable)?.removeAllViewsInLayout()
+        findViewById<LinearLayout>(R.id.localPlayable)?.removeAllViewsInLayout()
 
         navigationView = findViewById(R.id.nav_view)
         navigationView?.setNavigationItemSelectedListener(this)
@@ -74,8 +92,8 @@ class ActivitySearch : NavigationActivity() {
         findViewById<View>(R.id.buttonClearSearch)?.setOnClickListener {
             (findViewById<View>(R.id.textEditSearch) as? EditText)?.setText("")
             localResults.clear()
-            findViewById<EditText>(R.id.youtubePlaylistArea)?.visibility = View.GONE
-            findViewById<EditText>(R.id.youtubePlayableArea)?.visibility = View.GONE
+            findViewById<LinearLayout>(R.id.youtubePlaylistArea)?.visibility = View.GONE
+            findViewById<LinearLayout>(R.id.youtubePlayableArea)?.visibility = View.GONE
             refreshSearchResults()
         }
 
@@ -84,8 +102,8 @@ class ActivitySearch : NavigationActivity() {
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 val searched = charSequence.toString()
-                findViewById<EditText>(R.id.youtubePlaylistArea)?.visibility = View.GONE
-                findViewById<EditText>(R.id.youtubePlayableArea)?.visibility = View.GONE
+                findViewById<LinearLayout>(R.id.youtubePlaylistArea)?.visibility = View.GONE
+                findViewById<LinearLayout>(R.id.youtubePlayableArea)?.visibility = View.GONE
 
                 localResults.clear()
                 localResults += NoteStream.instance.data.localMusic.filtered(searched)

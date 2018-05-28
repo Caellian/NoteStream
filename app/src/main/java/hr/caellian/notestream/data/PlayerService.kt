@@ -1,18 +1,25 @@
 /*
- * Copyright (C) 2018 Tin Svagelj
+ * The MIT License (MIT)
+ * NoteStream, android music player and streamer
+ * Copyright (c) 2018 Tin Švagelj <tin.svagelj.email@gmail.com> a.k.a. Caellian
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
- * persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
 
 package hr.caellian.notestream.data
@@ -23,6 +30,7 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.media.session.MediaSession
 import android.os.*
+import android.support.annotation.RequiresApi
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
@@ -107,9 +115,11 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                     val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
                     tm?.listen(psl, PhoneStateListener.LISTEN_CALL_STATE)
 
-                    ms = MediaSession(this, Constants.MEDIA_SESSION_TAG)
-                    ms?.setCallback(NSMediaSessionCallback())
-                    ms?.isActive = true
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ms = MediaSession(this, Constants.MEDIA_SESSION_TAG)
+                        ms?.setCallback(NSMediaSessionCallback())
+                        ms?.isActive = true
+                    }
 
                     progressTimer.scheduleAtFixedRate(object : TimerTask() {
                         override fun run() {
@@ -127,9 +137,13 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
                     progressHandler = ProgressHandler(mp)
                     val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
                     tm?.listen(psl, PhoneStateListener.LISTEN_CALL_STATE)
-                    ms = MediaSession(this@PlayerService, Constants.MEDIA_SESSION_TAG)
-                    ms?.setCallback(NSMediaSessionCallback())
-                    ms?.isActive = true
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ms = MediaSession(this@PlayerService, Constants.MEDIA_SESSION_TAG)
+                        ms?.setCallback(NSMediaSessionCallback())
+                        ms?.isActive = true
+                    }
+
                     progressTimer.scheduleAtFixedRate(object : TimerTask() {
                         override fun run() {
                             if (playing) {
@@ -150,7 +164,9 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         tm?.listen(psl, PhoneStateListener.LISTEN_NONE)
 
         mp.release()
-        ms?.release()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ms?.release()
+        }
         progressTimer.cancel()
         super.onDestroy()
     }
@@ -160,6 +176,7 @@ class PlayerService : Service(), MediaPlayer.OnCompletionListener {
         return psb
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class NSMediaSessionCallback : MediaSession.Callback() {
 
         override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {

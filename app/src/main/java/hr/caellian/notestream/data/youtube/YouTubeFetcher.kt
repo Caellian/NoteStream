@@ -1,18 +1,25 @@
 /*
- * Copyright (C) 2018 Tin Svagelj
+ * The MIT License (MIT)
+ * NoteStream, android music player and streamer
+ * Copyright (c) 2018 Tin Švagelj <tin.svagelj.email@gmail.com> a.k.a. Caellian
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
- * persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
 
 package hr.caellian.notestream.data.youtube
@@ -44,6 +51,7 @@ object YouTubeFetcher {
     fun searchVideos(query: String): List<PlayableYouTube> {
         val result = mutableListOf<PlayableYouTube>()
         val search = youTube.search().list("id,snippet").apply {
+            key = k
             maxResults = ResultCount
             q = query
             type = "video"
@@ -80,6 +88,7 @@ object YouTubeFetcher {
         val result = mutableListOf<PlaylistYouTube>()
 
         val search = youTube.search().list("id,snippet").apply {
+            key = k
             maxResults = ResultCount
             q = query
             type = "playlist"
@@ -91,7 +100,7 @@ object YouTubeFetcher {
         response.items.forEach {
             val playlistId = it.id.playlistId
 
-            val high = it.snippet.thumbnails.high.url
+            val high = it.snippet?.thumbnails?.high?.url ?: "https://raw.githubusercontent.com/Caellian/NoteStream/master/resources/youtube-missing.png"
 
             val playlistYouTube = PlaylistYouTube(playlistId).apply {
                 label = it.snippet.title
@@ -110,6 +119,7 @@ object YouTubeFetcher {
         val result = mutableListOf<PlayableYouTube>()
 
         val search = youTube.playlistItems().list("id,snippet").apply {
+            key = k
             maxResults = ResultCount
             playlistId = playlistID
             fields = "items(snippet(channelTitle,resourceId/videoId,thumbnails,title))"
