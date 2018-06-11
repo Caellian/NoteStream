@@ -33,6 +33,8 @@ repositories {
 }
 
 android {
+    signingConfigs {
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "hr.caellian.notestream"
@@ -44,12 +46,14 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     defaultConfig.vectorDrawables.useSupportLibrary = true
+    buildToolsVersion '27.0.3'
+    productFlavors {
+    }
 }
 
 ext {
@@ -57,31 +61,24 @@ ext {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "com.android.support:recyclerview-v7:$supportVersion"
     implementation "com.android.support:appcompat-v7:$supportVersion"
     implementation "com.android.support:design:$supportVersion"
     implementation "com.android.support:percent:$supportVersion"
-
     implementation 'com.google.android.gms:play-services-auth:15.0.1'
     implementation 'com.google.android.gms:play-services-base:15.0.1'
-    implementation ('com.google.api-client:google-api-client-android:1.23.0') {
+    implementation('com.google.api-client:google-api-client-android:1.23.0') {
         exclude group: 'org.apache.httpcomponents'
     }
-    implementation ('com.google.apis:google-api-services-youtube:v3-rev195-1.23.0') {
+    implementation('com.google.apis:google-api-services-youtube:v3-rev195-1.23.0') {
         exclude group: 'org.apache.httpcomponents'
     }
-
-    implementation "com.daimajia.swipelayout:library:1.2.0@aar"
+    implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
     implementation 'com.akexorcist:RoundCornerProgressBar:2.0.3'
     implementation 'me.relex:circleindicator:1.2.2@aar'
-
-
     implementation 'com.github.evgenyneu:js-evaluator-for-android:v2.0.0'
     implementation 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
     testImplementation 'junit:junit:4.12'
 }

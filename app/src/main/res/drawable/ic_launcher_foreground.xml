@@ -23,31 +23,17 @@
   -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:aapt="http://schemas.android.com/aapt"
         android:width="108dp"
         android:height="108dp"
         android:viewportWidth="37.944664"
         android:viewportHeight="37.944664">
-    <group android:translateX="12.904699"
-            android:translateY="10.972332">
+    <group android:translateX="12.904699" android:translateY="10.972332">
       <path
           android:pathData="m0,0 l13.8564,8 -13.8564,8z"
-          android:strokeAlpha="1"
           android:strokeLineJoin="round"
           android:strokeWidth="1"
           android:strokeColor="#f44c04"
-          android:fillAlpha="1">
-        <aapt:attr name="android:fillColor">
-          <gradient 
-              android:startY="0.87"
-              android:startX="0.5"
-              android:endY="11.13"
-              android:endX="6.43"
-              android:type="linear">
-            <item android:offset="0" android:color="@color/colorPrimaryDark"/>
-            <item android:offset="1" android:color="@color/colorAccent"/>
-          </gradient>
-        </aapt:attr>
+          android:fillColor="#ff7733">
       </path>
     </group>
 </vector>
